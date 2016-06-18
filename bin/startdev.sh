@@ -1,1 +1,1 @@
-plackup --env development --server Plack::Handler::Standalone --app lacuna.psgi
+plackup --env development --server Plack::Handler::Standalone --app keno.psgi

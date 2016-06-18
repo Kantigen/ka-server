@@ -1,7 +1,7 @@
 use 5.010;
 use strict;
 use feature "switch";
-use lib '/data/Lacuna-Server-Open/lib';
+use lib '/home/keno/ka-server/lib';
 use Lacuna::DB;
 use Lacuna;
 use Lacuna::Util qw(randint format_date);
@@ -29,9 +29,9 @@ GetOptions(
 $App::Daemon::loglevel = $quiet ? $WARN : $DEBUG;
 $App::Daemon::logfile  = '/tmp/reboot_schedule_building.log';
 
-chdir '/data/Lacuna-Server-Open/bin';
+chdir '/home/keno/ka-server/bin';
 
-my $pid_file        = '/data/Lacuna-Server-Open/bin/schedule_building.pid';
+my $pid_file        = '/home/keno/ka-server/bin/schedule_building.pid';
 
 my $start = time;
 

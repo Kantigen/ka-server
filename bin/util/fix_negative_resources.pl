@@ -1,5 +1,5 @@
 use strict;
-use lib '/data/Lacuna-Server-Open/lib';
+use lib '/home/keno/ka-server/lib';
 use Lacuna;
 use Lacuna::Constants qw(FOOD_TYPES ORE_TYPES);
 use DBI;

@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use lib '/data/Lacuna-Server-Open/lib';
+use lib '/home/keno/ka-server/lib';
 use L;
 use List::Util qw(sum);
 use Getopt::Long;

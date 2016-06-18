@@ -1,6 +1,6 @@
 use 5.010;
 use strict;
-use lib '/data/Lacuna-Server-Open/lib';
+use lib '/home/keno/ka-server/lib';
 use Data::Dumper;
 use DateTime;
 use Lacuna::DB;

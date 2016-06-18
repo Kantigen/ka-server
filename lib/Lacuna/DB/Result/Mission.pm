@@ -24,7 +24,7 @@ has params => (
     lazy    => 1,
     default => sub {
         my $self = shift;
-        return Config::JSON->new('/data/Lacuna-Mission/missions/'. $self->mission_file_name);
+        return Config::JSON->new('/home/keno/ka-mission/missions/'. $self->mission_file_name);
     },
 );
 
@@ -560,7 +560,7 @@ sub feed_filename {
 
 sub initialize {
     my ($class, $zone, $filename) = @_;
-    return undef unless (-f '/data/Lacuna-Mission/missions/'.$filename);
+    return undef unless (-f '/home/keno/ka-mission/missions/'.$filename);
     my $mission = Lacuna->db->resultset('Lacuna::DB::Result::Mission')->new({
         zone                => $zone,
         mission_file_name   => $filename,

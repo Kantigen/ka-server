@@ -2,7 +2,7 @@ use 5.010;
 use strict;
 use warnings;
 
-use lib '/data/Lacuna-Server-Open/lib';
+use lib '/home/keno/ka-server/lib';
 use Lacuna::DB;
 use Lacuna;
 use Lacuna::Util qw(randint format_date);
@@ -32,9 +32,9 @@ $App::Daemon::logfile  = '/tmp/reboot_schedule_captcha.log';
 $App::Daemon::as_user  = 'root';
 $App::Daemon::as_group = 'root';
 
-chdir '/data/Lacuna-Server-Open/bin';
+chdir '/home/keno/ka-server/bin';
 
-my $pid_file        = '/data/Lacuna-Server-Open/bin/schedule_captcha.pid';
+my $pid_file        = '/home/keno/ka-server/bin/schedule_captcha.pid';
 
 my $start = time;
 

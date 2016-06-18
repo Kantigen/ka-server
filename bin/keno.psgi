@@ -1,5 +1,5 @@
 use strict;
-use lib ('/data/Lacuna-Server-Open/lib');
+use lib ('/home/keno/ka-server/lib');
 use 5.010;
 use Config::JSON;
 use Plack::App::URLMap;
@@ -12,10 +12,10 @@ use JSON qw(encode_json);
 
 $|=1;
 
-my $config = Config::JSON->new("/data/Lacuna-Server-Open/etc/reboot.conf");
+my $config = Config::JSON->new("/home/keno/ka-server/etc/keno-antigen.conf");
 
 use Log::Log4perl;
-Log::Log4perl::init('/data/Lacuna-Server-Open/etc/log4perl-reboot.conf');
+Log::Log4perl::init('/home/keno/ka-server/etc/log4perl.conf');
 Log::Any::Adapter->set('Log::Log4perl');
 
 my $offline = [ 500,

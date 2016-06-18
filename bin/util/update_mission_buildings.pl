@@ -1,6 +1,6 @@
 use strict;
 use 5.010;
-use lib '/data/Lacuna-Server-Open/lib';
+use lib '/home/keno/ka-server/lib';
 use Lacuna;
 use Config::JSON;
 use Module::Find;

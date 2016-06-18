@@ -1,6 +1,6 @@
 use 5.10.0;
 use strict;
-use lib '/data/Lacuna-Server-Open/lib';
+use lib '/home/keno/ka-server/lib';
 use Getopt::Long;
 
 use L;

@@ -1,5 +1,5 @@
 use 5.010;
-use lib '/data/Lacuna-Server-Open/lib';
+use lib '/home/keno/ka-server/lib';
 use Lacuna::DB;
 use Lacuna;
 use DateTime;

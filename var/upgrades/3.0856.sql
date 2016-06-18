@@ -1,3 +1,0 @@
-
-delete from mission;
-
