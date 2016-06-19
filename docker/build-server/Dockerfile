@@ -46,7 +46,7 @@ RUN cpanm Term::ProgressBar Term::ProgressBar::Quiet PerlX::Maybe Firebase::Auth
 RUN cpanm Digest::MD4 Bad::Words
 
 RUN groupadd nogroup
-WORKDIR /data/Lacuna-Server-Open/bin
+WORKDIR /home/keno/ka-server/bin
 
 RUN yum -y install vixie-cron
 RUN chkconfig crond on

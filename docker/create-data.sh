@@ -19,6 +19,6 @@
 # You only need to create a data-only container, you don't need to
 # run it. This script will create it for you.
 #
-docker create --name tle-mysql-data arungupta/mysql-data-container
-docker create --name tle-captcha-data -v /data/captcha lacuna/tle-captcha-data
+docker create --name ka-mysql-data arungupta/mysql-data-container
+docker create --name ka-captcha-data -v /home/keno/captcha keno/ka-captcha-data
 
