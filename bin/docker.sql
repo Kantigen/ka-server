@@ -1,6 +1,6 @@
-create database reboot;
-create user 'lacuna'@'%' identified by 'lacuna';
-grant all privileges on reboot.* to 'lacuna'@'%';
+create database keno;
+create user 'keno'@'%' identified by 'keno';
+grant all privileges on keno.* to 'keno'@'%';
 flush privileges;
 
 

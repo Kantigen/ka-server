@@ -1,3 +1,3 @@
-docker exec -it tle-mysql-server mysql -uroot -placuna lacuna
+docker exec -it ka-mysql-server mysql -uroot -pkeno keno
 
 

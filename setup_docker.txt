@@ -8,10 +8,10 @@ Docker documentation can be found at:-
 Docker works with 'containers' which you can think of as lightweight
 virtual machines. They can be built once, and deployed in many places.
 
-A docker image has been created to allow the Lacuna Expanse Server to
-be run from linux, in OS-X or in Windows.
+A docker image has been created to allow Keno Antigen to be run from 
+linux, in OS-X or in Windows.
 
-By comparison, if you were to set up a Lacuna Expanse Server, you would
+By comparison, if you were to set up a server from scratch, you would
 need to do so either on a Linux server, or a virtual machine running
 Centos. You would need to install all the packages, including building
 Perl and loading all the support libraries and CPAN modules. From
@@ -20,24 +20,23 @@ experience thes can take up to 16 hours to do and to resolve any issues.
 By comparison you can download the docker image (perhaps 10 to 20
 minutes) and run up the server in just a few seconds in Docker.
 
-TODO
-====
+This implementation follows the general docker principle of having
+one function for each docker container. The containers currently are
 
-This initial implementation of Docker is just a build of a complete
-development environment. As such it does not follow the principle of
-each docker container doing just one thing. It does however work...
+  * ka-mysql-data - A data only container to persist MySQL data
+  * ka-captcha-data - A data only container to hold Captcha images
+  * ka-memcached - Memcache Daemon
+  * ka-redis - Redis Database
+  * ka-beanstalkd - Beanstalk Job Queue
+  * ka-mysql-server - The MySQL Database
+  * ka-server - The Perl server code
+  * ka-nginx - The NGINX process that pulls it all together
+  * ka-api-docs - The Web Socket documentation using Jekyll
+  * ka-web - The Javascript client code
 
-This implementation will shortly be changed so as to separate out
-the various components into their own Docker containers.
+These docker containers run an a Docker network
 
-  * web-application
-  * beanstalk
-  * mysql-server
-  * memcache
-  * nginx
-
-This will make the system easier to build and deploy. 
-
+  * ka-network
 
 Install Docker
 ==============
@@ -67,8 +66,13 @@ recreate it with a base memory of 8192 MB.
 Creating the Docker Images
 ==========================
 
-The git repository, Lacuna-Server-Open includes a Dockerfile and a number
-of scripts which can be used to create the image.
+The git repository, ka-server includes a number of scripts to run most of the
+docker containers (a further docker container is held in ka-client)
+
+There are also a number of scripts and Dockerfiles which can be used to 
+create the docker images. Normally you would not need to create a docker image
+locally you would download it automatically from dockerhub when you 'run' the
+image.
 
 
 Create a data-only container for mysql
@@ -78,79 +82,82 @@ Normally when you stop or close a container any data within it will be
 destroyed. However by using a separate data-only container it is possible
 to keep the data even if you stop/kill/rebuild any container using it.
 
-  docker create --name tle-mysql-data arungupta/mysql-data-container
+There are two data containers, one for the mysql database and one for 
+captcha files. These can be created as follows.
 
-This will create the data container to which the web application will 
-connect when it is run. This will be used by mysql to maintain the database.
+$ cd ka-server/docker
+$ ./create-data.sh
 
-If you ever have a need to refresh the database then you can delete this
-image and recreate it.
+Create a docker network
+-----------------------
 
+The Docker network allows the various containers to communicate between
+themselves without having to expose ports to the host.
 
-To build the application image from scratch
--------------------------------------------
+$ cd ka-server/docker
+$ ./create-network.sh
 
-You don't need to build an image yourself, you can download and run the
-pre-built image (see below). You may only need to do this if you want to
-make changes to the server setup (note, you don't need to do this if you
-are just changing the source code).
+Run up the various background docker containers
+-----------------------------------------------
 
-  ./docker_build.sh
+$ cd ka-server/docker
+$ ./run-beanstalk.sh
+$ ./run-memcached.sh
+$ ./run-redis.sh
+$ ./run-mysql-server.sh
+$ ./run-nginx.sh
 
-This will load the base image (Centos) and automatically do all the steps to
-load and build the web server software. Note, this code will download some
-libraries (such a memcache) and it is possible that it will fail due to a
-change in the version number of these packages. (This is the same issue you
-may have if you build it manually.) The whole process will take a couple of
-hours (depending on your download speed).
+Run up the main server code
+---------------------------
 
-Once you have built it you can run the image as follows.
+Whereas the other docker containers will run in the background, during
+development it is best to run the server code in the foreground (i.e. it
+drops you into the container at the command prompt) so that you can run
+different server tasks within the container.
 
-  ./docker_run.sh
+$ cd ka-server/docker
+$ ./run-server.sh
 
-The server will start and put you in the command prompt almost instantly.
+Once you are at the command prompt you can do various things, e.g.
+run all tests.
 
+[root@123 ka-server]# prove
 
-To download and run the pre-built image
----------------------------------------
+Or run the server code
 
-This is the preferred approach, the image has been built already, all you
-need to do is download it and run it from docker-hub. The download takes
-about 20 minutes (depending upon network speed).
-
-  ./docker_run_prebuilt.sh
-
-Once downloaded, it remains cached locally so that you don't need to download
-it again.
-
+[root@123 ka-server]# cd bin
+[root@123 bin]# ./startdev.sh
 
 Initializing the database
 =========================
 
-You can connect to the running server (see above) with another bash session.
+But the very first time you need to initialize the database from the 
+server code.
 
-  ./docker_exec.sh
+$ cd ka-server/docker
+$ ./run-server.sh
 
-This will put you in the bin directory.
+[root@123 ka-server]# cd /home/keno/ka-server/bin
+[root@123 bin]# mysql -h ka-mysql-server --password=keno
+mysql> source docker.sql
+mysql> exit
 
-The first time you run your image there will be no database and so you should
-run the following scripts
+This should create an empty keno database.
 
-  $ mysql
-  mysql> source docker.sql
-  mysql> exit
-  $ cd setup
-  $ perl init_lacuna.pl
-  $ perl generate_captcha.pl
+Connecting to the database
+--------------------------
 
-The two perl scripts will take a while to complete (20 minutes?) but once
-completed your web server should be ready to go. 
+Once connected you can use another terminal to connect a mysql client.
 
-The database is preserved in the data only container you created earlier.
+$ cd ka-server/docker
+$ ./connect-mysql-server.sh
+mysql>
+
+Once connected you can do all your normal databasey type stuff.
 
 
-Making code changes to the TLE application
-==========================================
+Making code changes to the Keno application code
+================================================
 
 The container running the web application is mapping the directories
 'lib','bin','etc' and 'var' from the host. This means that you can make
