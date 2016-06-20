@@ -21,7 +21,7 @@ use Test::Class::Moose::Runner;
 #
 # Connect to the Redis Docker image
 #
-my $redis = Redis->new(server => $ENV{SBW_REDIS_PORT_6379_TCP_ADDR}.":".$ENV{SBW_REDIS_PORT_6379_TCP_PORT});
+my $redis = Redis->new(server => "ka-redis:6379");
 KA::Redis->initialize({
     redis => $redis,
 });
@@ -31,15 +31,15 @@ KA::Config->initialize;
 # Connect to the beanstalk Docker image
 #
 KA::Queue->initialize({
-    server      => $ENV{SBW_BEANSTALK_PORT_11300_TCP_ADDR}.":".$ENV{SBW_BEANSTALK_PORT_11300_TCP_PORT},
+    server      => "ka-beanstalkd:11300",
     ttr         => 120,
     debug       => 0,
 });
 
-Log::Log4perl->init('/opt/code/etc/log4perl.conf');
+Log::Log4perl->init('/home/keno/ka-server/etc/log4perl.conf');
 
 my $db = KA::DB->connect(
-    'DBI:SQLite:/opt/code/log/test.db',
+    'DBI:SQLite:/home/keno/ka-server/log/test.db',
 );
 $db->deploy({ add_drop_table => 1 });
 

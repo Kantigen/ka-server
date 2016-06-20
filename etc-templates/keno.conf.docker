@@ -12,7 +12,7 @@
     },
    "beanstalk" : {
       "debug" : 0,
-      "server" : "tle-beanstalkd",
+      "server" : "ka-beanstalkd:11300",
       "ttr" : 120,
       "max_timeouts" : 10,
       "max_reserves" : 10
@@ -24,12 +24,12 @@
       "fonts" : [ "Ayuthaya", "Chalkduster", "HeadlineA", "Kai" ],
    },
    "db-reboot" : {
-      "dsn" : "DBI:mysql:host=tle-mysql-server;database=reboot",
+      "dsn" : "DBI:mysql:host=ka-mysql-server;database=reboot",
       "password" : "lacuna",
       "username" : "lacuna"
    },
    "db" : {
-      "dsn" : "DBI:mysql:host=tle-mysql-server;database=lacuna",
+      "dsn" : "DBI:mysql:host=ka-mysql-server;database=lacuna",
       "password" : "lacuna",
       "username" : "lacuna"
    },
@@ -74,7 +74,7 @@
    },
    "memcached" : [
       {
-         "host" : "tle-memcached",
+         "host" : "ka-memcached",
          "port" : "11211"
       }
    ],
@@ -139,5 +139,10 @@
          "name" : "XXXX",
          "url" : "http://xxxx/"
       }
-   ]
+   ],
+   "test" : {
+       "foo" : "bar"
+   },
+   "secret"        : "a random code",
+   "email_secret"  : "another random code"
 }
