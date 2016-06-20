@@ -45,6 +45,12 @@ RUN cpanm Text::CSV_XS Tie::IxHash URI::Encode UUID::Tiny XML::FeedPP XML::Hash:
 RUN cpanm Term::ProgressBar Term::ProgressBar::Quiet PerlX::Maybe Firebase::Auth Gravatar::URL
 RUN cpanm Digest::MD4 Bad::Words
 
+ENV ANYEVENT_WEBSOCKET_TEST_SKIP_SSL=1
+RUN cpanm YANICK/Parallel-ForkManager-1.16.tar.gz
+RUN cpanm AnyEvent::WebSocket::Client Test::Compile Test::Class::Moose DBIx::Class::EasyFixture Test::Number::Delta
+RUN cpanm Redis MooseX::Singleton Crypt::SaltedHash Data::Validate::Email Text::Trim MooseX::NonMoose AnyEvent::WebSocket::Server
+RUN cpanm Plack::App::WebSocket::Connection Test::Mock::Class
+
 RUN groupadd nogroup
 WORKDIR /home/keno/ka-server/bin
 
