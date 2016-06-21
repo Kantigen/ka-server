@@ -1,1 +1,1 @@
-docker build -t keno/ka-nginx .
+docker build -t kenoantigen/ka-nginx .

@@ -1,1 +1,1 @@
-docker build -t keno/ka-server .
+docker build -t kenoantigen/ka-server .

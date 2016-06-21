@@ -20,5 +20,5 @@
 # run it. This script will create it for you.
 #
 docker create --name ka-mysql-data arungupta/mysql-data-container
-docker create --name ka-captcha-data -v /home/keno/captcha keno/ka-captcha-data
+docker create --name ka-captcha-data -v /home/keno/captcha kenoantigen/ka-captcha-data
 

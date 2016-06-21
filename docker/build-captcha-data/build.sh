@@ -1,1 +1,1 @@
-docker build -t keno/ka-captcha-data .
+docker build -t kenoantigen/ka-captcha-data .
