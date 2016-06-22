@@ -23,15 +23,10 @@
       # .ttf fonts in above path
       "fonts" : [ "Ayuthaya", "Chalkduster", "HeadlineA", "Kai" ],
    },
-   "db-reboot" : {
-      "dsn" : "DBI:mysql:host=ka-mysql-server;database=reboot",
-      "password" : "lacuna",
-      "username" : "lacuna"
-   },
    "db" : {
-      "dsn" : "DBI:mysql:host=ka-mysql-server;database=lacuna",
-      "password" : "lacuna",
-      "username" : "lacuna"
+      "dsn" : "DBI:mysql:host=ka-mysql-server;database=keno",
+      "password" : "keno",
+      "username" : "keno"
    },
    "envolve" : {
       "Sn" : 0,

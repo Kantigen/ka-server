@@ -17,7 +17,7 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-my $config = Lacuna->config->get('db-reboot');
+my $config = Lacuna->config->get('db');
 my $db = DBI->connect($config->{dsn}, $config->{username}, $config->{password});
 $db->do("update taxes set paid_6 = paid_5, paid_5 = paid_4, paid_4 = paid_3, paid_3 = paid_2, paid_2 = paid_1, paid_1 = paid_0, paid_0 = 0");
 

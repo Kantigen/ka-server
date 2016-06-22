@@ -10,3 +10,4 @@ var/www/public/server_overview.json
 var/www/public/starmap.json
 var/www/public/api
 var/www/public/captcha
+var/starmaps/*.png
