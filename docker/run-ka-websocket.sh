@@ -1,6 +1,6 @@
 docker run                                          \
   --rm -it --name=ka-websocket                        \
-  -p 0.0.0.0:6000:80                              \
+  -p 0.0.0.0:8090:80                              \
   --net=ka-network                                 \
   -v ${PWD}/../bin:/home/keno/ka-server/bin     \
   -v ${PWD}/../docs:/home/keno/ka-server/docs   \

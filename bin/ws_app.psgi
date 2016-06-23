@@ -12,6 +12,7 @@ use KA::Config;
 use KA::Redis;
 use KA::SDB;
 use KA::DB;
+use Lacuna;
 
 use Log::Log4perl;
 
@@ -54,6 +55,8 @@ KA::SDB->initialize({
     db => $db,
 });
 
+my $config = Lacuna->config->get();
+my $client_url = $config->{client_url};
 
 Log::Log4perl->init('/home/keno/ka-server/etc/log4perl.conf');
 
@@ -65,15 +68,11 @@ Log::Log4perl->init('/home/keno/ka-server/etc/log4perl.conf');
 #
 my $app = builder {
     enable 'Headers',
-#        set     => ['Access-Control-Allow-Origin' => 'http://spacebotwar.com:8080'];
+        set     => ['Access-Control-Allow-Origin' => $client_url];
     enable 'Headers',
         set     => ['Access-Control-Allow-Credentials' => 'true'];
     # the 'start' of the game, where you go to get connection to a game server.
-#    mount "/ws/start"           => KA::WebSocket::Start->new({ server => 'Kingsley'    })->to_app;
     mount "/ws/user"            => KA::WebSocket::User->new({ server => 'Livingstone'  })->to_app;
-
-#    mount "/"                   => Plack::App::IndexFile->new(root => "/opt/code/src")->to_app;
-
 };
 $app;
 

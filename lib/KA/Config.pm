@@ -8,7 +8,7 @@ use Config::JSON;
 has filename => (
     is          => 'rw',
     isa         => 'Str',
-    default    => '/home/keno/ka-server/etc/keno.conf',
+    default    => '/home/keno/ka-server/etc/keno-antigen.conf',
 );
 
 has config_json => (
