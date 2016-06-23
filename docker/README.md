@@ -66,12 +66,12 @@ In Lacuna-Server-Open there is a sub-directory 'docker'
 Setting up a server is as simple as running the following scripts, in this
 order
 
-    $ ./create_tle_network.sh
-    $ ./create_tle_data.sh
-    $ ./run_tle_beanstalk.sh
-    $ ./run_tle_memcached.sh
-    $ ./run_tle_mysql_server.sh
-    $ ./run_tle_nginx.sh
+    $ ./create-network.sh
+    $ ./create-data.sh
+    $ ./run-ka-beanstalk.sh
+    $ ./run-ka-memcached.sh
+    $ ./run-ka-mysql-server.sh
+    $ ./run-ka-nginx.sh
 
 If this has worked, you can now do the following to see what is running.
 
@@ -82,22 +82,22 @@ of 'Up xx minutes').
 
 These containers are fairly self-explanatory.
 
-### tle-beanstalk
+### ka-beanstalk
 
 This runs the beanstalk message queue. It is a standard Docker container.
 It is used to run job queues for building upgrade completion, ship arrival
 and captcha generation.
 
-### tle-memcached
+### ka-memcached
 
 Again a standard Docker container with default ports.
 
-### tle-mysql-server
+### ka-mysql-server
 
 This is a standard Docker MySql server. You can also connect to this
 container to run a mysql client to inspect and modify your database.
 
-### tle-mysql-data
+### ka-mysql-data
 
 This is a container, but it is data-only. It is never run. This allows you
 to have a persistent database for mysql. You can start/stop other containers
@@ -110,13 +110,13 @@ and then do the following.
     $ docker rm -v tle-mysql-data
     $ ./create_tle_data.sh
 
-### tle-nginx
+### ka-nginx
 
 This is your web server which exposes the docker port to the outside world.
 By default this will run the web server on localhost port 8000 (but this can
 be configured).
 
-### tle-server
+### ka-server
 
 This is slightly different to the above, when it runs it puts you into
 a bash shell to allow you to run commands.
