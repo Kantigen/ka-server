@@ -282,7 +282,6 @@ sub _on_message {
         $log->debug("route = [$route]");
         my $obj;
         if ($route) {
-            $log->debug("ROUTE... [$route]");
             $route = ref($self)."::".$route;
             eval "require $route";
             $obj = $route->new({});

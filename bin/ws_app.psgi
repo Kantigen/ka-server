@@ -72,7 +72,7 @@ my $app = builder {
     enable 'Headers',
         set     => ['Access-Control-Allow-Credentials' => 'true'];
     # the 'start' of the game, where you go to get connection to a game server.
-    mount "/ws/user"            => KA::WebSocket::User->new({ server => 'Livingstone'  })->to_app;
+    mount "/ws"            => KA::WebSocket->new({ server => 'Livingstone'  })->to_app;
 };
 $app;
 
