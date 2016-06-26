@@ -23,7 +23,6 @@ sub on_connect {
     my ($self, $context) = @_;
 
     return {
-        code        => 0,
         message     => 'Welcome to KA User server',
     };
 }
@@ -38,24 +37,20 @@ sub ws_clientCode {
     
     my $client_code_id = $context->client_code;
     $log->debug("clientCode: client_code [$client_code_id]");
-    my $message = "";
-    # if the client code is valid, use it
+    
     my $client_code = KA::ClientCode->new({
         id  => $client_code_id,
     });
-    if ($client_code->is_valid) {
-        $message = "GOOD Client Code";
-    }
-    else {
-        $message = "NEW Client Code";
+
+    # If the client code supplied is not valid, get another
+    if (not $client_code->is_valid) {
+        $log->debug("clientCode: is invalid [$client_code_id]");
         $client_code->get_new_id;
     }
 
     $context->client_code($client_code->id);
 
     return {
-        code         => 0,
-        message      => $message,
         clientCode   => $client_code->id,
     };
 }
@@ -75,6 +70,9 @@ sub assert_user_is_logged_in {
 #
 sub assert_valid_client_code {
     my ($self, $context) = @_;
+
+    my $log = Log::Log4perl->get_logger('KA::WebSocket::User');
+    $log->debug("CONTEXT: ".Dumper($context));
 
     if (not defined $context->client_code) {
         confess [1002, "clientCode is required." ]
@@ -115,8 +113,6 @@ sub ws_register {
 
     $log->debug("ws_register: return");
     return {
-        code        => 0,
-        message     => 'Success',
         loginStage  => 'enterEmailCode',
         username    => $user->username,
     };
@@ -156,10 +152,7 @@ sub ws_forgotPassword {
         });
     }
 
-    return {
-        code           => 0,
-        message        => "Success",
-    };
+    return {};
 }
 
 #-- Login with password
@@ -181,10 +174,7 @@ sub ws_loginWithPassword {
 
     $context->user($user);
 
-    return {
-        code    => 0,
-        message => "Success",
-    }
+    return {};
 }
 
 #-- Enter New Password
@@ -209,14 +199,11 @@ sub ws_enterNewPassword {
     my $stage = $user->registration_stage;
     if ($stage eq 'complete' or $stage eq 'enterNewPassword') {
         return {
-            code        => 0,
-            message     => 'Success',
             loginStage  => 'complete',
         }
     }
     # otherwise the stage does not allow a password to be set
     confess [1002, 'Cannot change password yet'];
-
 }
 
 
@@ -255,8 +242,6 @@ sub ws_loginWithEmailCode {
     $context->user($user);
 
     return {
-        code        => 0,
-        message     => 'Success',
         loginStage  => 'enterNewPassword',
         username    => $user->username,
     };
@@ -276,9 +261,6 @@ sub ws_logout {
 
     $context->user(undef);
 
-    return {
-        code    => 0,
-        message => "Success",
-    }
+    return {};
 }
 1;

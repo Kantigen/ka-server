@@ -268,9 +268,10 @@ sub _on_message {
     }
 
     $log->debug("Establish");
-    my $path    = $json_msg->{route};
-    my $content = $json_msg->{content} || {};
-    my $msg_id  = $json_msg->{msgId};
+    my $path        = $json_msg->{route};
+    my $content     = $json_msg->{content} || {};
+    my $msg_id      = $json_msg->{msgId};
+    my $client_code  = $json_msg->{clientCode};
 
     eval {
         my ($route, $method) = $path =~ m{(.*)/([^/]*)};
@@ -296,6 +297,8 @@ sub _on_message {
             room            => $self->room,
             connection      => $connection,
             content         => $content,
+            msg_id          => $msg_id,
+            client_code     => $client_code,
         });
         $log->debug("Call [$obj][$method]");
 
@@ -303,11 +306,13 @@ sub _on_message {
         # a JSON reply
         # 
         my $content = $obj->$method($context);
-        if ($content) {
+        if (defined $content) {
             my $reply = {
                 room        => $self->room,
                 route       => $path,
                 content     => $content,
+                status      => 0,
+                message     => 'OK',
             };
             if ($msg_id) {
                 $reply->{msgId} = $msg_id;
@@ -361,9 +366,9 @@ sub report_error {
         route   => $path,
         msgId   => $msg_id,
         room    => $self->room,
+        status  => $error->[0],
+        message => $error->[1],
         content => {
-            code        => $error->[0],
-            message     => $error->[1],
             data        => $error->[2],
         },
     };
