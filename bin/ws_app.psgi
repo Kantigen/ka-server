@@ -41,7 +41,7 @@ KA::Queue->initialize({
 
 # Connect to the mysql Docker image
 #
-my $dsn = "dbi:mysql:sbw:ka-mysql-server:3306";
+my $dsn = "dbi:mysql:keno:ka-mysql-server:3306";
 
 my $db = KA::DB->connect(
     $dsn,
