@@ -181,8 +181,7 @@ sub broadcast_json {
     my $sent = JSON->new->encode($json);
     $log->info("BCAST: [$self] [$sent] connections=[".$self->number_of_clients."]");
     my $i = 0;
-    foreach my $con_key (keys %{$self->connections}) {
-        my $connection = $self->connections->{$con_key};
+    foreach my $connection (keys %{$self->connections}) {
         $self->send($connection, $sent);
     }
 }
@@ -220,9 +219,8 @@ sub on_establish {
     });
     $log->debug("Establish");
     
-    my $con_ref = $self->connections;
-
-    $con_ref->{$connection} = $connection;
+    # Create initial blank data for the connection
+    $self->connections->{$connection} = {};
     $log->info("START: there are ".scalar(keys %{$self->connections}). " connections");
                 
     my $reply = {
@@ -298,9 +296,13 @@ sub _on_message {
             connection      => $connection,
             content         => $content,
             msg_id          => $msg_id,
+            client_data     => $self->connections->{$connection},
             client_code     => $client_code,
         });
         $log->debug("Call [$obj][$method]");
+
+        # If the object requires the user to be logged in
+#        if ($obj->must_be_logged_in and not 
 
         # If the method returns content, then render
         # a JSON reply
@@ -348,8 +350,7 @@ sub kill_client_data {
     my ($self, $connection) = @_;
 
     my $log = $self->log;
-    my $con_ref = $self->connections;
-    delete $con_ref->{$connection};
+    delete $self->connections->{$connection};
     $log->info("FINISH: [$self] there are ".scalar(keys %{$self->connections}). " connections");
     undef $connection;
     $log->info("killed connection data");

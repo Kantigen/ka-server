@@ -21,7 +21,13 @@ has 'client_code' => (
     isa     => 'Maybe[Str]',
 );
 
-has 'user' => (
+# Each client has a client_data area
+# within which each module can store data, e.g. {user}
+# to denote the logged in user.
+# We store it as a hash rather than (say) a DBIC object
+# in order to save space.
+#
+has 'client_data' => (
     is      => 'rw',
 #    isa     => 'Maybe[KA::DB::Result::User]',
 );

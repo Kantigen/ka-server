@@ -5,17 +5,46 @@ use Log::Log4perl;
 use Data::Dumper;
 use Text::Trim qw(trim);
 use Email::Valid;
+use AnyEvent::Beanstalk;
 
 use KA::SDB;
 use KA::Queue;
 
 extends 'KA::WebSocket';
 
+has beanstalk_client => (
+    is      => 'rw',
+    lazy    => 1,
+    builder => '_build_beanstalk_client',
+);
+
+sub _build_beanstalk_client {
+    my ($self) = @_;
+
+    my $client = AnyEvent::Beanstalk->new(
+        server  => 'ka-beanstalkd',
+    );
+    return $client
+}
+
 sub BUILD {
     my ($self) = @_;
 
     $self->log->debug("BUILD: USER $self");
+    $self->beanstalk_client->reserve( sub { 
+        my $job = shift;
+        $self->on_beanstalk_job($job);
+    });
 }
+
+
+sub on_beanstalk_job {
+    my ($self, $job) = @_;
+
+    $self->log->debug("ON_BEANSTALK_JOB: [".Dumper($job)."]");
+}
+
+
 
 # A user has joined the server
 #
@@ -50,6 +79,12 @@ sub ws_clientCode {
 
     $context->client_code($client_code->id);
 
+    $self->beanstalk_client->put({
+        priority    => 100,
+        ttr         => 120,
+        delay       => 1,
+    });
+
     return {
         clientCode   => $client_code->id,
     };
@@ -60,10 +95,10 @@ sub ws_clientCode {
 sub assert_user_is_logged_in {
     my ($self, $context) = @_;
 
-    if (not defined $context->user) {
+    if (not defined $context->client_data->{user}) {
         confess [1002, "User is not logged in" ]
     }
-    return $context->user;
+    return $context->client_data->{user};
 }
 
 #--- Assert that the client_code is valid
@@ -164,6 +199,10 @@ sub ws_loginWithPassword {
     my $db = KA::SDB->instance->db;
 
     $log->debug("ws_loginWithPassword: ");
+
+    if (defined $context->client_data->{user}) {
+        confess [1666, "Already logged in. Log out first"];
+    }
     # validate the Client Code
     my $client_code = $self->assert_valid_client_code($context);
 
@@ -172,7 +211,7 @@ sub ws_loginWithPassword {
         password    => $context->content->{password},
     });
 
-    $context->user($user);
+    $context->client_data->{user} = $user->as_hash;
 
     return {};
 }
@@ -239,7 +278,7 @@ sub ws_loginWithEmailCode {
     if ($user->registration_stage ne 'enterEmailCode') {
         confess [1002, "Email Registration no longer valid."];
     }
-    $context->user($user);
+    $context->user($user->as_hash);
 
     return {
         loginStage  => 'enterNewPassword',
