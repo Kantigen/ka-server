@@ -10,7 +10,7 @@ use Time::HiRes qw(gettimeofday);
 use KA::SDB;
 use KA::Queue;
 
-extends 'KA::WebSocket';
+#extends 'KA::WebSocket';
 
 # A user has joined the server
 #
@@ -20,6 +20,11 @@ sub on_connect {
     return {
         message     => 'Welcome to KA User server',
     };
+}
+sub log {
+    my ($self) = @_;
+    my $server = "User";
+    return Log::Log4perl->get_logger( "WS::$server" );
 }
 
 
@@ -45,13 +50,6 @@ sub ws_clientCode {
 
     $context->client_code($client_code->id);
     $self->log->debug("Time before put ".gettimeofday);
-
-    $self->beanstalk_client->put({
-        priority    => 100,
-        ttr         => 120,
-        delay       => 10,
-        data        => '@@@@@@@@@@@@@@@@ Client Code @@@@@@@@@@@@@@@@@',
-    });
 
     $self->log->debug("Time after put ".gettimeofday);
     
@@ -251,13 +249,6 @@ sub ws_loginWithEmailCode {
     $context->user($user->as_hash);
 
     $self->log->debug("Time before put ".gettimeofday);
-
-    $self->beanstalk_client->put({
-        priority    => 100,
-        ttr         => 120,
-        delay       => 10,
-        data        => '@@@@@@@@@@@@@@@@ Login @@@@@@@@@@@@@@@@@',
-    });
 
     $self->log->debug("Time after put ".gettimeofday);
     

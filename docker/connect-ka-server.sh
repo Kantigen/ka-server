@@ -1,4 +1,4 @@
-docker exec -it tle-server bash
+docker exec -it ka-server bash
 
 
 

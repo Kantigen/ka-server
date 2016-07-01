@@ -3,17 +3,13 @@ package KA::WebSocket;
 use Moose;
 use MooseX::NonMoose;
 
-extends 'Plack::Component';
 use Carp;
-use Plack::Response;
 use AnyEvent;
 use AnyEvent::WebSocket::Server;
 use Try::Tiny;
-use Plack::App::WebSocket::Connection;
 use JSON;
 use Data::Dumper;
 use Log::Log4perl;
-use AnyEvent::Beanstalk;
 use Time::HiRes qw(gettimeofday);
 
 use KA::ClientCode;
@@ -100,21 +96,15 @@ sub BUILD {
 
     $self->log->info("BUILD WEBSOCKET #### $self");
     my $ws = AnyEvent->timer(
-        after       => 0.0,
+        after       => 10,
         interval    => 10,
         cb          => sub {
             $self->heartbeat;
         },
     );
+    # Persist the heartbeat timer.
     $self->hb_timer($ws);
 
-    $self->log->debug("BUILD: USER $self");
-    $self->log->debug("Time before reserve ".gettimeofday);
-    $self->beanstalk_client->reserve( sub {
-        my $job = shift;
-        $self->on_beanstalk_job($job);
-    });
-    $self->log->debug("Time after reserve ".gettimeofday);
 }
 
 
@@ -157,15 +147,16 @@ sub instance_stats {
 sub heartbeat {
     my ($self) = @_;
 
+    $self->log->debug("In Heartbeat 1");
     my $stats = $self->instance_stats;
     # Put the stats onto the stats queue
     my $queue = KA::Queue->instance;
-#    my $job = $queue->publish('stats', {
-#        task        => 'websocket',
-#        stats       => $stats,
-#    },{
-#        priority    => 1000,
-#    });
+    my $job = $queue->publish('stats', {
+        task        => 'websocket',
+        stats       => $stats,
+    },{
+        priority    => 1000,
+    });
 }
 
 
@@ -250,7 +241,7 @@ sub on_connect {
 # Establish a connection
 # 
 sub on_establish {
-    my ($self, $connection, $env) = @_;
+    my ($self, $connection) = @_;
 
     $self->incr_stat('stats_new_connections');
     my $log = $self->log;
@@ -275,12 +266,12 @@ sub on_establish {
     $log->debug("Establish");
     $self->render_json($context, $reply);
 
-    my $state = {
-    };
+    my $state = {};
+    
     $log->debug("Establish");
     
     $connection->on(
-        message => sub {
+        each_message => sub {
             $self->_on_message($state, @_);
         }
     );
@@ -297,6 +288,7 @@ sub on_establish {
 sub _on_message {
     my ($self, $state, $connection, $msg) = @_;
 
+    $msg = $msg->body;
     my $log = $self->log;
 
     $log->info("RCVD: $msg");
@@ -430,40 +422,25 @@ sub report_error {
     $self->send($connection, $msg);
 }
 
-my $ERROR_ENV = "plack.app.websocket.error";
-
 # This is where all the work gets done. 
 #
 sub call {
-    my ($self, $env) = @_;
+    my ($self, $fh) = @_;
 
-    my $log = $self->log;
-    if ($env->{"psgi.run_once"}) {
-        $log->debug("RUNNING IN A NON-PERSISTENT ENVIRONMENT");
-    }
-    else {
-        $log->debug("RUNNING IN A PERSISTENT ENVIRONMENT");
-    }
+    $self->log->debug("got here [$fh]");
+ 
+    $self->ws_server->establish($fh)->cb(sub {
+        my ($arg) = @_;
 
+        my $connection = eval { $arg->recv };
 
-    if (!$env->{"psgi.streaming"} || !$env->{"psgi.nonblocking"} || !$env->{"psgix.io"}) {
-        $env->{$ERROR_ENV} = "not supported by the PSGI server";
-        return $self->on_error($env);
-    }
-    my $cv_conn = $self->ws_server->establish_psgi($env, $env->{"psgix.io"});
-    return sub {
-        my $responder = shift;
-        $cv_conn->cb(sub {
-            my ($cv_conn) = @_;
-            my ($conn) = try { $cv_conn->recv };
-            if (!$conn) {
-                $env->{$ERROR_ENV} = "invalid request";
-                _respond_via($responder, $self->on_error($env));
-                return;
-            }
-            $self->on_establish(Plack::App::WebSocket::Connection->new($conn, $responder), $env);
-        });
-    };
+        if ($@) {
+            warn "Invalid connection request: $@\n";
+            close($fh);
+            return;
+        }
+        $self->on_establish($connection);
+    });
 }
 
 sub _respond_via {
@@ -474,32 +451,6 @@ sub _respond_via {
     else {
         $responder->($psgi_res);
     }
-}
-
-
-sub on_error {
-    my ($self, $env) = @_;
-
-    my $res = Plack::Response->new;
-    $res->content_type("text/plain");
-    if (!defined($env->{$ERROR_ENV})) {
-        $res->status(500);
-        $res->body("Unknown error");
-    }
-    elsif ($env->{$ERROR_ENV} eq "not supported by the PSGI server") {
-        $res->status(500);
-        $res->body("The server does not support WebSocket.");
-    }
-    elsif ($env->{$ERROR_ENV} eq "invalid request") {
-        $res->status(400);
-        $res->body("The request is invalid for a WebSocket request.");
-    }
-    else {
-        $res->status(500);
-        $res->body("Unknown error: $env->{$ERROR_ENV}");
-    }
-    $res->content_length(length($res->body));
-    return $res->finalize;
 }
 
 
