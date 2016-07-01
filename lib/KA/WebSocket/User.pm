@@ -5,46 +5,12 @@ use Log::Log4perl;
 use Data::Dumper;
 use Text::Trim qw(trim);
 use Email::Valid;
-use AnyEvent::Beanstalk;
+use Time::HiRes qw(gettimeofday);
 
 use KA::SDB;
 use KA::Queue;
 
 extends 'KA::WebSocket';
-
-has beanstalk_client => (
-    is      => 'rw',
-    lazy    => 1,
-    builder => '_build_beanstalk_client',
-);
-
-sub _build_beanstalk_client {
-    my ($self) = @_;
-
-    my $client = AnyEvent::Beanstalk->new(
-        server  => 'ka-beanstalkd',
-    );
-    return $client
-}
-
-sub BUILD {
-    my ($self) = @_;
-
-    $self->log->debug("BUILD: USER $self");
-    $self->beanstalk_client->reserve( sub { 
-        my $job = shift;
-        $self->on_beanstalk_job($job);
-    });
-}
-
-
-sub on_beanstalk_job {
-    my ($self, $job) = @_;
-
-    $self->log->debug("ON_BEANSTALK_JOB: [".Dumper($job)."]");
-}
-
-
 
 # A user has joined the server
 #
@@ -78,13 +44,17 @@ sub ws_clientCode {
     }
 
     $context->client_code($client_code->id);
+    $self->log->debug("Time before put ".gettimeofday);
 
     $self->beanstalk_client->put({
         priority    => 100,
         ttr         => 120,
-        delay       => 1,
+        delay       => 10,
+        data        => '@@@@@@@@@@@@@@@@ Client Code @@@@@@@@@@@@@@@@@',
     });
 
+    $self->log->debug("Time after put ".gettimeofday);
+    
     return {
         clientCode   => $client_code->id,
     };
@@ -279,6 +249,18 @@ sub ws_loginWithEmailCode {
         confess [1002, "Email Registration no longer valid."];
     }
     $context->user($user->as_hash);
+
+    $self->log->debug("Time before put ".gettimeofday);
+
+    $self->beanstalk_client->put({
+        priority    => 100,
+        ttr         => 120,
+        delay       => 10,
+        data        => '@@@@@@@@@@@@@@@@ Login @@@@@@@@@@@@@@@@@',
+    });
+
+    $self->log->debug("Time after put ".gettimeofday);
+    
 
     return {
         loginStage  => 'enterNewPassword',

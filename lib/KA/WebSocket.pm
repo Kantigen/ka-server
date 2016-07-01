@@ -13,6 +13,8 @@ use Plack::App::WebSocket::Connection;
 use JSON;
 use Data::Dumper;
 use Log::Log4perl;
+use AnyEvent::Beanstalk;
+use Time::HiRes qw(gettimeofday);
 
 use KA::ClientCode;
 use KA::WebSocket::Context;
@@ -45,6 +47,22 @@ has connections => (
     isa     => 'HashRef',
     default => sub { {} },
 );
+
+has beanstalk_client => (
+    is      => 'rw',
+    lazy    => 1,
+    builder => '_build_beanstalk_client',
+);
+
+sub _build_beanstalk_client {
+    my ($self) = @_;
+
+    my $client = AnyEvent::Beanstalk->new(
+        server  => 'ka-beanstalkd',
+    );
+    return $client
+}
+
 
 sub log {
     my ($self) = @_;
@@ -89,6 +107,32 @@ sub BUILD {
         },
     );
     $self->hb_timer($ws);
+
+    $self->log->debug("BUILD: USER $self");
+    $self->log->debug("Time before reserve ".gettimeofday);
+    $self->beanstalk_client->reserve( sub {
+        my $job = shift;
+        $self->on_beanstalk_job($job);
+    });
+    $self->log->debug("Time after reserve ".gettimeofday);
+}
+
+
+sub on_beanstalk_job {
+    my ($self, $job) = @_;
+
+    $self->log->debug("=================================== ON_BEANSTALK_JOB ================================: [\n".Dumper($job)."]");
+    $self->log->debug("Time before delete ".gettimeofday);
+    $job->client->delete($job->id);
+    $self->log->debug("Time after delete ".gettimeofday);
+
+    $self->log->debug("BUILD: USER $self");
+    $self->log->debug("Time before reserve ".gettimeofday);
+    $self->beanstalk_client->reserve( sub {
+        my $job = shift;
+        $self->on_beanstalk_job($job);
+    });
+    $self->log->debug("Time after reserve ".gettimeofday);
 }
 
 # Generate a hash for the statistics of this instance
@@ -116,12 +160,12 @@ sub heartbeat {
     my $stats = $self->instance_stats;
     # Put the stats onto the stats queue
     my $queue = KA::Queue->instance;
-    my $job = $queue->publish('stats', {
-        task        => 'websocket',
-        stats       => $stats,
-    },{
-        priority    => 1000,
-    });
+#    my $job = $queue->publish('stats', {
+#        task        => 'websocket',
+#        stats       => $stats,
+#    },{
+#        priority    => 1000,
+#    });
 }
 
 
