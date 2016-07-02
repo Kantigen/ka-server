@@ -6,7 +6,7 @@ use YAML;
 
 has 'job' => (
     is          => 'ro',
-    isa         => 'Beanstalk::Job',
+#    isa         => 'AnyEvent::Beanstalk::Job',
     required    => 1,
     handles     => [qw(id buried reserved data error stats delete touch peek release bury args tube ttr priority)],
 );

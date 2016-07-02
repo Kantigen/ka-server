@@ -1,14 +1,14 @@
 package KA::Queue;
 
 use MooseX::Singleton;
-use Beanstalk::Client;
+use AnyEvent::Beanstalk;
 use Data::Dumper;
 
 use KA::Queue::Job;
 
 has '_beanstalk' => (
     is          => 'ro',
-    isa         => 'Beanstalk::Client',
+    isa         => 'AnyEvent::Beanstalk',
     lazy        => 1,
     builder     => '__build_beanstalk',
 );
@@ -56,11 +56,11 @@ sub log {
 sub __build_beanstalk {
     my ($self) = @_;
 
-    my $beanstalk = Beanstalk::Client->new({
+    my $beanstalk = AnyEvent::Beanstalk->new(
         server      => 'ka-beanstalkd:11300',
         ttr         => $self->ttr,
         debug       => $self->debug,
-    });
+    );
     $self->log->debug("BEANSTALK: [$beanstalk]");
 
     return $beanstalk;
@@ -70,17 +70,21 @@ sub publish {
     my ($self, $queue, $payload, $options) = @_;
 
     my $log         = $self->log;
-    $log->debug("queue [$queue] payload [".Dumper($payload)."] options [".Dumper($options)."]");
+    $log->debug("queue [$queue] payload [$payload)] ");
 
     my $beanstalk   = $self->_beanstalk;
     $queue          = $queue || 'default';
     $options        = defined $options ? $options : {},
     $beanstalk->use($queue);
+    $log->debug("QUEUE [$queue] payload [$payload] ");
 
-    my $job = $beanstalk->put($options, $payload);
-    $log->debug("JOB: [$job]");
-
-    return KA::Queue::Job->new({job => $job});
+    $beanstalk->put({
+        data    => $payload,
+        priority    => 100,
+        ttr         => 120,
+        delay       => 0,
+    });
+#    $beanstalk->put($options, $payload);
 }
 
 sub peek {
@@ -88,7 +92,7 @@ sub peek {
 
     my $beanstalk = $self->_beanstalk;
 
-    my $job = $beanstalk->peek($job_id);
+    my $job = $beanstalk->peek($job_id)->recv;
     if ($job) {
         return KA::Queue::Job->new({job => $job});
     }
@@ -100,7 +104,7 @@ sub delete {
 
     my $beanstalk = $self->_beanstalk;
 
-    $beanstalk->delete($job_id);
+    $beanstalk->delete($job_id)->recv;
     return;
 }
 
@@ -126,7 +130,7 @@ sub kick {
     $bound = $bound || 1;
 
     my $beanstalk   = $self->_beanstalk;
-    my $kicked      = $beanstalk->kick($bound);
+    my $kicked      = $beanstalk->kick($bound)->recv;
 
     return $kicked;
 }
@@ -137,7 +141,7 @@ sub pause_tube {
     $seconds = $seconds || 0;
 
     my $beanstalk   = $self->_beanstalk;
-    my $ret = $beanstalk->pause_tube($tube, $seconds);
+    my $ret = $beanstalk->pause_tube($tube, $seconds)->recv;
 }
 
 sub stats {
@@ -168,8 +172,8 @@ sub consume {
     RESERVE:
     while (not $job) {
         $log->debug("wait on tube [$tube]");
-        $beanstalk->watch_only($tube);
-        $job = $beanstalk->reserve;
+        $beanstalk->watch_only($tube)->recv;
+        $job = $beanstalk->reserve()->recv;
 
         # Defend against undef jobs (most likely due to DEADLINE_SOON)
         if (not $job) {

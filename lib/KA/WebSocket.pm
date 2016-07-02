@@ -44,25 +44,8 @@ has connections => (
     default => sub { {} },
 );
 
-has beanstalk_client => (
-    is      => 'rw',
-    lazy    => 1,
-    builder => '_build_beanstalk_client',
-);
-
-sub _build_beanstalk_client {
-    my ($self) = @_;
-
-    my $client = AnyEvent::Beanstalk->new(
-        server  => 'ka-beanstalkd',
-    );
-    return $client
-}
-
-
 sub log {
     my ($self) = @_;
-    my $server = $self->room || "null";
     return Log::Log4perl->get_logger( "WS::".$self->room );
 }
 
@@ -108,23 +91,6 @@ sub BUILD {
 }
 
 
-sub on_beanstalk_job {
-    my ($self, $job) = @_;
-
-    $self->log->debug("=================================== ON_BEANSTALK_JOB ================================: [\n".Dumper($job)."]");
-    $self->log->debug("Time before delete ".gettimeofday);
-    $job->client->delete($job->id);
-    $self->log->debug("Time after delete ".gettimeofday);
-
-    $self->log->debug("BUILD: USER $self");
-    $self->log->debug("Time before reserve ".gettimeofday);
-    $self->beanstalk_client->reserve( sub {
-        my $job = shift;
-        $self->on_beanstalk_job($job);
-    });
-    $self->log->debug("Time after reserve ".gettimeofday);
-}
-
 # Generate a hash for the statistics of this instance
 # Note: this structure will be augmented by descendents
 #
@@ -150,13 +116,13 @@ sub heartbeat {
     $self->log->debug("In Heartbeat 1");
     my $stats = $self->instance_stats;
     # Put the stats onto the stats queue
-    my $queue = KA::Queue->instance;
-    my $job = $queue->publish('stats', {
-        task        => 'websocket',
-        stats       => $stats,
-    },{
-        priority    => 1000,
-    });
+#    my $queue = KA::Queue->instance;
+#    my $job = $queue->publish('stats', {
+#        task        => 'websocket',
+#        stats       => $stats,
+#    },{
+#        priority    => 1000,
+#    });
 }
 
 

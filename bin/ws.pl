@@ -6,7 +6,11 @@ use warnings;
 use lib "../lib";
 
 use Redis;
+use AnyEvent;
+use AnyEvent::Socket qw(tcp_server);
+use AnyEvent::Redis;
 
+use KA::WebSocket;
 use KA::WebSocket::User;
 use KA::Queue;
 use KA::Config;
@@ -59,12 +63,6 @@ my $condvar = AnyEvent->condvar;
 
 Log::Log4perl->init('/home/keno/ka-server/etc/log4perl.conf');
 
-use AnyEvent;
-use AnyEvent::Socket qw(tcp_server);
-use AnyEvent::WebSocket::Server;
-use AnyEvent::Beanstalk;
-use KA::WebSocket;
-
 my $web_socket = KA::WebSocket->new;
 
 #--- Web Socket handler
@@ -75,15 +73,15 @@ tcp_server 0, 80, sub {
 };
 
 #--- beanstalk handler
-my $beanstalk_client = AnyEvent::Beanstalk->new(server => 'ka-beanstalkd');
 my $timer = AE::timer 0, 1, sub { print STDERR "In Timer!\n" };
+my $queue = KA::Queue->instance;
 
 while (1) {
     print STDERR "Reserving Job...\n";
-    my $job = $beanstalk_client->reserve()->recv;
+    my $job = $queue->consume('ws_receive');
     print Dumper( $job);
-    print STDERR "Deleting Job...\n";
-    $beanstalk_client->delete($job->id)->recv;
+    print STDERR "Deleting Job...[".$job->payload."]\n";
+    $job->delete;
 }
 
 #--- Redis handler

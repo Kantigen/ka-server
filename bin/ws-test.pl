@@ -64,15 +64,12 @@ use AnyEvent::WebSocket::Server;
 use AnyEvent::Beanstalk;
 
 # beanstalk sender
-my $beanstalk_client = AnyEvent::Beanstalk->new(server => 'ka-beanstalkd');
 my $timer = AE::timer 0, 10, sub { 
     print STDERR "In 10 sec Timer!\n";
-    $beanstalk_client->put({
-        data        => "Hello world",
-        priority    => 100,
-        ttr         => 120,
-        delay       => 5,
-    });
+
+    my $queue = KA::Queue->instance();
+
+    $queue->publish('ws_receive', "Hello World!");
 };
 
 $condvar->recv;
