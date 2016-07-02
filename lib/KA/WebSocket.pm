@@ -6,6 +6,7 @@ use MooseX::NonMoose;
 use Carp;
 use AnyEvent;
 use AnyEvent::WebSocket::Server;
+use AnyEvent::WebSocket::Connection;
 use Try::Tiny;
 use JSON;
 use Data::Dumper;
@@ -39,6 +40,12 @@ sub _build_ws_server {
 
 # A hash of all clients that are connected to this server
 has connections => (
+    is      => 'rw',
+    isa     => 'HashRef',
+    default => sub { {} },
+);
+
+has client_data => (
     is      => 'rw',
     isa     => 'HashRef',
     default => sub { {} },
@@ -139,7 +146,8 @@ sub fatal {
 sub send {
     my ($self, $connection, $msg) = @_;
 
-    $self->log->info("Sent: [$msg]");
+    $self->log->info("XXXXXXXXXXXXXXXXXXXXXXXXX Sent: [$connection][$msg]");
+    $self->log->debug("XXXXXXXXXX ".Dumper($connection));
     $self->incr_stat('stats_sent_messages');
     $connection->send($msg);
 }
@@ -151,6 +159,7 @@ sub render_json {
 
     my $sent = JSON->new->encode($json);
     $self->send($context->connection, $sent);
+    $self->log->info("********************* Sent");
 }
 
 # Send a message to one client, without the context
@@ -182,8 +191,8 @@ sub broadcast_json {
     my $sent = JSON->new->encode($json);
     $log->info("BCAST: [$self] [$sent] connections=[".$self->number_of_clients."]");
     my $i = 0;
-    foreach my $connection (keys %{$self->connections}) {
-        $self->send($connection, $sent);
+    foreach my $key (keys %{$self->connections}) {
+        $self->send($self->connections->{$key}, $sent);
     }
 }
 
@@ -221,7 +230,9 @@ sub on_establish {
     $log->debug("Establish");
     
     # Create initial blank data for the connection
-    $self->connections->{$connection} = {};
+    $self->connections->{$connection} = $connection;
+    $self->client_data->{$connection} = {};
+
     $log->info("START: there are ".scalar(keys %{$self->connections}). " connections");
                 
     my $reply = {
@@ -257,7 +268,7 @@ sub _on_message {
     $msg = $msg->body;
     my $log = $self->log;
 
-    $log->info("RCVD: $msg");
+    $log->info("RCVD: [$connection] $msg");
 
     my $json = JSON->new;
     my $json_msg = eval {$json->decode($msg)};
@@ -298,7 +309,7 @@ sub _on_message {
             connection      => $connection,
             content         => $content,
             msg_id          => $msg_id,
-            client_data     => $self->connections->{$connection},
+            client_data     => $self->client_data->{$connection},
             client_code     => $client_code,
         });
         $log->debug("Call [$obj][$method]");
@@ -353,6 +364,7 @@ sub kill_client_data {
 
     my $log = $self->log;
     delete $self->connections->{$connection};
+    delete $self->client_data->{$connection};
     $log->info("FINISH: [$self] there are ".scalar(keys %{$self->connections}). " connections");
     undef $connection;
     $log->info("killed connection data");
@@ -443,11 +455,11 @@ sub queue {
     
     if ($payload->{user_id}) {
         # Then see if there is a connection with this user_id
-        CONNECTION: foreach my $key (keys %{$self->connections}) {
-            if (my $user = $self->connections->{$key}{user}) {
+        CONNECTION: foreach my $key (keys %{$self->client_data}) {
+            if (my $user = $self->client_data->{$key}{user}) {
                 $self->log->debug("QQQQ ".Dumper($user));
                 if ($user->{id} == $payload->{user_id}) {
-                    $connection = $key;
+                    $connection = $self->connections->{$key};
                     last CONNECTION;
                 }
             }
@@ -491,9 +503,37 @@ sub queue {
             content         => $content,
             client_data     => $connection ? $self->connections->{$connection} : {},
         });
-    $self->log->debug("Call [$obj][$method] connection=[$connection]");
+        $self->log->debug("Call [$obj][$method] connection=[$connection]");
+
+        # If the method returns content, then render
+        # a JSON reply
+        #
         my $content = $obj->$method($context);
+        if (defined $content) {
+            my $reply = {
+                room        => $self->room,
+                route       => $path,
+                content     => $content,
+                status      => 0,
+                message     => 'OK',
+            };
+
+            $self->render_json($context, $reply);
+        }
     }; 
+    my @error;
+    if ($@ and ref($@) eq 'ARRAY') {
+        $self->log->error("ARRAY ERROR");
+        @error = @{$@};
+    }
+    elsif ($@) {
+        $self->log->error("UNKNOWN ERROR [".$@."]");
+        @error = (
+            1000,
+            'unknown error',
+            'please refer to server error log!',
+        );
+    }
 
     $job->delete;
 }
