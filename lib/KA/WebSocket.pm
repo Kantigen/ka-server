@@ -409,14 +409,92 @@ sub call {
     });
 }
 
-sub _respond_via {
-    my ($responder, $psgi_res) = @_;
-    if (ref($psgi_res) eq "CODE") {
-        $psgi_res->($responder);
+# This is responsible for handling beanstalk queue messages
+#   typical messages looks like
+#
+#   {
+#     route     => '/user/loginWithPassword',
+#     user_id   => 123,
+#     status    => 0,
+#     message   => 'OK',
+#     content   => {
+#       username    => 'james_bond',
+#       id          => 7,
+#       email       => 'jb@mi5.gov.co.uk'
+#     }
+#   }
+#
+#   Note, although this is similar to the websocket messages
+#   they do not call the same methods
+#   
+#   the user_id is used to identify which user the message
+#   is for. By searching the connections it should be 
+#   possible to find the connection key for that user.
+#
+#   If user_id is zero or not specified then it is a general
+#   queue message.
+#
+sub queue {
+    my ($self, $job) = @_;
+
+    $self->log->debug("JOB: ".Dumper($job->payload));
+    my $payload = $job->payload;
+    my $connection;
+    
+    if ($payload->{user_id}) {
+        # Then see if there is a connection with this user_id
+        CONNECTION: foreach my $key (keys %{$self->connections}) {
+            if (my $user = $self->connections->{$key}{user}) {
+                if ($user->{user_id} == $payload->{user_id}) {
+                    $connection = $self->connections->{$key};
+                    last CONNECTION;
+                }
+            }
+        }
+        # if we can't find the user, then abort the job
+        unless ($connection) {
+            $self->log->info("Cannot find user ".$payload->{user_id});
+            $job->delete;
+            return;
+        }
     }
-    else {
-        $responder->($psgi_res);
-    }
+    # Convert the route to a class and method
+    my $path        = $payload->{route};
+    my $content     = $payload->{content} || {};
+
+    eval {
+        my ($route, $method) = $path =~ m{(.*)/([^/]*)};
+        $method = "mq_".$method;
+        $route =~ s{/$}{};
+        $route =~ s{^/}{};
+        $route =~ s{/}{::};
+        $route =~ s/([\w']+)/\u\L$1/g;      # Capitalize user::foo to User::Foo
+        $self->log->debug("route = [$route]");
+        my $obj;
+        if ($route) {
+            $route = ref($self)."::".$route;
+            # TODO work out how long an eval takes?
+
+            eval "require $route";
+            $obj = $route->new({});
+        }
+        else {
+            $self->log->debug("ROUTE... [SELF!]");
+            $route = $self;
+            $obj = $self;
+        }
+        $self->log->debug("route = [$route]");
+        my $context = KA::WebSocket::Context->new({
+            room            => $self->room,
+            connection      => $connection,
+            content         => $content,
+            client_data     => $connection ? $self->connections->{$connection} : {},
+        });
+        $self->log->debug("Call [$obj][$method]");
+        my $content = $obj->$method($context);
+    }; 
+
+    $job->delete;
 }
 
 

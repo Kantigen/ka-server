@@ -79,9 +79,10 @@ my $queue = KA::Queue->instance;
 while (1) {
     print STDERR "Reserving Job...\n";
     my $job = $queue->consume('ws_receive');
-    print Dumper( $job);
-    print STDERR "Deleting Job...[".$job->payload."]\n";
-    $job->delete;
+    print STDERR "Deleting Job...[".Dumper($job->payload)."]\n";
+
+    # The ws_receive queue is handled by the WebSocket queue router
+    $web_socket->queue($job);
 }
 
 #--- Redis handler

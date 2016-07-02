@@ -27,6 +27,16 @@ sub log {
     return Log::Log4perl->get_logger( "WS::$server" );
 }
 
+#--- Receive a Message Queue message
+#
+sub mq_hello {
+    my ($self, $context) = @_;
+
+    my $log = Log::Log4perl->get_logger('KA::WebSocket::User');
+    $log->debug(Dumper($context));
+}
+
+
 
 #--- Get or confirm that a clientCode is valid
 #

@@ -3,6 +3,7 @@ package KA::Queue;
 use MooseX::Singleton;
 use AnyEvent::Beanstalk;
 use Data::Dumper;
+use JSON::XS;
 
 use KA::Queue::Job;
 
@@ -66,25 +67,32 @@ sub __build_beanstalk {
     return $beanstalk;
 }
 
+#--- Publish to a named queue
+#   $queue is the name of the queue e.g. 'ws-receive'
+#   $payload is a perl data structure
+#
 sub publish {
-    my ($self, $queue, $payload, $options) = @_;
+    my ($self, $args) = @_;
+
+    my $payload     = $args->{payload} || {};
+    my $queue       = $args->{queue} || 'default';
+    my $delay       = $args->{delay} || 0;
+    my $priority    = $args->{priority} || 2000;
+    my $ttr         = $args->{ttr} || $self->ttr;
 
     my $log         = $self->log;
     $log->debug("queue [$queue] payload [$payload)] ");
 
     my $beanstalk   = $self->_beanstalk;
-    $queue          = $queue || 'default';
-    $options        = defined $options ? $options : {},
     $beanstalk->use($queue);
-    $log->debug("QUEUE [$queue] payload [$payload] ");
-
+    $payload = encode_json($payload);
+    
     $beanstalk->put({
-        data    => $payload,
-        priority    => 100,
-        ttr         => 120,
-        delay       => 0,
+        data        => $payload,
+        priority    => $priority,
+        ttr         => $ttr,
+        delay       => $delay,
     });
-#    $beanstalk->put($options, $payload);
 }
 
 sub peek {

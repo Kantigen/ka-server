@@ -69,7 +69,15 @@ my $timer = AE::timer 0, 10, sub {
 
     my $queue = KA::Queue->instance();
 
-    $queue->publish('ws_receive', "Hello World!");
+    $queue->publish({
+        queue   => 'ws_receive', 
+        payload => {
+            route   => '/user/hello',
+            content => {
+                foo     => 'bar'
+            }
+        },
+    });
 };
 
 $condvar->recv;

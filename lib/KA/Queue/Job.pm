@@ -1,8 +1,7 @@
 package KA::Queue::Job;
 
 use Moose;
-use YAML;
-
+use JSON::XS;
 
 has 'job' => (
     is          => 'ro',
@@ -14,7 +13,7 @@ has 'job' => (
 sub payload {
     my ($self) = @_;
 
-    return $self->job->args;
+    my $payload =  decode_json($self->job->data);
 }
 
 __PACKAGE__->meta->make_immutable;
