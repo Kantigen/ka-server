@@ -33,7 +33,7 @@ sub mq_hello {
     my ($self, $context) = @_;
 
     my $log = Log::Log4perl->get_logger('KA::WebSocket::User');
-    $log->debug(Dumper($context));
+    $log->debug("MQ_HELLO: ".Dumper($context));
 }
 
 

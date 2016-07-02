@@ -388,7 +388,7 @@ sub report_error {
     $self->send($connection, $msg);
 }
 
-# This is where all the work gets done. 
+# This is the entry point for a WebSocket call
 #
 sub call {
     my ($self, $fh) = @_;
@@ -445,8 +445,9 @@ sub queue {
         # Then see if there is a connection with this user_id
         CONNECTION: foreach my $key (keys %{$self->connections}) {
             if (my $user = $self->connections->{$key}{user}) {
-                if ($user->{user_id} == $payload->{user_id}) {
-                    $connection = $self->connections->{$key};
+                $self->log->debug("QQQQ ".Dumper($user));
+                if ($user->{id} == $payload->{user_id}) {
+                    $connection = $key;
                     last CONNECTION;
                 }
             }
@@ -473,7 +474,7 @@ sub queue {
         my $obj;
         if ($route) {
             $route = ref($self)."::".$route;
-            # TODO work out how long an eval takes?
+            # TODO time how long an eval takes?
 
             eval "require $route";
             $obj = $route->new({});
@@ -490,7 +491,7 @@ sub queue {
             content         => $content,
             client_data     => $connection ? $self->connections->{$connection} : {},
         });
-        $self->log->debug("Call [$obj][$method]");
+    $self->log->debug("Call [$obj][$method] connection=[$connection]");
         my $content = $obj->$method($context);
     }; 
 
