@@ -278,84 +278,8 @@ sub _on_message {
         return;
     }
 
-    $log->debug("Establish");
-    my $path        = $json_msg->{route};
-    my $content     = $json_msg->{content} || {};
-    my $msg_id      = $json_msg->{msgId};
-    my $client_code  = $json_msg->{clientCode};
-
-    eval {
-        my ($route, $method) = $path =~ m{(.*)/([^/]*)};
-        $method = "ws_".$method;
-        $route =~ s{/$}{};
-        $route =~ s{^/}{};
-        $route =~ s{/}{::};
-        $route =~ s/([\w']+)/\u\L$1/g;      # Capitalize user::foo to User::Foo
-        $log->debug("route = [$route]");
-        my $obj;
-        if ($route) {
-            $route = ref($self)."::".$route;
-            eval "require $route";
-            $obj = $route->new({});
-        }
-        else {
-            $log->debug("ROUTE... [SELF!]");
-            $route = $self;
-            $obj = $self;
-        }
-        $log->debug("route = [$route]");
-        my $context = KA::WebSocket::Context->new({
-            room            => $self->room,
-            connection      => $connection,
-            content         => $content,
-            msg_id          => $msg_id,
-            client_data     => $self->client_data->{$connection},
-            client_code     => $client_code,
-        });
-        $log->debug("Call [$obj][$method]");
-
-        # If the object requires the user to be logged in
-#        if ($obj->must_be_logged_in and not 
-
-        # If the method returns content, then render
-        # a JSON reply
-        # 
-        my $content = $obj->$method($context);
-        if (defined $content) {
-            my $reply = {
-                room        => $self->room,
-                route       => $path,
-                content     => $content,
-                status      => 0,
-                message     => 'OK',
-            };
-            if ($msg_id) {
-                $reply->{msgId} = $msg_id;
-            }
-
-            $self->render_json($context, $reply);
-        }
-    };
-
-    my @error;
-    if ($@ and ref($@) eq 'ARRAY') {
-        $log->warn("ARRAY ERROR");
-        @error = @{$@};
-    }
-    elsif ($@) {
-        $log->warn("UNKNOWN ERROR [".$@."]");
-        @error = (
-            1000,
-            'unknown error',
-            'please refer to server error log!',
-        );
-    }
-    if (@error) {
-        $self->report_error($connection, \@error, $path, $msg_id);
-
-    }
+    $self->route_call('ws_', $json_msg, $connection);
 }
-
 
 # Remove all data held for the client
 #
@@ -455,29 +379,40 @@ sub queue {
     
     if ($payload->{user_id}) {
         # Then see if there is a connection with this user_id
+        # TODO Currently it sends to all open sessions for this user
+        # we probably want to only send to the session that requested
+        # the data.
+        # 
         CONNECTION: foreach my $key (keys %{$self->client_data}) {
             if (my $user = $self->client_data->{$key}{user}) {
                 $self->log->debug("QQQQ ".Dumper($user));
                 if ($user->{id} == $payload->{user_id}) {
                     $connection = $self->connections->{$key};
-                    last CONNECTION;
+                    $self->route_call('mq_', $job->payload, $connection);
                 }
             }
         }
         # if we can't find the user, then abort the job
         unless ($connection) {
             $self->log->info("Cannot find user ".$payload->{user_id});
-            $job->delete;
-            return;
         }
     }
+    $job->delete;
+}
+
+
+sub route_call {
+    my ($self, $prefix, $payload, $connection) = @_;
+
     # Convert the route to a class and method
     my $path        = $payload->{route};
     my $content     = $payload->{content} || {};
+    my $client_code = $payload->{clientCode};
+    my $msg_id      = $payload->{msgId} || 0;
 
     eval {
         my ($route, $method) = $path =~ m{(.*)/([^/]*)};
-        $method = "mq_".$method;
+        $method = $prefix.$method;
         $route =~ s{/$}{};
         $route =~ s{^/}{};
         $route =~ s{/}{::};
@@ -501,7 +436,9 @@ sub queue {
             room            => $self->room,
             connection      => $connection,
             content         => $content,
-            client_data     => $connection ? $self->connections->{$connection} : {},
+            msg_id          => $msg_id,
+            client_data     => $connection ? $self->client_data->{$connection} : {},
+            client_code     => $client_code,
         });
         $self->log->debug("Call [$obj][$method] connection=[$connection]");
 
@@ -517,13 +454,16 @@ sub queue {
                 status      => 0,
                 message     => 'OK',
             };
+            if ($msg_id) {
+                $reply->{msgId} = $msg_id;
+            }
 
             $self->render_json($context, $reply);
         }
     }; 
     my @error;
     if ($@ and ref($@) eq 'ARRAY') {
-        $self->log->error("ARRAY ERROR");
+        $self->log->error("ARRAY ERROR".Dumper($@));
         @error = @{$@};
     }
     elsif ($@) {
@@ -534,8 +474,10 @@ sub queue {
             'please refer to server error log!',
         );
     }
+    if (@error) {
+        $self->report_error($connection, \@error, $path, $msg_id);
 
-    $job->delete;
+    }
 }
 
 
