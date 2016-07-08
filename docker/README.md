@@ -106,11 +106,11 @@ to have a persistent database for mysql. You can start/stop other containers
 but your mysql data will remain.
 
 If you ever want to 'blow-away' your database and start again then you
-should first stop and remove all containers that refer to it (tle-mysql)
+should first stop and remove all containers that refer to it (ka-mysql)
 and then do the following.
 
-    $ docker rm -v tle-mysql-data
-    $ ./create_tle_data.sh
+    $ docker rm -v ka-mysql-data
+    $ ./create-data.sh
 
 ### ka-nginx
 
@@ -152,7 +152,7 @@ There are a few things you need to do to set up your development system.
 
 If you have just created your ka-mysql-data container then it will be empty.
 
-The first time you run up the tle-server you need to run a few commands.
+The first time you run up the ka-server you need to run a few commands.
 
     $ cd /home/keno/ka-server/bin
     $ mysql --host=ka-mysql-server -uroot -pkeno
@@ -165,8 +165,8 @@ This sets up the mysql user account 'keno' which is used by the web application.
 
 You now need to initialize the database. (this will take a few minutes).
 
-    $ cd /home/keno/ka-server/setup
-    $ perl init_keno.pl
+    $ cd /home/keno/ka-server/bin/setup
+    $ perl init-keno.pl
 
 
 Captchas no longer need to be generated up-front. They will be generated
