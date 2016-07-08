@@ -124,7 +124,7 @@ foreach my $proc (qw(peek_buried peek_ready peek_delayed)) {
     $meta->add_method($proc => sub {
         my ($self) = @_;
 
-        my $job = $self->_beanstalk->$proc;
+        my $job = $self->_beanstalk->$proc->recv;
         if ($job) {
             return KA::Queue::Job->new({job => $job});
         }

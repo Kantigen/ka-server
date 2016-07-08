@@ -34,8 +34,6 @@ sub test_client_code {
     # An invalid clientCode should return a valid one
     #
     my $response = $ws_user->ws_clientCode($context);
-    is($response->{code},       0,                  "Response: code");
-    is($response->{message},    "NEW Client Code",  "Response: message");
 
     my $client_code_id = $response->{clientCode};
     isnt($client_code_id,       undef,              "There is a client code");
@@ -53,8 +51,6 @@ sub test_client_code {
     $context->msg_id(124);
 
     $response = $ws_user->ws_clientCode($context);
-    is($response->{code},           0,                  "Response: code");
-    is($response->{message},        "GOOD Client Code", "Response: message");
 
     $client_code_id = $response->{clientCode};
     isnt($client_code_id,       undef,                  "Response: clientCode is defined");
@@ -141,8 +137,6 @@ sub test_register {
     my $response;
     if (lives_ok { $response = $ws_user->ws_register($context) } 'good client code' ) {
         is_deeply($response, {
-                code        => '0',
-                message     => 'Success',
                 username    => 'joseph',
                 loginStage  => 'enterEmailCode',
             },
@@ -157,7 +151,6 @@ sub test_register {
     my $queue = KA::Queue->instance;
     my $job = $queue->peek_ready;
     isnt($job, undef, "Job is ready"); 
-    #diag(Dumper($job));
     $queue->delete($job->job->id);
 
     $fixtures->unload;
@@ -198,21 +191,16 @@ sub test_forgot_password {
     # non-existing username or email should return success
     $content->{usernameOrEmail} = "username_unknown";
     my $response = $ws_user->ws_forgotPassword($context);
-    is($response->{code}, 0, "Response: code good");
-    is($response->{message}, "Success", "Response: message Success");
 
     # but no email job should be raised
     my $queue = KA::Queue->instance;
     my $job = $queue->peek_ready;
+
     is($job, undef, "No email job"); 
  
     # existing username should return success
     $content->{usernameOrEmail} = "alfred";
-    if ( lives_ok { $response = $ws_user->ws_forgotPassword($context) } 'good client code' ) {
-        is($response->{code},       0,                          "Response: code good");
-        is($response->{message},    "Success",                  "Response: message good");
-    }
-    else {
+    unless ( lives_ok { $response = $ws_user->ws_forgotPassword($context) } 'good client code' ) {
         diag(Dumper($@));
     }
     # email job should be raised
@@ -222,11 +210,7 @@ sub test_forgot_password {
 
     # existing email should return success
     $content->{usernameOrEmail} = 'bert@example.com';
-    if ( lives_ok { $response = $ws_user->ws_forgotPassword($context) } 'good client code' ) {
-        is($response->{code},       0,                          "Response: code good");
-        is($response->{message},    "Success",                  "Response: message good");
-    }
-    else {
+    unless ( lives_ok { $response = $ws_user->ws_forgotPassword($context) } 'good client code' ) {
         diag(Dumper($@));
     }
     # email job should be raised
@@ -281,12 +265,11 @@ sub test_login_with_password {
     like($@->[1], qr/^Client Code is invalid/, "Message");
     $context->client_code(KA::ClientCode->new->id);
 
-    # User who has completed registration should be allowed to change password.
-    my $user = $db->resultset('User')->find({
-        id      => 1,
-    });
-    $context->user($user);
-
+#    # User who has completed registration should be allowed to change password.
+#    my $user = $db->resultset('User')->find({
+#        id      => 1,
+#    });
+#    $context->client_data->{user} = $user->as_hash;
 
     # No matching username should return an error
     $content->{username} = "someone_else";
@@ -304,14 +287,10 @@ sub test_login_with_password {
 
     # Correct username and password should log in
     my $response;
-    if ( lives_ok { $response = $ws_user->ws_loginWithPassword($context) } 'good login' ) {
-        is($response->{code},       0,                          "Response: code good");
-        is($response->{message},    "Success",                  "Response: message good");
-    }
-    else {
+    unless ( lives_ok { $response = $ws_user->ws_loginWithPassword($context) } 'good login' ) {
         diag(Dumper($@));
     }
-    is($context->user->id, 1, "Correct user id");
+    is($context->client_data->{user}{id}, 1, "Correct user id");
     $fixtures->unload;
 }
 
@@ -354,7 +333,7 @@ sub test_enter_new_password {
     my $user = $db->resultset('User')->find({
         id      => 1,
     });
-    $context->user($user);
+    $context->client_data->{user} = $user->as_hash;
 
     # Password should not be too short
     $content->{password} = 'T1ny';
@@ -384,10 +363,7 @@ sub test_enter_new_password {
 
     my $response;
     if ( lives_ok { $response = $ws_user->ws_enterNewPassword($context) } 'good password change' ) {
-        diag(Dumper($response));
         is_deeply($response, {
-            code        => 0,
-            message     => 'Success',
             loginStage  => 'complete',
         });
     }
@@ -396,13 +372,10 @@ sub test_enter_new_password {
     $user = $db->resultset('User')->find({
         id      => 3,
     });
-    $context->user($user);
+    $context->client_data->{user} = $user->as_hash;
 
     if ( lives_ok { $response = $ws_user->ws_enterNewPassword($context) } 'good password change' ) {
-        diag(Dumper($response));
         is_deeply($response, {
-            code        => 0,
-            message     => 'Success',
             loginStage  => 'complete',
         });
     }
@@ -411,7 +384,7 @@ sub test_enter_new_password {
     $user = $db->resultset('User')->find({
         id      => 2,
     });
-    $context->user($user);
+    $context->client_data->{user} = $user->as_hash;
 
     throws_ok { $ws_user->ws_enterNewPassword($context) } qr/^ARRAY/, 'throws error for wrong registration state';
     is($@->[0], 1002, "Code");
@@ -476,8 +449,6 @@ sub test_login_with_email_code {
     my $response;
     if ( lives_ok { $response = $ws_user->ws_loginWithEmailCode($context) } 'good login' ) {
         is_deeply($response, {
-            code        => '0',
-            message     => 'Success',
             username    => 'bernard',
             loginStage  => 'enterNewPassword',
         });
@@ -485,7 +456,8 @@ sub test_login_with_email_code {
     else {
         diag(Dumper($@));
     }
-    is($context->user->id, 2, "Correct user id");
+
+    is($context->client_data->{user}{id}, 2, "Correct user id");
     $fixtures->unload;
 }
 
@@ -516,27 +488,21 @@ sub test_logout {
     });
 
     # If you are not logged in, it should return success
-    $context->user(undef);
+    undef $context->client_data->{user};
+
     my $response;
-    if ( lives_ok { $response = $ws_user->ws_logout($context) } 'good logout 1' ) {
-        is($response->{code},       0,                          "Response: code good");
-        is($response->{message},    "Success",                  "Response: message good");
-    }
-    else {
+    unless ( lives_ok { $response = $ws_user->ws_logout($context) } 'good logout 1' ) {
         diag(Dumper($@));
     }
 
     # If you are logged in, it should return success.
-    $context->user($user);
-    if ( lives_ok { $response = $ws_user->ws_logout($context) } 'good logout 2' ) {
-        is($response->{code},       0,                          "Response: code good");
-        is($response->{message},    "Success",                  "Response: message good");
-    }
-    else {
+    $context->client_data->{user} = $user->as_hash;
+
+    unless ( lives_ok { $response = $ws_user->ws_logout($context) } 'good logout 2' ) {
         diag(Dumper($@));
     }
 
-    is($context->user, undef, "User is logged out");
+    is($context->client_data->{user}{id}, undef, "User is logged out");
     $fixtures->unload;
 }
 1;

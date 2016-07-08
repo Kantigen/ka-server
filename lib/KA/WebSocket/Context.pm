@@ -30,6 +30,7 @@ has 'client_code' => (
 has 'client_data' => (
     is      => 'rw',
 #    isa     => 'Maybe[KA::DB::Result::User]',
+    default => sub { {} },
 );
 
 has 'msg_id' => (

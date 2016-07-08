@@ -73,7 +73,7 @@ my $timer = AE::timer 0, 10, sub {
         queue   => 'ws_receive', 
         payload => {
             route   => '/user/hello',
-            user_id => 2,
+            user_id => 1,
             content => {
                 foo     => 'bar'
             }

@@ -73,7 +73,7 @@ sub ws_clientCode {
 sub assert_user_is_logged_in {
     my ($self, $context) = @_;
 
-    if (not defined $context->client_data->{user}) {
+    if (not defined $context->client_data or not defined $context->client_data->{user}) {
         confess [1002, "User is not logged in" ]
     }
     return $context->client_data->{user};
@@ -119,9 +119,12 @@ sub ws_register {
 
     # Create a Job to send a registration email
     my $queue = KA::Queue->instance;
-    $queue->publish('email_register', {
-        username    => $user->username,
-        email       => $user->email,
+    $queue->publish({
+        queue       => 'email_register',
+        payload     => {
+            username    => $user->username,
+            email       => $user->email,
+        }
     });
 
     $log->debug("ws_register: return");
@@ -159,9 +162,12 @@ sub ws_forgotPassword {
     if ($user) {
         # Create a Job to send a forgotten password email
         my $queue = KA::Queue->instance;
-        $queue->publish('email_forgot_password', {
-            username    => $user->username,
-            email       => $user->email,
+        $queue->publish({
+            queue       => 'email_forgot_password',
+            payload     => {
+                username    => $user->username,
+                email       => $user->email,
+            }
         });
     }
 
@@ -176,10 +182,10 @@ sub ws_loginWithPassword {
     my $log = Log::Log4perl->get_logger('KA::WebSocket::User');
     my $db = KA::SDB->instance->db;
 
-    $log->debug("ws_loginWithPassword: ");
+    $log->debug("ws_loginWithPassword: ".Dumper($context->client_data));
 
     if (defined $context->client_data->{user}) {
-        confess [1666, "Already logged in. Log out first"];
+        confess [1001, "Already logged in. Log out first"];
     }
     # validate the Client Code
     my $client_code = $self->assert_valid_client_code($context);
@@ -213,7 +219,7 @@ sub ws_enterNewPassword {
     $db->resultset('User')->assert_password_valid($context->content->{password});
 
     # Only certain registration states are allowed
-    my $stage = $user->registration_stage;
+    my $stage = $user->{registration_stage};
     if ($stage eq 'complete' or $stage eq 'enterNewPassword') {
         return {
             loginStage  => 'complete',
@@ -253,10 +259,12 @@ sub ws_loginWithEmailCode {
     }
 
     # User must be in correct registration stage
+    $log->debug("Registration stage ".Dumper($user));
+
     if ($user->registration_stage ne 'enterEmailCode') {
         confess [1002, "Email Registration no longer valid."];
     }
-    $context->user($user->as_hash);
+    $context->client_data->{user} = $user->as_hash;
 
     $self->log->debug("Time before put ".gettimeofday);
 
@@ -281,7 +289,7 @@ sub ws_logout {
     # validate the Client Code
     my $client_code = $self->assert_valid_client_code($context);
 
-    $context->user(undef);
+    undef $context->client_data->{user};
 
     return {};
 }
