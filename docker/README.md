@@ -68,10 +68,12 @@ order
 
     $ ./create-network.sh
     $ ./create-data.sh
-    $ ./run-ka-beanstalk.sh
+    $ ./run-ka-beanstalk
     $ ./run-ka-memcached.sh
     $ ./run-ka-mysql-server.sh
-    $ ./run-ka-nginx.sh
+    $ ./run-ka-nginx
+    $ ./run-ka-redis
+    $ ./run-ka-websocket
 
 If this has worked, you can now do the following to see what is running.
 
@@ -121,11 +123,11 @@ be configured).
 This is slightly different to the above, when it runs it puts you into
 a bash shell to allow you to run commands.
 
-    $ ./run_tle_server.sh
+    $ ./run-ka-server.sh
 
 This puts you into the container, at directory
 
-    /data/Lacuna-Server/bin
+    /home/keno/ka-server/bin
 
 You can start and restart your development web server from within this container. 
 There are a number of commands you have to run the first time (see below)
@@ -140,7 +142,7 @@ NOTE: On a Windows environment, this can give the following error
 I have no idea why! If so then just type the contents of the startdev.sh script
 and run it directly from the command line. e.g.
 
-    plackup --env development --server Plack::Handler::Standalone --app lacuna.psgi
+    plackup --env development --server Plack::Handler::Standalone --app keno.psgi
 
 But, as I said, the first time there are some setup things to do first. (see below)
 
@@ -148,23 +150,23 @@ But, as I said, the first time there are some setup things to do first. (see bel
 
 There are a few things you need to do to set up your development system.
 
-If you have just created your tle-mysql-data container then it will be empty.
+If you have just created your ka-mysql-data container then it will be empty.
 
 The first time you run up the tle-server you need to run a few commands.
 
-    $ cd /data/Lacuna-Server-Open/bin
-    $ mysql --host=tle-mysql-server -uroot -placuna
+    $ cd /home/keno/ka-server/bin
+    $ mysql --host=ka-mysql-server -uroot -pkeno
     mysql> source docker.sql
     mysql> exit
 
-This sets up the mysql user account 'lacuna' which is used by the web application.
+This sets up the mysql user account 'keno' which is used by the web application.
 
-(Note that the root mysql account has been given the password 'lacuna').
+(Note that the root mysql account has been given the password 'keno').
 
 You now need to initialize the database. (this will take a few minutes).
 
-    $ cd /data/Lacuna-Server-Open/bin/setup
-    $ perl init_lacuna.pl
+    $ cd /home/keno/ka-server/setup
+    $ perl init_keno.pl
 
 
 Captchas no longer need to be generated up-front. They will be generated
@@ -178,7 +180,7 @@ code itself (unlikely).
 You may want to generate the html version of the documentation so you
 can view it in your web browser.
 
-    $ cd /data/Lacuna-Server-Open/bin
+    $ cd /home/keno/ka-server/bin
     $ perl generate_docs.pl
 
 

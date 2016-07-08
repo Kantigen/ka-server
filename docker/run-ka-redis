@@ -1,0 +1,25 @@
+#!/usr/bin/perl
+
+my $pwd;
+use Cwd;
+BEGIN {
+    ($pwd = Cwd::abs_path($0)) =~ s[/[^/]*$][];
+    print "pwd=$pwd\n";
+}
+
+use lib $pwd;
+use KAcfg;
+
+exec_docker(
+            'run',
+            [
+             -it => -p => join(':',
+                               6379,6379),
+             '--name=ka-redis',
+             '--net=ka-network',
+             '-d',
+            ],
+            'redis'
+           );
+
+

@@ -1,0 +1,32 @@
+#!/usr/bin/perl
+
+my $pwd;
+use Cwd;
+BEGIN {
+    ($pwd = Cwd::abs_path($0)) =~ s[/[^/]*$][];
+    print "pwd=$pwd\n";
+}
+
+use lib $pwd;
+use KAcfg;
+
+exec_docker(
+            'run',
+            [
+             '--rm',
+             -it =>
+             -p => join(':',
+                        cfg('listen_inet','0.0.0.0'),
+                        cfg('listen_port','8090'),
+                        80),
+             '--name=ka-websocket',
+             '--net=ka-network',
+             '--volumes-from' => 'ka-captcha-data',
+             -e => "KA_NO_MIDDLEWARE=1",
+             map { 
+                 vol("$root/$_", "/home/keno/ka-server/$_")
+             } qw/bin docs etc lib t var/
+            ],
+            'kenoantigen/ka-server'
+           );
+
