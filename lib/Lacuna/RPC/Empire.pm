@@ -1419,10 +1419,10 @@ sub _rewrite_request_for_logging {
         };
     }
     elsif ($method eq 'edit_profile') {
-        $params = {
-            @$params,
-            provided $params->{sitter_password}, sitter_password => 'xxx',
-        }
+        $params->[1] = {
+            %{$params->[1]},
+            sitter_password => 'xxx',
+        };
     }
     return $params;
 }
@@ -1446,7 +1446,7 @@ __PACKAGE__->register_rpc_method_names(
     enable_self_destruct disable_self_destruct
     set_status_message
     find
-    get_profile get_public_profile
+    get_own_profile get_public_profile
     is_name_available
     logout
     get_full_status get_status
