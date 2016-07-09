@@ -22,7 +22,7 @@ sub test_construction {
     isa_ok($ws_user, 'KA::WebSocket::User');
 }
 
-sub test_client_code {
+sub test_ws_clientCode {
     my ($self) = @_;
 
     my $context = KA::WebSocket::Context->new({
@@ -58,7 +58,7 @@ sub test_client_code {
     is($client_code_id,         $good_client_code->id,  "Client code is unchanged");
 }
 
-sub test_register {
+sub test_ws_register {
     my ($self) = @_;
 
     my $log = Log::Log4perl->get_logger(__PACKAGE__);
@@ -157,7 +157,7 @@ sub test_register {
 }
 
 
-sub test_forgot_password {
+sub test_ws_forgotPassword {
     my ($self) = @_;
 
     my $log = Log::Log4perl->get_logger(__PACKAGE__);
@@ -232,7 +232,7 @@ sub test_forgot_password {
 
 }
 
-sub test_login_with_password {
+sub test_ws_loginWithPassword {
     my ($self) = @_;
 
     my $log = Log::Log4perl->get_logger(__PACKAGE__);
@@ -265,12 +265,6 @@ sub test_login_with_password {
     like($@->[1], qr/^Client Code is invalid/, "Message");
     $context->client_code(KA::ClientCode->new->id);
 
-#    # User who has completed registration should be allowed to change password.
-#    my $user = $db->resultset('User')->find({
-#        id      => 1,
-#    });
-#    $context->client_data->{user} = $user->as_hash;
-
     # No matching username should return an error
     $content->{username} = "someone_else";
     throws_ok { $ws_user->ws_loginWithPassword($context) } qr/^ARRAY/, "Throw, unknown username";
@@ -294,7 +288,7 @@ sub test_login_with_password {
     $fixtures->unload;
 }
 
-sub test_enter_new_password {
+sub test_ws_enterNewPassword {
     my ($self) = @_;
 
     my $log = Log::Log4perl->get_logger(__PACKAGE__);
@@ -393,7 +387,7 @@ sub test_enter_new_password {
 }
 
 
-sub test_login_with_email_code {
+sub test_ws_loginWithEmailCode {
     my ($self) = @_;
 
     my $log = Log::Log4perl->get_logger(__PACKAGE__);
@@ -461,7 +455,7 @@ sub test_login_with_email_code {
     $fixtures->unload;
 }
 
-sub test_logout {
+sub test_ws_logout {
     my ($self) = @_;
 
     my $log = Log::Log4perl->get_logger(__PACKAGE__);

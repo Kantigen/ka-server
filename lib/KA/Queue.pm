@@ -132,6 +132,13 @@ foreach my $proc (qw(peek_buried peek_ready peek_delayed)) {
     });
 }
 
+sub use {
+    my ($self, $name) = @_;
+
+    $self->_beanstalk->use->recv;
+}
+
+
 sub kick {
     my ($self, $bound) = @_;
 
