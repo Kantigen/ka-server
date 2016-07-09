@@ -1415,6 +1415,7 @@ sub _rewrite_request_for_logging {
         $params = {
             @$params,
             password => 'xxx',
+            password1 => 'xxx',
         };
     }
     elsif ($method eq 'edit_profile') {
