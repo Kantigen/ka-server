@@ -41,7 +41,7 @@ my $ore_stamps      = 4;                # How many pockets of high ore concentra
 srand($seed);
 my $quick_test      = 0;                # For testing purposes, set to 0 for production
 
-my $lacunans_have_been_placed = 0;
+my $keno_have_been_placed = 0;
 my $mask;                               # masks to 'stamp' a pattern of star density on the density map
 my $ore_mask;                           # mask used to create a pattern of ore density in TLE
 my $density;                            # TLE is split into chunks, each of which has a density of stars
@@ -122,8 +122,8 @@ sub setup {
 
     say "Creating database version";
     $db->resultset('DBVersion')->create({
-        major_version   => 1,
-        minor_version   => 1,
+        major_version   => 2,
+        minor_version   => 0,
         description     => "Initial version",
     });
 
@@ -278,7 +278,7 @@ sub update_database {
 sub update_database_chunk {
     my ($p,$q) = @_;
 
-    my $create_lacunan = 1 if ($p == 0 and $q == 0);
+    my $create_keno = 1 if ($p == 0 and $q == 0);
 
     # Relative numbers of planets for this chunk.
     my $body_numbers = planets_for_chunk($p,$q);
@@ -303,7 +303,7 @@ sub update_database_chunk {
             name            => $name,
             body_numbers    => $body_numbers,
             total_bodies    => $total_bodies,
-            create_lacunan  => $create_lacunan,
+            create_keno     => $create_keno,
         });
     }
 }
@@ -318,7 +318,7 @@ sub add_star_system {
     my $name = $args->{name};
     my $total_bodies    = $args->{total_bodies};
     my $body_numbers    = $args->{body_numbers};
-    my $create_lacunan  = $args->{create_lacunan};
+    my $create_keno     = $args->{create_keno};
 
     my @star_colors = (qw(magenta red green blue yellow white));
     my $orbit_deltas = {
@@ -396,18 +396,18 @@ sub add_star_system {
             if ($add_features) {
                 add_features($body);
             }
-            if ($body_name =~ m/^P/ and $create_lacunan) {
+            if ($body_name =~ m/^P/ and $create_keno) {
                 # create KAn home world (unless already done)
-                create_lacunan_home_world($body);
+                create_keno_home_world($body);
             }
         }
     }
 }
 
-sub create_lacunan_home_world {
+sub create_keno_home_world {
     my ($body) = @_;
 
-    return if $lacunans_have_been_placed;
+    return if $keno_have_been_placed;
 
     $body->update({name=>'KA'});
     say "\t\t\tMaking this the KAns home world.";
@@ -436,7 +436,7 @@ sub create_lacunan_home_world {
     });
     $empire->insert;
     $empire->found($body);
-    $lacunans_have_been_placed = 1;
+    $keno_have_been_placed = 1;
 }
 
 sub add_features {

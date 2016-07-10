@@ -76,6 +76,7 @@ sub run {
     #
     $self->out('Started');
     $queue->watch('mq_worker');
+    $queue->watch('building');
 
     while (1) {
         my $job = $queue->consume;

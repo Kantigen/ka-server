@@ -645,13 +645,8 @@ before delete => sub {
 
     # delete any scheduled work or upgrade jobs
     #
-    my $schedule_rs = KA->db->resultset('Schedule')->search({
-        parent_table    => 'Building',
-        parent_id       => $self->id,
-    });
-    while (my $schedule = $schedule_rs->next) {
-        $schedule->delete;
-    }
+    $self->delete_schedule($self->id, '/building/finishWork');
+    $self->delete_schedule($self->id, '/building/finishUpgrade');
 };
 
 sub has_special_resources {
@@ -956,25 +951,46 @@ sub start_upgrade {
         upgrade_ends    => $upgrade_ends,
     });
 
-    my $schedule = KA->db->resultset('Schedule')->create({
-        delivery        => $upgrade_ends,
-        queue           => 'reboot-build',
-        parent_table    => 'Building',
-        parent_id       => $self->id,
-        task            => 'finish_upgrade',
-    });
+    $self->create_schedule($self->id, '/building/finishUpgrade', $upgrade_ends);
+
     return $self;
+}
+
+sub delete_schedule {
+    my ($self, $id, $route) = @_;
+
+    my $schedule_rs = KA->db->resultset('Schedule')->search({
+        route       => $route,
+        db_id       => $id,
+    });
+
+    while (my $schedule = $schedule_rs->next) {
+        $schedule->delete;
+    }
+}
+
+sub create_schedule {
+    my ($self, $id, $route, $delivery) = @_;
+
+    my $schedule = KA->db->resultset('Schedule')->create({
+        queue       => 'building',
+        route       => $route,
+        delivery    => $delivery,
+        db_id       => $id,
+        payload     => {
+            route       => $route,
+            content => {
+                building_id     => $id,
+            },
+        },
+    });
+    return $schedule;
 }
 
 sub finish_upgrade {
     my ($self) = @_;
 
-    my ($schedule) = KA->db->resultset('Schedule')->search({
-        parent_table    => 'Building',
-        parent_id       => $self->id,
-        task            => 'finish_upgrade',
-    });
-    $schedule->delete if defined $schedule;
+    $self->delete_schedule($self->id, '/building/finishUpgrade');
 
     if ($self->is_upgrading) {
         my $body = $self->body;
@@ -1059,32 +1075,18 @@ sub reschedule_queue {
     if ($build) {
         # Remove this scheduled event
         my $duration = $end_time->epoch - $start_time->epoch;
-        my ($schedule) = KA->db->resultset('Schedule')->search({
-            parent_table    => 'Building',
-            parent_id       => $self->id,
-            task            => 'finish_upgrade',
-        });
-        $schedule->delete if defined $schedule;
+
+        $self->delete_schedule($build->id, '/building/finishUpgrade');
 
         # Change the scheduled time for all subsequent builds (if any)
         while (my $build = shift @build_queue) {
-            my ($schedule) = KA->db->resultset('Schedule')->search({
-                parent_table    => 'Building',
-                parent_id       => $self->id,
-                task            => 'finish_upgrade',
-            });
-            $schedule->delete if defined $schedule;
+            $self->delete_schedule($build->id, '/building/finishUpgrade');
+
             my $upgrade_ends = $build->upgrade_ends->subtract(seconds => $duration);
             $build->upgrade_ends($upgrade_ends);
             $build->update;
 
-            $schedule = KA->db->resultset('Schedule')->create({
-                delivery        => $upgrade_ends,
-                queue           => 'reboot-build',
-                parent_table    => 'Building',
-                parent_id       => $build->id,
-                task            => 'finish_upgrade',
-            });
+            $self->create_schedule($build->id, '/building/finishUpgrade', $upgrade_ends);
         }
     }
 }
@@ -1118,22 +1120,9 @@ sub reschedule_work {
     $self->work_ends($new_work_ends);
     $self->update;
 
-    my $schedules = KA->db->resultset('Schedule')->search({
-        parent_table    => 'Building',
-        parent_id       => $self->id,
-        task            => 'finish_work',
-    });
-    while (my $schedule = $schedules->next) {
-        $schedule->delete if defined $schedule;
-    }
+    $self->delete_schedule($self->id, '/building/finishWork');
 
-    my $new_sched = KA->db->resultset('KA::DB::Result::Schedule')->create({
-        delivery        => $new_work_ends,
-        queue           => 'reboot-build',
-        parent_table    => 'Building',
-        parent_id       => $self->id,
-        task            => 'finish_work',
-    });
+    $self->create_schedule($self->id, '/building/finishWork', $new_work_ends);
     return $self;
 }
 
@@ -1149,14 +1138,8 @@ sub start_work {
     $self->update;
 
     # add to queue
-    my $schedule = KA->db->resultset('Schedule')->create({
-        delivery        => $self->work_ends,
-        queue           => 'reboot-build',
-        parent_table    => 'Building',
-        parent_id       => $self->id,
-        task            => 'finish_work',
-    });
- 
+    $self->create_schedule($self->id, '/building/finishWork', $self->work_ends);
+
     return $self;
 }
 
@@ -1167,12 +1150,8 @@ sub finish_work {
     $self->work({});
     $self->update;
 
-    my ($schedule) = KA->db->resultset('Schedule')->search({
-        parent_table    => 'Building',
-        parent_id       => $self->id,
-        task            => 'finish_work',
-    });
-    $schedule->delete if defined $schedule;
+    $self->delete_schedule($self->id, '/building/finishWork');
+
     return $self;
 }
 
