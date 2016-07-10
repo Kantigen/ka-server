@@ -75,7 +75,7 @@ sub queue_for_delivery {
         },
         delay       => $delay,
         priority    => $priority,
-    });
+    })->recv;
     $self->job_id($job->id);
     $self->update;
 }

@@ -31,10 +31,10 @@ KA::Config->initialize;
 
 # Connect to the beanstalk Docker image
 #
-KA::Queue->initialize({
-    server      => "ka-beanstalkd:11300",
-    
-});
+#KA::Queue->initialize({
+#    server      => "ka-beanstalkd:11300",
+#    
+#});
 
 # Connect to the mysql Docker image
 #

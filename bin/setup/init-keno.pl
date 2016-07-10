@@ -6,7 +6,9 @@ use KA;
 use KA::Util qw(randint);
 use KA::Constants qw(ORE_TYPES);
 use KA::DB::Result::Empire;
+use KA::Redis;
 
+use Redis;
 use DateTime;
 use Time::HiRes;
 use List::Util qw(max);
@@ -23,6 +25,14 @@ use GD::Image;
 
 my $config  = KA->config;
 my $db      = KA->db;
+
+# Connect to the Redis Docker image
+#
+my $redis = Redis->new(server => "ka-redis:6379");
+KA::Redis->initialize({
+    redis => $redis,
+});
+
 
 # These might need adjusting to get optimum results
 my $fudge_factor    = 1.8;              # Increase to increase the number of stars and decrease the size of voids.

@@ -50,7 +50,7 @@ RUN cpanm YANICK/Parallel-ForkManager-1.16.tar.gz
 RUN cpanm AnyEvent::WebSocket::Client Test::Compile Test::Class::Moose DBIx::Class::EasyFixture Test::Number::Delta
 RUN cpanm Redis MooseX::Singleton Crypt::SaltedHash Data::Validate::Email Text::Trim MooseX::NonMoose AnyEvent::WebSocket::Server
 RUN cpanm Plack::App::WebSocket::Connection Test::Mock::Class Plack::Middleware::Headers Plack::Handler::Twiggy
-RUN cpanm MooseX::App Text::WagnerFischer
+RUN cpanm MooseX::App Text::WagnerFischer AnyEvent::Beanstalk AnyEvent::Beanstalk AnyEvent::Redis
 
 RUN groupadd nogroup
 WORKDIR /home/keno/ka-server/bin
