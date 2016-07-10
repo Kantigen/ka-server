@@ -80,7 +80,7 @@ after can_send_to_target => sub {
 
 after send => sub {
     my $self = shift;
-    KA->cache->increment('stake', $self->body->empire_id, 1, 60 * 60 * 24);
+    KA->cache->incr('stake', $self->body->empire_id, 1, 60 * 60 * 24);
 };
 
 1;

@@ -64,18 +64,18 @@ sub queue_for_delivery {
 
     my $queue       = KA->queue;
     my $priority    = $self->priority || 1000;
-    my $job = $queue->publish($self->queue,
-        {
+    my $job = $queue->publish({
+        queue       => $self->queue,
+        payload     => {
             id              => $self->id,
             parent_table    => $self->parent_table,
             parent_id       => $self->parent_id,
             task            => $self->task,
             args            => $self->args,
-        },{
-            delay           => $delay,
-            priority        => $priority,
-        }
-    );
+        },
+        delay       => $delay,
+        priority    => $priority,
+    });
     $self->job_id($job->id);
     $self->update;
 }

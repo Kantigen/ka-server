@@ -258,7 +258,7 @@ sub exchange_with_stash {
         confess [1009, 'You have already reached your stash exchange limit for the day at this embassy.']
     }
     $self->alliance->exchange($self->body, $donation, $request, $self->max_exchange_size);
-    KA->cache->increment('stash_exchanges_'.format_date(undef,'%d'), $self->body_id, 1, 60 * 60 * 26);
+    KA->cache->incr('stash_exchanges_'.format_date(undef,'%d'), $self->body_id, 1, 60 * 60 * 26);
     $self->exchanges_remaining_today( $self->exchanges_remaining_today - 1 );
 }
 

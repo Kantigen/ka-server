@@ -260,11 +260,11 @@ sub report_abuse {
     my $session  = $self->get_session({session_id => $session_id, building_id => $building_id });
     my $empire   = $session->current_empire;
     my $building = $session->current_building;
-    my $times_reporting = $cache->increment('empire_reporting_trade_abuse'.DateTime->now->day, $empire->id, 1, 60 * 60 * 24);
+    my $times_reporting = $cache->incr('empire_reporting_trade_abuse'.DateTime->now->day, $empire->id, 1, 60 * 60 * 24);
     if ($times_reporting > 10) {
         confess [1010, 'You have reported enough abuse for one day.'];
     }
-    my $reports = $cache->increment('trade_abuse',$trade_id,1, 60 * 60 * 24 * 3);
+    my $reports = $cache->incr('trade_abuse',$trade_id,1, 60 * 60 * 24 * 3);
     if ($reports >= 5) {
         my $trade = $building->market->find($trade_id);
         if (defined $trade) {

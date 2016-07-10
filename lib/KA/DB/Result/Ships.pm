@@ -240,12 +240,12 @@ sub note_arrival {
     if ($type eq "attack_group") {
         my $payload = $self->payload;
         for my $key (keys %{$payload->{fleet}}) {
-            KA->cache->increment($payload->{fleet}->{$key}->{type}.'_arrive_'.$self->foreign_body_id.$self->foreign_star_id,
+            KA->cache->incr($payload->{fleet}->{$key}->{type}.'_arrive_'.$self->foreign_body_id.$self->foreign_star_id,
                                      $self->body->empire_id,1, 60*60*24*30);
         }
     }
     else {
-        KA->cache->increment($type.'_arrive_'.$self->foreign_body_id.$self->foreign_star_id, $self->body->empire_id,1, 60*60*24*30);
+        KA->cache->incr($type.'_arrive_'.$self->foreign_body_id.$self->foreign_star_id, $self->body->empire_id,1, 60*60*24*30);
     }
 }
 

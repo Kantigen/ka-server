@@ -5,11 +5,13 @@ use Config::JSON;
 use Plack::App::URLMap;
 use Log::Log4perl;
 use Log::Any::Adapter;
-use KA;
-use KA::DB;
 use Plack::Builder;
 use JSON qw(encode_json);
+use Redis;
 
+use KA;
+use KA::DB;
+use KA::Redis;
 
 $|=1;
 
@@ -87,6 +89,12 @@ if (defined $latest_file) {
     }
 }
 
+# Connect to the Redis Docker image
+#
+my $redis = Redis->new(server => "ka-redis:6379");
+KA::Redis->initialize({
+    redis => $redis,
+});
 
 
 my $app = builder {

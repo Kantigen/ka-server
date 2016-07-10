@@ -556,7 +556,7 @@ sub rpc_count {
 
 sub inc_rpc_count {
     my $self = shift;
-    return KA->cache->increment('rpc_count_'.format_date(undef,'%d'), $self->id, 1, 60 * 60 * 30);
+    return KA->cache->incr('rpc_count_'.format_date(undef,'%d'), $self->id, 1, 60 * 60 * 30);
 }
 
 # Reseting the RPC count for an empire should be done only under dire
@@ -592,7 +592,7 @@ has rpc_rate => (
     lazy    => 1,
     default => sub {
         my $self = shift;
-        return KA->cache->increment('rpc_rate_'.format_date(undef,'%M'), $self->id, 1, 60 * 2);
+        return KA->cache->incr('rpc_rate_'.format_date(undef,'%M'), $self->id, 1, 60 * 2);
     }
 );
 
@@ -757,7 +757,7 @@ sub attach_invite_code {
                 $invite->accept_date(DateTime->now);
                 $invite->update;
             }
-            KA->cache->increment('friends_accepted', format_date(undef,'%F'), 1, 60 * 60 * 26);
+            KA->cache->incr('friends_accepted', format_date(undef,'%F'), 1, 60 * 60 * 26);
             my $inviter = $invite->inviter;
             if (defined $inviter) { # they may have deleted
                 my $accepts = $invites->search({inviter_id => $invite->inviter_id, invitee_id => {'>' => 0}})->count;
@@ -992,7 +992,7 @@ sub invite_friend {
         zone        => $self->home_planet->zone,
         email       => $email,
     })->insert;
-    KA->cache->increment('friends_invited', format_date(undef,'%F'), 1, 60 * 60 * 26);
+    KA->cache->incr('friends_invited', format_date(undef,'%F'), 1, 60 * 60 * 26);
     my $message = sprintf "%s\n\nMy name in the game is %s. Use the code below when you register and you'll be placed near me.\n\n%s\n\n%s\n\nIf you are unfamiliar with The KA Expanse, visit the web site at: http://www.lacunaexpanse.com/",
         $custom_message,
         $self->name,

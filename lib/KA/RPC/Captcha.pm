@@ -27,7 +27,9 @@ sub fetch {
     $cache->delete('captcha_valid', $session_id);
 
     # Now trigger a new captcha generation
-    my $job = KA->queue->publish('reboot-captcha');
+    my $job = KA->queue->publish({
+        queue   => 'reboot-captcha'
+    });
     
     return {
         guid    => $captcha->guid,
@@ -66,7 +68,7 @@ sub solve {
         }
     }
 
-    my $failures = $cache->increment('captcha_errors', $session_id, 1, 30 * 60);
+    my $failures = $cache->incr('captcha_errors', $session_id, 1, 30 * 60);
     $cache->set('rpc_block', $session_id, $failures, $failures == 1 ? 5 : 30 * ($failures - 1));
 
     if ($failures > 5) {

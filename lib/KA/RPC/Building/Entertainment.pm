@@ -78,7 +78,7 @@ sub duck_quack {
     my $session  = $self->get_session({session_id => $session_id, building_id => $building_id });
     my $empire   = $session->current_empire;
     my $building = $session->current_building;
-    KA->cache->increment('ducks', 'quacked', 1, 60 * 60 * 24);
+    KA->cache->incr('ducks', 'quacked', 1, 60 * 60 * 24);
     return {
         status => $self->format_status($session, $building->body),
         quack  => $quacks[ rand @quacks ],

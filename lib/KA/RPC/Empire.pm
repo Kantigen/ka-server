@@ -169,7 +169,7 @@ sub login {
     my $config = KA->config;
     my $throttle = $config->get('rpc_throttle') || 30;
     if ($empire->rpc_rate > $throttle) {
-        KA->cache->increment('rpc_limit_'.format_date(undef,'%d'), $empire->id, 1, 60 * 60 * 30);
+        KA->cache->incr('rpc_limit_'.format_date(undef,'%d'), $empire->id, 1, 60 * 60 * 30);
         confess [1010, 'Slow down, '.$empire->name.'! No more than '.$throttle.' requests per minute.'];
     }
     my $max = $config->get('rpc_limit') || 2500;
@@ -272,7 +272,9 @@ sub fetch_captcha {
 
     # Now trigger a new captcha generation
 
-    my $job = KA->queue->publish('reboot-captcha');
+    my $job = KA->queue->publish({
+        queue   => 'reboot-captcha',
+    });
 
     return {
         guid    => $captcha->guid,
@@ -436,7 +438,7 @@ sub create {
 
     # create args
     my $empire = KA->db->resultset('Empire')->new(\%params)->insert;
-    KA->cache->increment('empires_created', format_date(undef,'%F'), 1, 60 * 60 * 26);
+    KA->cache->incr('empires_created', format_date(undef,'%F'), 1, 60 * 60 * 26);
 
     # handle invitation
     $empire->attach_invite_code($args{invite_code});

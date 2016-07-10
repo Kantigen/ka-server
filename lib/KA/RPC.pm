@@ -88,7 +88,7 @@ sub get_session {
                 confess [1010, 'Too fast response, ' . $empire->name . '!'];
             }
             if ($empire->rpc_rate > $throttle) {
-                KA->cache->increment('rpc_limit_'.format_date(undef,'%d'), $empire->id, 1, 60 * 60 * 30);
+                KA->cache->incr('rpc_limit_'.format_date(undef,'%d'), $empire->id, 1, 60 * 60 * 30);
                 confess [1010, 'Slow down '.$empire->name.'! No more than '.$throttle.' requests per minute.'];
             }
             my $max = KA->config->get('rpc_limit') || 2500;
