@@ -146,8 +146,6 @@ sub fatal {
 sub send {
     my ($self, $connection, $msg) = @_;
 
-    $self->log->info("XXXXXXXXXXXXXXXXXXXXXXXXX Sent: [$connection][$msg]");
-    $self->log->debug("XXXXXXXXXX ".Dumper($connection));
     $self->incr_stat('stats_sent_messages');
     $connection->send($msg);
 }
@@ -159,7 +157,6 @@ sub render_json {
 
     my $sent = JSON->new->encode($json);
     $self->send($context->connection, $sent);
-    $self->log->info("********************* Sent");
 }
 
 # Send a message to one client, without the context
@@ -365,7 +362,7 @@ sub call {
 #   
 #   the user_id is used to identify which user the message
 #   is for. By searching the connections it should be 
-#   possible to find the connection key for that user.
+#   possible to find the connection key(s) for that user.
 #
 #   If user_id is zero or not specified then it is a general
 #   queue message.
@@ -383,7 +380,7 @@ sub queue {
         # we probably want to only send to the session that requested
         # the data.
         # 
-        CONNECTION: foreach my $key (keys %{$self->client_data}) {
+        foreach my $key (keys %{$self->client_data}) {
             if (my $user = $self->client_data->{$key}{user}) {
                 $self->log->debug("QQQQ ".Dumper($user));
                 if ($user->{id} == $payload->{user_id}) {

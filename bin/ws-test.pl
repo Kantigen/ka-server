@@ -70,7 +70,7 @@ my $timer = AE::timer 0, 10, sub {
     my $queue = KA::Queue->instance();
 
     $queue->publish({
-        queue   => 'ws_receive', 
+        queue   => 'mq_worker', 
         payload => {
             route   => '/user/hello',
             user_id => 1,

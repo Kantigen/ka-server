@@ -133,11 +133,16 @@ foreach my $proc (qw(peek_buried peek_ready peek_delayed)) {
 }
 
 sub use {
-    my ($self, $name) = @_;
+    my ($self, $tube) = @_;
 
-    $self->_beanstalk->use->recv;
+    $self->_beanstalk->use($tube)->recv;
 }
 
+sub watch {
+    my ($self, $tube) = @_;
+
+    $self->_beanstalk->watch($tube)->recv;
+}
 
 sub kick {
     my ($self, $bound) = @_;
@@ -186,13 +191,13 @@ sub consume {
     $log->debug("beanstalk = [$beanstalk]");
     RESERVE:
     while (not $job) {
-        $log->debug("wait on tube [$tube]");
-        $beanstalk->watch_only($tube)->recv;
+        $log->debug("wait on tube [$tube]") if defined $tube;
+        $beanstalk->watch_only($tube)->recv if defined $tube;
         $job = $beanstalk->reserve()->recv;
 
         # Defend against undef jobs (most likely due to DEADLINE_SOON)
         if (not $job) {
-            $log->debug("No Job! [".$beanstalk->error."]");
+            $log->debug("No Job! [".Dumper($beanstalk)."]");
             sleep 1;
             redo RESERVE;
         }
