@@ -6,4 +6,3 @@ use namespace::autoclean -except => ['meta'];
 use base 'DBIx::Class::ResultSet';
 
 1;
-

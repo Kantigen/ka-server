@@ -15,10 +15,10 @@ my $home = $empire->home_planet;
 
 my $result;
 
-my $uni = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $uni = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 0,
     y               => -1,
-    class           => 'Lacuna::DB::Result::Building::University',
+    class           => 'KA::DB::Result::Building::University',
     level           => 2,
 });
 $home->build_building($uni);

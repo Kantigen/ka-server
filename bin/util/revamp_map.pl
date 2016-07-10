@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date random_element);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date random_element);
 use Getopt::Long;
 use List::MoreUtils qw(uniq);
 use Data::Rand;
@@ -21,12 +21,12 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db     = Lacuna->db;
+our $db     = KA->db;
 my $bodies  = $db->resultset('Map::Body');
 my $stars   = $db->resultset('Map::Star');
 my $empire  = $db->resultset('Empire');
 my $db_config  = $db->resultset('Config');
-my $config = Lacuna->config;
+my $config = KA->config;
 
 my @asteroid_types  = qw(A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26);
 my @habital_types   = qw(P1 P2 P3 P4 P5 P6 P7 P8 P9 P10 P11 P12 P13 P14 P15 P16 P17 P18 P19 P20 P21 P22 P23 P24 P25 P26 P27 P28 P29 P30 P31 P32 P33 P34 P35 P36 P37 P38 P39 P40);
@@ -91,7 +91,7 @@ my $news_2 = "Automatic sensors detect a cosmic string with energy readings of %
 my $news_3 = "Cosmic String leaving vast areas of destruction in it's wake.";
 my $news_4 = "Deep Space Monitoring station %d, co-ordinates %d|%d shutting down due to sensor overload.";
 
-my $cache = Lacuna->cache;
+my $cache = KA->cache;
 
 while (my $body = $bodies->next) {
     # I know it is inefficient to calculate this for every body, but we are only doing it once!
@@ -182,9 +182,9 @@ sub wreck_planet {
     out('Wrecking planet '.$body->name);
     $body->needs_surface_refresh(1);
     foreach my $building (@{$body->building_cache}) {
-        if ($building->class eq 'Lacuna::DB::Result::Building::Permanent::BlackHoleGenerator') {
+        if ($building->class eq 'KA::DB::Result::Building::Permanent::BlackHoleGenerator') {
             my $now = DateTime->now;
-            $building->class('Lacuna::DB::Result::Building::Permanent::Fissure');
+            $building->class('KA::DB::Result::Building::Permanent::Fissure');
             if ($building->is_working) {
                 $building->is_working(0);
                 $building->work_ends($now);
@@ -204,7 +204,7 @@ sub convert_body {
     srand($body->id);
 
     my $type = $body->get_type;
-    my $class_prefix = 'Lacuna::DB::Result::Map::Body::';
+    my $class_prefix = 'KA::DB::Result::Map::Body::';
     if ($type eq 'gas giant') {
         $class_prefix .= 'Planet::GasGiant::';
     }

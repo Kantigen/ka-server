@@ -2,9 +2,9 @@ use 5.010;
 use strict;
 use feature "switch";
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 use App::Daemon qw(daemonize );
 use Data::Dumper;
@@ -54,7 +54,7 @@ if ($initialize) {
     # existing jobs
     out('Reinitializing all jobs');
     out('Deleting existing jobs');
-    my $schedule_rs = Lacuna->db->resultset('Schedule')->search({
+    my $schedule_rs = KA->db->resultset('Schedule')->search({
         task    => [qw(finish_work finish_upgrade finish_construction)],
     });
     while (my $schedule = $schedule_rs->next) {
@@ -63,13 +63,13 @@ if ($initialize) {
     }
 
     out('Adding building upgrades');
-    my $building_rs = Lacuna->db->resultset('Building')->search({
+    my $building_rs = KA->db->resultset('Building')->search({
         is_working => 1,
     });
     while (my $building = $building_rs->next) {
         # add to queue
         out('Building - finish_work at '.$building->work_ends);
-        Lacuna->db->resultset('Schedule')->create({
+        KA->db->resultset('Schedule')->create({
             delivery        => $building->work_ends,
             queue           => 'reboot-build',
             parent_table    => 'Building',
@@ -79,13 +79,13 @@ if ($initialize) {
     }
 
     out('Adding building working end');
-    $building_rs = Lacuna->db->resultset('Building')->search({
+    $building_rs = KA->db->resultset('Building')->search({
         is_upgrading => 1,
     });
     while (my $building = $building_rs->next) {
         # add to queue
         out('Building - finish_upgrade at '.$building->upgrade_ends);
-        Lacuna->db->resultset('Schedule')->create({
+        KA->db->resultset('Schedule')->create({
             delivery        => $building->upgrade_ends,
             queue           => 'reboot-build',
             parent_table    => 'Building',
@@ -95,12 +95,12 @@ if ($initialize) {
     }
 
     out('Adding ship builds');
-    my $ship_rs = Lacuna->db->resultset('Fleet')->search({
+    my $ship_rs = KA->db->resultset('Fleet')->search({
         task => 'Building',
     });
     while (my $ship = $ship_rs->next) {
         # add to queue
-        my $schedule = Lacuna->db->resultset('Schedule')->create({
+        my $schedule = KA->db->resultset('Schedule')->create({
             delivery        => $ship->date_available,
             queue           => 'reboot-build',
             parent_table    => 'Fleet',
@@ -121,9 +121,9 @@ else {
     out('Running in the foreground');
 }
 
-my $config = Lacuna->config;
+my $config = KA->config;
 
-my $queue = Lacuna::Queue->new({
+my $queue = KA::Queue->new({
     max_timeouts    => $config->get('beanstalk/max_timeouts'),
     max_reserves    => $config->get('beanstalk/max_reserves'),
     server          => $config->get('beanstalk/server'),

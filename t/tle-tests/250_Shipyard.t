@@ -25,7 +25,7 @@ ok($result->{result}{building}{id}, "built a shipyard");
 my $shipyard = $tester->get_building($result->{result}{building}{id});
 $shipyard->finish_upgrade;
 
-my $probe = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->new({type=>'probe'});
+my $probe = KA->db->resultset('KA::DB::Result::Ships')->new({type=>'probe'});
 
 my $shipyard2 = $tester->get_building($shipyard->id);
 my @resources = qw(food water energy time waste ore);

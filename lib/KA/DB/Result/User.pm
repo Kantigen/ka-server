@@ -22,21 +22,6 @@ sub sqlt_deploy_hook {
     $sqlt_table->add_index(name => 'idx_password_recovery_key', fields => ['password_recovery_key']);
 }
 
-# Return the object as a (much smaller) hash
-#
-sub as_hash {
-    my ($self) = @_;
-
-    return {
-        id                      => $self->id,
-        username                => $self->username,
-        email                   => $self->email,
-        registration_stage      => $self->registration_stage,
-        password_recovery_key   => $self->password_recovery_key,
-    };
-}
-
-
 sub check_password {
     my ($self, $password) = @_;
 

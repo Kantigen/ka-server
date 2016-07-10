@@ -9,12 +9,12 @@ use Test::Memory::Cycle;
 use Data::Dumper;
 use 5.010;
 use DateTime;
-use Lacuna;
+use KA;
 
 
 my $minus_x = 493;
 my $minus_y = 498;
-my $closest = Lacuna->db->resultset('Map::Body')->search({
+my $closest = KA->db->resultset('Map::Body')->search({
     empire_id => {'>' => 1},
 },{
     '+select' => [

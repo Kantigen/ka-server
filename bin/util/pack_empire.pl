@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(format_date);
 use Getopt::Long;
 use DateTime;
 use JSON;
@@ -30,22 +30,22 @@ $|=1;
 
   out('Started');
   my $start = time;
-  my $dtf = Lacuna->db->storage->datetime_parser;
+  my $dtf = KA->db->storage->datetime_parser;
 
   out('Loading DB');
-  our $db = Lacuna->db;
+  our $db = KA->db;
 
-  my $empires = $db->resultset('Lacuna::DB::Result::Empire');
+  my $empires = $db->resultset('KA::DB::Result::Empire');
   my $empire = $empires->find($empire_id);
   die "Could not find Empire!\n" unless $empire;
   print "Setting up for empire: ".$empire->name." : ".$empire_id."\n";
   my $ehash;
   my $cap;
   if ($capitol) {
-      $cap = $db->resultset('Lacuna::DB::Result::Map::Body')->find($capitol);
+      $cap = $db->resultset('KA::DB::Result::Map::Body')->find($capitol);
   }
   else {
-      $cap = $db->resultset('Lacuna::DB::Result::Map::Body')->find($empire->home_planet_id);
+      $cap = $db->resultset('KA::DB::Result::Map::Body')->find($empire->home_planet_id);
   }
   unless ($cap) {
       die "Cannot find capitol $capitol\n";
@@ -67,14 +67,14 @@ $|=1;
   };
   my %plan_h;
   my %glyph_h;
-  my $bodies = Lacuna->db
-                     ->resultset('Lacuna::DB::Result::Map::Body')->search({
+  my $bodies = KA->db
+                     ->resultset('KA::DB::Result::Map::Body')->search({
                          empire_id => $empire->id,
                      });
   my $count = 0;
   my @bodies;
   while (my $body = $bodies->next) {
-      next if (!$station and ($body->isa('Lacuna::DB::Result::Map::Body::Planet::Station')));
+      next if (!$station and ($body->isa('KA::DB::Result::Map::Body::Planet::Station')));
       my %builds;
       $count++;
       print "Packing ".$body->name.":";
@@ -90,7 +90,7 @@ $|=1;
           is_cap    => $cap->id == $body->id ? 1 : 0,
       };
       print "Building:";
-      my $buildings = Lacuna->db->resultset('Lacuna::DB::Result::Building')->search({body_id => $body->id});
+      my $buildings = KA->db->resultset('KA::DB::Result::Building')->search({body_id => $body->id});
       my @blds;
       while (my $bld = $buildings->next) {
 #Treat Essentia_veins different? Drain and destroy?
@@ -121,7 +121,7 @@ $|=1;
           }
       }
       print "Glyphs:";
-      my $glyphs = Lacuna->db->resultset('Lacuna::DB::Result::Glyph')->search({body_id => $body->id});
+      my $glyphs = KA->db->resultset('KA::DB::Result::Glyph')->search({body_id => $body->id});
       while (my $glyph = $glyphs->next) {
           if ($glyph_h{$glyph->type}) {
               $glyph_h{$glyph->type}->{quantity} += $glyph->quantity;

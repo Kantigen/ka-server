@@ -3,10 +3,10 @@ use strict;
 use warnings;
 
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
-use Lacuna::CaptchaFactory;
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
+use KA::CaptchaFactory;
 
 use Getopt::Long;
 use App::Daemon qw(daemonize );
@@ -63,9 +63,9 @@ else {
     out('Running in the foreground');
 }
 
-my $config = Lacuna->config;
+my $config = KA->config;
 
-my $queue = Lacuna::Queue->new({
+my $queue = KA::Queue->new({
     max_timeouts    => $config->get('beanstalk/max_timeouts'),
     max_reserves    => $config->get('beanstalk/max_reserves'),
     server          => $config->get('beanstalk/server'),
@@ -89,7 +89,7 @@ eval {
         try {
             # process the job
 
-            my $captcha_factory = Lacuna::CaptchaFactory->new({
+            my $captcha_factory = KA::CaptchaFactory->new({
                 develop_mode    => $config->get('develop_mode') ? 1 : 0,
                 fonts           => $config->get('captcha/fonts'),
                 font_path       => $config->get('captcha/fontpath'),
@@ -101,7 +101,7 @@ eval {
             #
             # select * from captcha where created < DATE_SUB(now(), INTERVAL 1 HOUR) order by id desc;
             #
-            my $captchas = Lacuna->db->resultset('Captcha')->search({
+            my $captchas = KA->db->resultset('Captcha')->search({
                 created => \"< DATE_SUB(now(), INTERVAL 1 HOUR)",
             },{
                 order_by => { -desc => 'id' },

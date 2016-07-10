@@ -1,13 +1,13 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(format_date);
 use Getopt::Long;
 use JSON;
 # use SOAP::Amazon::S3;
-use Lacuna::Constants qw(SHIP_TYPES ORE_TYPES);
+use KA::Constants qw(SHIP_TYPES ORE_TYPES);
 use utf8;
 
 
@@ -31,7 +31,7 @@ use utf8;
   my $start = DateTime->now;
 
   out('Loading DB');
-  our $db = Lacuna->db;
+  our $db = KA->db;
 
   my $body_from = $db->resultset('Map::Body')->find($from);
   my $body_dest = $db->resultset('Map::Body')->find($to);
@@ -97,7 +97,7 @@ sub bhg_swap {
             orbit   => $old_data->{orbit},
         });
         if ($new_data->{type} ne 'asteroid') {
-            my $target_waste = Lacuna->db->resultset('Lacuna::DB::Result::WasteChain')
+            my $target_waste = KA->db->resultset('KA::DB::Result::WasteChain')
                 ->search({ planet_id => $target->id });
             if ($target_waste->count > 0) {
                 while (my $chain = $target_waste->next) {
@@ -111,11 +111,11 @@ sub bhg_swap {
             }
         }
         if (defined($target->empire)) {
-            my $mbody = Lacuna->db
-                ->resultset('Lacuna::DB::Result::Map::Body')
+            my $mbody = KA->db
+                ->resultset('KA::DB::Result::Map::Body')
                 ->find($target->id);
-            my $fbody = Lacuna->db
-                ->resultset('Lacuna::DB::Result::Map::Body')
+            my $fbody = KA->db
+                ->resultset('KA::DB::Result::Map::Body')
                 ->find($body->id);
             my $mess = sprintf("{Starmap %s %s %s} is now at %s/%s in orbit %s around {Starmap %s %s %s}.",
                     $fbody->x, $fbody->y, $fbody->name,
@@ -140,7 +140,7 @@ sub bhg_swap {
         }
     }
     if ($body->get_type ne 'asteroid') {
-        my $waste_chain = Lacuna->db->resultset('Lacuna::DB::Result::WasteChain')
+        my $waste_chain = KA->db->resultset('KA::DB::Result::WasteChain')
             ->search({ planet_id => $body->id });
         if ($waste_chain->count > 0) {
             while (my $chain = $waste_chain->next) {
@@ -154,13 +154,13 @@ sub bhg_swap {
         }
     }
     if (defined($body->empire)) {
-        my $mbody = Lacuna->db
-            ->resultset('Lacuna::DB::Result::Map::Body')
+        my $mbody = KA->db
+            ->resultset('KA::DB::Result::Map::Body')
             ->find($body->id);
         my $mess;
         unless ($new_data->{type} eq "empty") {
-            my $fbody = Lacuna->db
-                ->resultset('Lacuna::DB::Result::Map::Body')
+            my $fbody = KA->db
+                ->resultset('KA::DB::Result::Map::Body')
                 ->find($target->id);
             $mess = sprintf("{Starmap %s %s %s} took our place at %s/%s in orbit %s around {Starmap %s %s %s}.",
                     $fbody->x, $fbody->y, $fbody->name,
@@ -168,8 +168,8 @@ sub bhg_swap {
                     $fbody->star->x, $fbody->star->y, $fbody->star->name);
         }
         else {
-            my $star = Lacuna->db->
-                       resultset('Lacuna::DB::Result::Map::Star')->find($old_data->{star_id});
+            my $star = KA->db->
+                       resultset('KA::DB::Result::Map::Star')->find($old_data->{star_id});
             $mess = sprintf("There is now an empty orbit at %s/%s in orbit %s around {Starmap %s %s %s}",
                     $old_data->{x}, $old_data->{y}, $old_data->{orbit},
                     $star->x, $star->y, $star->name);
@@ -231,8 +231,8 @@ sub recalc_incoming_supply {
         my $bid = $chain->planet_id;
         next if defined($bids{$bid});
         $bids{$bid} = 1;
-        my $sender = Lacuna->db
-            ->resultset('Lacuna::DB::Result::Map::Body')
+        my $sender = KA->db
+            ->resultset('KA::DB::Result::Map::Body')
             ->find($bid);
         if (defined($sender->empire)) {
             $sender->recalc_chains; # Recalc all chains

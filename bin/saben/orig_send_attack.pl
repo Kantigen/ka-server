@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 use AnyEvent;
 $|=1;
@@ -33,12 +33,12 @@ if ($randomize) {
 
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 our $empires = $db->resultset('Empire');
 our $spies = $db->resultset('Spies');
 our $ships = $db->resultset('Ships');
 our $targets = $db->resultset('SabenTarget');
-my $config = Lacuna->config;
+my $config = KA->config;
 
 out('getting empires...');
 my $saben = $empires->find(-1);

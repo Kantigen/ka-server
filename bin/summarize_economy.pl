@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 use DateTime;
 use DateTime::Format::Strptime;
@@ -23,10 +23,10 @@ out('Started');
 my $start = DateTime->now;
 
 out('Loading DB');
-our $db = Lacuna->db;
-our $viral_log = $db->resultset('Lacuna::DB::Result::Log::Viral');
-our $economy_log = $db->resultset('Lacuna::DB::Result::Log::Economy');
-our $essentia_log = $db->resultset('Lacuna::DB::Result::Log::Essentia');
+our $db = KA->db;
+our $viral_log = $db->resultset('KA::DB::Result::Log::Viral');
+our $economy_log = $db->resultset('KA::DB::Result::Log::Economy');
+our $essentia_log = $db->resultset('KA::DB::Result::Log::Essentia');
 
 
 if ($all) {

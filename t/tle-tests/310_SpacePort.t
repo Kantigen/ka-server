@@ -19,10 +19,10 @@ my $command = $home->command;
 my $result;
 
 
-my $uni = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $uni = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 0,
     y               => -1,
-    class           => 'Lacuna::DB::Result::Building::University',
+    class           => 'KA::DB::Result::Building::University',
     level           => 2,
 });
 $home->build_building($uni);
@@ -77,26 +77,26 @@ is(ref $result->{result}{ships}, 'ARRAY', "can see orbiting ships");
 $result = $tester->post('spaceport', 'recall_all', [$session_id, $spaceport->id]);
 is(ref $result->{result}{ships}, 'ARRAY', 'can call recall_all');
 
-my $shipyard = Lacuna::db->resultset('Lacuna::DB::Result::Building')->new({
+my $shipyard = KA::db->resultset('KA::DB::Result::Building')->new({
 	x       => 0,
 	y       => 2,
-	class   => 'Lacuna::DB::Result::Building::Shipyard',
+	class   => 'KA::DB::Result::Building::Shipyard',
 	level   => 20,
 });
 $home->build_building($shipyard);
 $shipyard->finish_upgrade;
 
-my $intelligence = Lacuna::db->resultset('Lacuna::DB::Result::Building')->new({
+my $intelligence = KA::db->resultset('KA::DB::Result::Building')->new({
 	x       => 0,
 	y       => 3,
-	class   => 'Lacuna::DB::Result::Building::Intelligence',
+	class   => 'KA::DB::Result::Building::Intelligence',
 	level   => 20,
 });
 $home->build_building($intelligence);
 $intelligence->finish_upgrade;
 
 # need a spy done right now
-Lacuna->db->resultset('Lacuna::DB::Result::Spies')->new({
+KA->db->resultset('KA::DB::Result::Spies')->new({
     from_body_id    => $home->id,
     on_body_id      => $home->id,
     task            => 'Idle',
@@ -106,25 +106,25 @@ Lacuna->db->resultset('Lacuna::DB::Result::Spies')->new({
 
 my @ships;
 for my $i ( 0 .. 1 ) {
-	my $sweeper = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->new({type=>'sweeper'});
+	my $sweeper = KA->db->resultset('KA::DB::Result::Ships')->new({type=>'sweeper'});
 	$shipyard->build_ship($sweeper);
 	push @ships, $sweeper;
 }
-my $thud = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->new({type=>'thud'});
+my $thud = KA->db->resultset('KA::DB::Result::Ships')->new({type=>'thud'});
 $shipyard->build_ship($thud);
 push @ships, $thud;
 
-my $sweeper = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->new({type=>'sweeper'});
+my $sweeper = KA->db->resultset('KA::DB::Result::Ships')->new({type=>'sweeper'});
 $shipyard->build_ship($sweeper);
 
-my $spy_pod = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->new({type=>'spy_pod'});
+my $spy_pod = KA->db->resultset('KA::DB::Result::Ships')->new({type=>'spy_pod'});
 $shipyard->build_ship($spy_pod);
 
-my $spy_shuttle = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->new({type=>'spy_shuttle'});
+my $spy_shuttle = KA->db->resultset('KA::DB::Result::Ships')->new({type=>'spy_shuttle'});
 $shipyard->build_ship($spy_shuttle);
 
 my $finish = DateTime->now;
-Lacuna->db->resultset('Lacuna::DB::Result::Ships')->search({shipyard_id=>$shipyard->id})->update({date_available=>$finish});
+KA->db->resultset('KA::DB::Result::Ships')->search({shipyard_id=>$shipyard->id})->update({date_available=>$finish});
 
 $result = $tester->post('spaceport', 'view', [$session_id, $spaceport->id]);
 
@@ -136,7 +136,7 @@ is( $result->{error}{code}, 1016, 'prepare_send_spies requires a captcha.' );
 $result = $tester->post('spaceport', 'send_fleet', [$session_id, [ @ships ], { body_id => $enemy->empire->home_planet->id } ] );
 is( $result->{error}{code}, 1016, 'send_fleet requires a captcha.' );
 
-Lacuna->cache->set('captcha', $session_id, { guid => 1111, solution => 1111 }, 60 * 30 );
+KA->cache->set('captcha', $session_id, { guid => 1111, solution => 1111 }, 60 * 30 );
 
 ok( eval{ $tester->post('captcha','solve', [$session_id, 1111, 1111]) }, 'Solved captcha' );
 
@@ -147,9 +147,9 @@ my $spy_id = $result->{result}{spies}[0]{id};
 $result = $tester->post('spaceport', 'send_spies', [$session_id, $home->id, $enemy->empire->home_planet->id, $spy_pod->id, [ $spy_id ] ]);
 ok($result->{result}{ship}{date_arrives}, "spy pod sent");
 
-$spy_pod = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->search({id=>$spy_pod->id})->first; # pull the latest data on this ship
+$spy_pod = KA->db->resultset('KA::DB::Result::Ships')->search({id=>$spy_pod->id})->first; # pull the latest data on this ship
 $spy_pod->arrive;
-$spy = Lacuna->db->resultset('Lacuna::DB::Result::Spies')->search({id=>$spy_id})->first;
+$spy = KA->db->resultset('KA::DB::Result::Spies')->search({id=>$spy_id})->first;
 $spy->available_on($finish);
 $spy->task('Idle');
 $spy->update;
@@ -168,7 +168,7 @@ ok($result->{result}{ship}{date_arrives}, "sweeper sent");
 
 # need some spies done right now
 for my $count ( 1 .. 4 ) {
-    Lacuna->db->resultset('Lacuna::DB::Result::Spies')->new({
+    KA->db->resultset('KA::DB::Result::Spies')->new({
         from_body_id    => $home->id,
         on_body_id      => $home->id,
         task            => 'Idle',
@@ -184,13 +184,13 @@ my $spies = $result->{result}{spies};
 $result = $tester->post('spaceport', 'send_spies', [$session_id, $home->id, $enemy->empire->home_planet->id, $spy_shuttle->id, $spies ] );
 ok($result->{result}{ship}{date_arrives}, "spy shuttle sent to orbit");
 
-$spy_shuttle = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->search({id=>$spy_shuttle->id})->first; # pull the latest data on this ship
+$spy_shuttle = KA->db->resultset('KA::DB::Result::Ships')->search({id=>$spy_shuttle->id})->first; # pull the latest data on this ship
 $spy_shuttle->arrive;
 
-$spy_shuttle = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->search({id=>$spy_shuttle->id})->first; # pull the latest data on this ship
+$spy_shuttle = KA->db->resultset('KA::DB::Result::Ships')->search({id=>$spy_shuttle->id})->first; # pull the latest data on this ship
 
 for my $spy_id ( @$spies ) {
-    $spy = Lacuna->db->resultset('Lacuna::DB::Result::Spies')->search({id=>$spy_id})->first;
+    $spy = KA->db->resultset('KA::DB::Result::Spies')->search({id=>$spy_id})->first;
     $spy->available_on($finish);
     $spy->task('Idle');
     $spy->update;
@@ -202,10 +202,10 @@ is(ref $result->{result}{orbiting}, 'ARRAY', "can see what ships are available t
 $result = $tester->post('spaceport', 'prepare_fetch_spies', [$session_id, $enemy->empire->home_planet->id, $home->id ]);
 is( ref $result->{result}{ships}, 'ARRAY', "can prepare for fetch spies");
 
-$spy_shuttle = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->search({id=>$spy_shuttle->id})->first; # pull the latest data on this ship
+$spy_shuttle = KA->db->resultset('KA::DB::Result::Ships')->search({id=>$spy_shuttle->id})->first; # pull the latest data on this ship
 $result = $tester->post('spaceport', 'recall_ship', [$session_id, $spaceport->id, $spy_shuttle->id]);
 ok($result->{result}{ship}{date_arrives}, "spy shuttle recalled");
-$spy_shuttle = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->search({id=>$spy_shuttle->id})->first; # pull the latest data on this ship
+$spy_shuttle = KA->db->resultset('KA::DB::Result::Ships')->search({id=>$spy_shuttle->id})->first; # pull the latest data on this ship
 $spy_shuttle->arrive;
 
 $result = $tester->post('spaceport', 'view_all_ships', 

@@ -4,7 +4,7 @@ use warnings;
 use lib '/home/keno/ka-server/lib';
 use Getopt::Long;
 
-use Lacuna;
+use KA;
 
 my $quiet;
 GetOptions(
@@ -13,10 +13,10 @@ GetOptions(
 
 out("Started.");
 
-my $rs = Lacuna->db->resultset("SitterAuths");
+my $rs = KA->db->resultset("SitterAuths");
 
 my $soon = DateTime->now()->add(days => $rs->AUTH_WARNING_DAYS);
-my $dtf = Lacuna->db->storage->datetime_parser;
+my $dtf = KA->db->storage->datetime_parser;
 
 out("Checking for sitter_auths to delete.");
 # Delete any that have already expired
@@ -65,7 +65,7 @@ for my $baby_name (sort keys %expiring_sitters) {
         map {[ $_ => $expiring_sitters{$baby_name}{$_} ] } sort keys %{$expiring_sitters{$baby_name}}
     );
 
-    Lacuna->db->empire({name => $baby_name})->send_predefined_message(
+    KA->db->empire({name => $baby_name})->send_predefined_message(
         tags        => ['Alert'],
         params      => [ @table > 2 ? "Treaties" : "Treaty", 
                          @table > 2 ? "multiple" : "a",
@@ -85,7 +85,7 @@ for my $sitter_name (keys %expiring_babies) {
         map {[ $_ => $expiring_babies{$sitter_name}{$_} ]} sort keys %{$expiring_babies{$sitter_name}} 
     );
 
-    Lacuna->db->empire({name => $sitter_name})->send_predefined_message(
+    KA->db->empire({name => $sitter_name})->send_predefined_message(
         tags        => ['Alert'],
         filename    => 'expiring_babies.txt',
         params      => [ @table > 2 ? "Treaties" : "Treaty", 

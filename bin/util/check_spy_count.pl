@@ -2,10 +2,10 @@ use 5.010;
 use strict;
 use feature "switch";
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
+use KA::DB;
+use KA;
 use List::Util qw(shuffle);
-use Lacuna::Util qw(randint format_date);
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 $|=1;
 our $quiet;
@@ -20,17 +20,17 @@ out('Started');
 my $start = DateTime->now;
 
 out('Loading DB');
-our $db = Lacuna->db;
-my $empires = $db->resultset('Lacuna::DB::Result::Empire');
-my $bodies  = $db->resultset('Lacuna::DB::Result::Map::Body');
-my $spies   = $db->resultset('Lacuna::DB::Result::Spies');
+our $db = KA->db;
+my $empires = $db->resultset('KA::DB::Result::Empire');
+my $bodies  = $db->resultset('KA::DB::Result::Map::Body');
+my $spies   = $db->resultset('KA::DB::Result::Spies');
 while (my $empire = $empires->next) {
     next if $empire->id < 2;
     my $emp_bodies = $bodies->search({empire_id=>$empire->id});
     my $int_min_stat = {};
     while (my $body = $emp_bodies->next) {
         my $bid = $body->id;
-        my $int_min = $body->get_building_of_class('Lacuna::DB::Result::Building::Intelligence');
+        my $int_min = $body->get_building_of_class('KA::DB::Result::Building::Intelligence');
         if (defined($int_min) and ($int_min->max_spies < $int_min->spy_count)) {
             out(sprintf("Empire: %20s Planet: %20s:%8d Max:%2d Count: %3d", $empire->name, $body->name, $body->id, $int_min->max_spies, $int_min->spy_count));
             my $bod_spies = $spies->search({from_body_id=>$bid}, {order_by => { -desc => 'id'}});

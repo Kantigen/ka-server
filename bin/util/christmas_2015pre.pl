@@ -7,7 +7,7 @@ use L;
 use List::Util qw(sum);
 use Getopt::Long;
 
-LD->class('Empire')->has_many('selflogins', 'Lacuna::DB::Result::Log::Login', sub {
+LD->class('Empire')->has_many('selflogins', 'KA::DB::Result::Log::Login', sub {
     my $args = shift;
     return (
             {

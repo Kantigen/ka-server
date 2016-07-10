@@ -6,8 +6,8 @@ use 5.010;
 use strict;
 use warnings;
 
-use Lacuna::Util qw(randint);
-use Lacuna::Constants qw(ORE_TYPES);
+use KA::Util qw(randint);
+use KA::Constants qw(ORE_TYPES);
 
 use TestHelper;
 TestHelper->clear_all_test_empires;
@@ -23,10 +23,10 @@ $empire->update;
 
 # Build an SST and a space port
 
-my $tester_spaceport   = $tester->build_building('Lacuna::DB::Result::Building::SpacePort',   2);
-my $tester_shipyard    = $tester->build_building('Lacuna::DB::Result::Building::Shipyard',    2);
-my $tester_transporter = $tester->build_building('Lacuna::DB::Result::Building::Transporter', 20);
-my $tester_trade       = $tester->build_building('Lacuna::DB::Result::Building::Trade',       20);
+my $tester_spaceport   = $tester->build_building('KA::DB::Result::Building::SpacePort',   2);
+my $tester_shipyard    = $tester->build_building('KA::DB::Result::Building::Shipyard',    2);
+my $tester_transporter = $tester->build_building('KA::DB::Result::Building::Transporter', 20);
+my $tester_trade       = $tester->build_building('KA::DB::Result::Building::Trade',       20);
 
 my $tester_trade_id = $tester_trade->id;
 diag "trade min ID = ".$tester_trade_id;
@@ -39,17 +39,17 @@ my $tester_home = $tester->empire->home_planet;
 
 for ( 0 .. 10 ) {
     $tester_home->add_glyph('rutile');
-    $tester_home->add_plan('Lacuna::DB::Result::Building::Food::Malcud', 1,3);
+    $tester_home->add_plan('KA::DB::Result::Building::Food::Malcud', 1,3);
 }
 
 for ( 0 .. 15 ) {
     $tester_home->add_glyph('gold');
-    $tester_home->add_plan('Lacuna::DB::Result::Building::Trade', 2);
+    $tester_home->add_plan('KA::DB::Result::Building::Trade', 2);
 }
 
 # Build ships so we can trade
 for ( 0 .. 2 ) {
-    my $ship = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->new({type=>'hulk'});
+    my $ship = KA->db->resultset('KA::DB::Result::Ships')->new({type=>'hulk'});
     $tester_shipyard->build_ship($ship);
 }
 $tester->finish_ships($tester_shipyard->id);
@@ -81,7 +81,7 @@ $result = $tester->post('trade', 'get_plan_summary', [$tester_session_id, $teste
 $result = $tester->post('trade', 'add_to_market', [$tester_session_id, $tester_trade_id, [
     {
         type        => 'plan',
-        plan_class  => 'Lacuna::DB::Result::Building::Food::Malcud',
+        plan_class  => 'KA::DB::Result::Building::Food::Malcud',
         level       => 1,
         extra_build_level => 3,
         quantity    => 3,

@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 use JSON;
 use utf8;
@@ -31,7 +31,7 @@ use utf8;
   my $builds = get_ships($config);
 
   for my $body_name (sort keys %$builds) {
-      my $body = Lacuna->db->resultset('Map::Body')->search( { name => "$body_name" })->first;
+      my $body = KA->db->resultset('Map::Body')->search( { name => "$body_name" })->first;
       unless ($body) {
           out("Could not find $body_name");
           next;
@@ -39,7 +39,7 @@ use utf8;
       for my $shash (@{$builds->{$body_name}}) {
           my $to_build = $shash->{number};
           if ($maintain) {
-              my $current = Lacuna->db->resultset('Ships')->search({ body_id => $body->id, type => $shash->{type} })->count;
+              my $current = KA->db->resultset('Ships')->search({ body_id => $body->id, type => $shash->{type} })->count;
               $to_build -= $current;
               $to_build = 0 if $to_build < 0;
           }

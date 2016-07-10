@@ -2,10 +2,10 @@ use lib '../../lib';
 use strict;
 use 5.010;
 use List::Util::WeightedChoice qw( choose_weighted );
-use Lacuna;
-use Lacuna::Util qw(randint);
-use Lacuna::Constants qw(ORE_TYPES);
-use Lacuna::DB::Result::Empire;
+use KA;
+use KA::Util qw(randint);
+use KA::Constants qw(ORE_TYPES);
+use KA::DB::Result::Empire;
 
 use DateTime;
 use Time::HiRes;
@@ -21,8 +21,8 @@ use GD::Image;
 # I have tried to use 'x' and 'y' to refer to co-ordinates in the TLE map
 # 'p' and 'q' refer to co-ordinates in the (courser grained) chunk map
 
-my $config  = Lacuna->config;
-my $db      = Lacuna->db;
+my $config  = KA->config;
+my $db      = KA->db;
 
 # These might need adjusting to get optimum results
 my $fudge_factor    = 1.8;              # Increase to increase the number of stars and decrease the size of voids.
@@ -69,7 +69,7 @@ exit 0 if $ENV{CREATE_DB_ONLY};
 
 setup();
 
-# Create Lacuna Expanse Corp systems
+# Create KA Expanse Corp systems
 #
 push @{$ds_stars->{"0:0"}}, {x => 0, y => 0};
 push @{$ds_stars->{"0:0"}}, {x => 0, y => 6};
@@ -122,7 +122,7 @@ sub setup {
 
     # Read the default ore values for each planet/asteroid/GG type
     foreach my $a (1..26) {
-        my $name = "Lacuna::DB::Result::Map::Body::Asteroid::A$a";
+        my $name = "KA::DB::Result::Map::Body::Asteroid::A$a";
         my $body = $name->new();
         # this is a bit of a cludge!
         bless $body, $name;
@@ -133,7 +133,7 @@ sub setup {
     }
     foreach my $p (1..40) {
         next if $p == 33;
-        my $name = "Lacuna::DB::Result::Map::Body::Planet::P$p";
+        my $name = "KA::DB::Result::Map::Body::Planet::P$p";
         my $body = $name->new();
         bless $body, $name;
         foreach my $ore (ORE_TYPES) {
@@ -141,7 +141,7 @@ sub setup {
         }
     }
     foreach my $g (1..5) {
-        my $name = "Lacuna::DB::Result::Map::Body::Planet::GasGiant::G$g";
+        my $name = "KA::DB::Result::Map::Body::Planet::GasGiant::G$g";
         my $body = $name->new();
         bless $body, $name;
         foreach my $ore (ORE_TYPES) {
@@ -357,7 +357,7 @@ sub add_star_system {
 
             # convert body_name into a Class
             my $add_features;
-            my $class = 'Lacuna::DB::Result::Map::Body::';
+            my $class = 'KA::DB::Result::Map::Body::';
             my $size = 0;
             if ($body_name =~ m/^A/) {
                 $class .= "Asteroid::$body_name";
@@ -387,7 +387,7 @@ sub add_star_system {
                 add_features($body);
             }
             if ($body_name =~ m/^P/ and $create_lacunan) {
-                # create Lacunan home world (unless already done)
+                # create KAn home world (unless already done)
                 create_lacunan_home_world($body);
             }
         }
@@ -399,17 +399,17 @@ sub create_lacunan_home_world {
 
     return if $lacunans_have_been_placed;
 
-    $body->update({name=>'Lacuna'});
-    say "\t\t\tMaking this the Lacunans home world.";
-    my $empire = Lacuna->db->resultset('Empire')->new({
+    $body->update({name=>'KA'});
+    say "\t\t\tMaking this the KAns home world.";
+    my $empire = KA->db->resultset('Empire')->new({
         id                      => 1,
-        name                    => 'Lacuna Expanse Corp',
+        name                    => 'KA Expanse Corp',
         date_created            => DateTime->now,
         stage                   => 'founded',
         status_message          => 'Will trade for Essentia.',
-        password                => Lacuna::DB::Result::Empire->encrypt_password('secret56'),
-        species_name            => 'Lacunan',
-        species_description     => 'The economic deities that control the Lacuna Expanse.',
+        password                => KA::DB::Result::Empire->encrypt_password('secret56'),
+        species_name            => 'KAn',
+        species_description     => 'The economic deities that control the KA Expanse.',
         min_orbit               => 1,
         max_orbit               => 7,
         manufacturing_affinity  => 1, # cost of building new stuff
@@ -479,7 +479,7 @@ sub get_star_name {
     STARNAME:
     while (my $name = <$star_names>) {
         chomp $name;
-        next STARNAME if $name eq 'Lacuna';
+        next STARNAME if $name eq 'KA';
 
         if ($db->resultset('Map::Star')->search({ name => $name })->count == 0 ) {
             return $name
@@ -608,7 +608,7 @@ sub generate_stars {
             my $rand_y = randint($y_chunk_min, $y_chunk_max);
             # Is this location suitable?
             #
-            # Leave a 'void' for the Lacuna Expanse Corp home worlds
+            # Leave a 'void' for the KA Expanse Corp home worlds
             # at least 60 units of 0|0
             
             my $dist = sqrt($rand_x * $rand_x + $rand_y * $rand_y);

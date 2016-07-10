@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 use List::Util qw(shuffle);
 $|=1;
@@ -26,9 +26,9 @@ out('Finding Mission Files');
 my @mission_files = get_mission_files();
 
 out('Loading DB...');
-our $db = Lacuna->db;
+our $db = KA->db;
 our $dtf = $db->storage->datetime_parser;
-our $missions = $db->resultset('Lacuna::DB::Result::Mission');
+our $missions = $db->resultset('KA::DB::Result::Mission');
 
 out('Deleting missions nobody has completed...');
 my $old = $missions->search({date_posted => { '<' => $dtf->format_datetime(DateTime->now->subtract( hours => 72 ))}});
@@ -38,7 +38,7 @@ while (my $mission = $old->next) {
 
 if ($mission ne '' && $zone ne '') {
     out('Adding specific mission...');
-    my $mission = Lacuna::DB::Result::Mission->initialize($zone, $mission);
+    my $mission = KA::DB::Result::Mission->initialize($zone, $mission);
     say $mission->params->get('name').' added to '.$zone.'!';
 }
 else {
@@ -49,13 +49,13 @@ else {
         @zones = ($zone);
     }
     else {
-        @zones = $db->resultset('Lacuna::DB::Result::Map::Body')->search(
+        @zones = $db->resultset('KA::DB::Result::Map::Body')->search(
             { empire_id => { '>' => 0 }},
             { distinct => 1 })->get_column('zone')->all;
     }
     foreach my $zone (@zones) {
         out($zone);
-        my $current_missions = $db->resultset('Lacuna::DB::Result::Mission')->search(
+        my $current_missions = $db->resultset('KA::DB::Result::Mission')->search(
             { zone => "$zone" });
         my @current;
         while (my $mission = $current_missions->next) {
@@ -71,7 +71,7 @@ else {
         foreach (1..$number) {
             last unless scalar @avail > 0;
             my $mission_file = splice(@avail, rand(@avail), 1);
-            my $mission = Lacuna::DB::Result::Mission->initialize($zone, $mission_file);
+            my $mission = KA::DB::Result::Mission->initialize($zone, $mission_file);
             say $mission->params->get('name');
         }
     }
@@ -89,7 +89,7 @@ out((($finish - $start)/60)." minutes have elapsed");
 
 
 sub get_mission_files {
-    opendir my $dir, '/data/Lacuna-Mission/missions/';
+    opendir my $dir, '/data/KA-Mission/missions/';
     my @files = readdir $dir;
     closedir $dir;
     my @missions;

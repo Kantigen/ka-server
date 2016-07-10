@@ -11,7 +11,7 @@ my $tester = TestHelper->new->generate_test_empire;
 my $session_id = $tester->session->id;
 my $empire = $tester->empire;
 my $home = $empire->home_planet;
-my $db = Lacuna->db;
+my $db = KA->db;
 
 my $result;
 

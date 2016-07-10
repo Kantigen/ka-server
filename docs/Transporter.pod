@@ -611,7 +611,7 @@ The unique id of the ship that you want to push. See the C<get_prisoners> method
 
 =head2 trade_one_for_one ( session_id, building_id, have, want, quantity )
 
-Lacuna Expanse Corp will do one for one trades of any resource in exchange for 3 essentia.
+KA Expanse Corp will do one for one trades of any resource in exchange for 3 essentia.
 
  {
     "status" : { ... }

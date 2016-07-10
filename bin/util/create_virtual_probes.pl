@@ -1,11 +1,11 @@
 use strict;
 use 5.010;
 use lib '/home/keno/ka-server/lib';
-use Lacuna;
+use KA;
 
 $|=1;
 
-our $db = Lacuna->db;
+our $db = KA->db;
 
 my $oracles = $db->resultset('Building')->search({
     class   => 'Building::Permanent::OracleOfAnid',

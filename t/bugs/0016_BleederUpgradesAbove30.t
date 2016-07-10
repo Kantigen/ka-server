@@ -16,7 +16,7 @@ my $tester_session_id = $tester->session->id;
 my $empire = $tester->empire;
 my $home = $empire->home_planet;
 
-my $deployed_bleeder = $tester->build_building('Lacuna::DB::Result::Building::DeployedBleeder', 29);
+my $deployed_bleeder = $tester->build_building('KA::DB::Result::Building::DeployedBleeder', 29);
 
 $deployed_bleeder->start_upgrade;
 $deployed_bleeder->finish_upgrade;

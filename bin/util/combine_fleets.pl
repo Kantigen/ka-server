@@ -2,9 +2,9 @@ use 5.010;
 use strict;
 use feature "switch";
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 $|=1;
 our $quiet;
@@ -16,10 +16,10 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 
 out('Touch all fleets');
-my $fleets = $db->resultset('Lacuna::DB::Result::Fleet')->search;
+my $fleets = $db->resultset('KA::DB::Result::Fleet')->search;
 
 while (my $fleet = $fleets->next) {
     eval {

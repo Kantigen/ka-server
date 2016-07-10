@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 use JSON;
 use utf8;
@@ -29,11 +29,11 @@ use utf8;
   my $start = time;
 
   out('Loading DB');
-  our $db = Lacuna->db;
+  our $db = KA->db;
 
   if (@eid) {
       for my $eid (@eid) {
-          my @bodies = map { $_->id } $db->resultset('Lacuna::DB::Result::Map::Body')->search({
+          my @bodies = map { $_->id } $db->resultset('KA::DB::Result::Map::Body')->search({
                            empire_id => $eid,
                        });
           push @bid, @bodies;
@@ -49,7 +49,7 @@ sub clean_off {
   my ($sanitize, $bids) = @_;
 
   for my $bid (@$bids) {
-      my $body = $db->resultset('Lacuna::DB::Result::Map::Body')->find($bid);
+      my $body = $db->resultset('KA::DB::Result::Map::Body')->find($bid);
       unless ($body) {
           print "Cannot find body id $bid\n";
           next;

@@ -1,8 +1,8 @@
-## A quick start to running Lacuna Expanse Server in Docker
+## A quick start to running KA Expanse Server in Docker
 
 Docker is a quick and easy way (well, compared to trying to build a server from 
 scratch!) of getting a development system up and running so you can experiment
-and modify the Lacuna Expanse server code.
+and modify the KA Expanse server code.
 
 Please read the documents at ![Install Docker Engine](https://docs.docker.com/engine/installation/)
 for your specific system.
@@ -43,15 +43,15 @@ home directory is at C:\\Users\micro
 You need to checkout the code from github into a local directory as normal, I
 will assume you are checking out to 
 
-    ~/Lacuna-Server-Open
+    ~/KA-Server-Open
 
 using the commands
 
-    git clone https://github.com/plainblack/Lacuna-Server-Open.git
+    git clone https://github.com/plainblack/KA-Server-Open.git
 
 You need to create some config files for the docker config,
 
-    $ cd ~/Lacuna-Server-Open/etc-templates
+    $ cd ~/KA-Server-Open/etc-templates
     $ cp lacuna.conf.docker ../etc/lacuna.conf
     $ cp log4perl.conf.docker ../etc/log4perl.conf
     $ cp nginx.conf.docker ../etc/nginx.conf
@@ -61,7 +61,7 @@ defaults.
 
 ### Starting up the docker containers.
 
-In Lacuna-Server-Open there is a sub-directory 'docker'
+In KA-Server-Open there is a sub-directory 'docker'
 
 Setting up a server is as simple as running the following scripts, in this
 order
@@ -137,7 +137,7 @@ but normally to start and stop your server code you just do the following.
 
 NOTE: On a Windows environment, this can give the following error
 
-    : syntax error at (eval 11) line 1, near "package Plack::Sandbox::2fdata_2fLacuna_2dServer_2fbin_2flacuna_2epsgi
+    : syntax error at (eval 11) line 1, near "package Plack::Sandbox::2fdata_2fKA_2dServer_2fbin_2flacuna_2epsgi
 
 I have no idea why! If so then just type the contents of the startdev.sh script
 and run it directly from the command line. e.g.
@@ -208,7 +208,7 @@ which you can choose to tail in another terminal session.
 
 You can now run the development server
 
-    $ cd /data/Lacuna-Server/bin
+    $ cd /data/KA-Server/bin
     $ ./startdev.sh
 
 This will run in the current terminal session, type ctrl-c to terminate

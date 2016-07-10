@@ -1,10 +1,10 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
-use Lacuna::AI::DeLambert;
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
+use KA::AI::DeLambert;
 use Getopt::Long;
 use List::MoreUtils qw(uniq);
 use utf8;
@@ -31,12 +31,12 @@ if (not $attackers) {
 }
 
 out('Loading DB');
-our $db = Lacuna->db;
-my $empires = Lacuna->db->resultset('Lacuna::DB::Result::Empire')->search({
+our $db = KA->db;
+my $empires = KA->db->resultset('KA::DB::Result::Empire')->search({
 });
 
 out('getting empires...');
-my $de_lambert = Lacuna::AI::DeLambert->new;
+my $de_lambert = KA::AI::DeLambert->new;
 
 out("Sending attack message about '$attackers'");
 

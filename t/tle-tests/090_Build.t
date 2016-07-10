@@ -15,7 +15,7 @@ my $result;
 
 my $empire_id = $tester->empire->id;
 my $home_planet = $tester->empire->home_planet_id;
-my $db = Lacuna->db;
+my $db = KA->db;
 
 $result = $tester->post('body', 'get_status', [$session_id, $home_planet]);
 my $last_energy = $result->{result}{body}{energy_stored};
@@ -32,7 +32,7 @@ $result = $tester->post('malcud', 'repair', [$session_id, $malcud_id]);
 ok(exists $result->{result}, 'Can call repair.');
 
 
-my $building = $db->resultset('Lacuna::DB::Result::Building')->find($malcud_id);
+my $building = $db->resultset('KA::DB::Result::Building')->find($malcud_id);
 $building->finish_upgrade;
 
 $result = $tester->post('malcud', 'view', [$session_id, $building->id]);
@@ -43,14 +43,14 @@ $last_energy = $result->{result}{body}{energy_stored};
 
 
 
-my $empire = $db->resultset('Lacuna::DB::Result::Empire')->find($empire_id);
+my $empire = $db->resultset('KA::DB::Result::Empire')->find($empire_id);
 my $home = $empire->home_planet;
 
 # quick build basic university
-my $uni = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $uni = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 0,
     y               => -1,
-    class           => 'Lacuna::DB::Result::Building::University',
+    class           => 'KA::DB::Result::Building::University',
     level           => 2,
 });
 $home->build_building($uni);
@@ -58,37 +58,37 @@ $uni->finish_upgrade;
 
 
 # build some infrastructure
-my $food = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $food = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 0,
     y               => -2,
-    class           => 'Lacuna::DB::Result::Building::Food::Algae',
+    class           => 'KA::DB::Result::Building::Food::Algae',
     level           => 2,
 });
 $home->build_building($food);
 $food->finish_upgrade;
 
-my $energy = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $energy = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 0,
     y               => -3,
-    class           => 'Lacuna::DB::Result::Building::Energy::Hydrocarbon',
+    class           => 'KA::DB::Result::Building::Energy::Hydrocarbon',
     level           => 1,
 });
 $home->build_building($energy);
 $energy->finish_upgrade;
 
-my $water = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $water = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 0,
     y               => -4,
-    class           => 'Lacuna::DB::Result::Building::Water::Purification',
+    class           => 'KA::DB::Result::Building::Water::Purification',
     level           => 4,
 });
 $home->build_building($water);
 $water->finish_upgrade;
 
-my $ore = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $ore = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 0,
     y               => -5,
-    class           => 'Lacuna::DB::Result::Building::Ore::Mine',
+    class           => 'KA::DB::Result::Building::Ore::Mine',
     level           => 1,
 });
 $home->build_building($ore);
@@ -96,10 +96,10 @@ $ore->finish_upgrade;
 
 # we need a dev ministry so we can upgrade lots of stuff.
 
-my $dev = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $dev = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 0,
     y               => 5,
-    class           => 'Lacuna::DB::Result::Building::Development',
+    class           => 'KA::DB::Result::Building::Development',
     level           => 2,
 });
 $home->build_building($dev);
@@ -157,13 +157,13 @@ ok(exists $result->{result}, 'can downgrade the university');
 $result = $tester->post('university', 'demolish', [$session_id, $uni->id]);
 ok(exists $result->{result}{status}, 'can demolish university');
 
-$home->add_plan('Lacuna::DB::Result::Building::Permanent::EssentiaVein',1);
-ok($home->get_plan('Lacuna::DB::Result::Building::Permanent::EssentiaVein',1), 'can add and get a plan');
+$home->add_plan('KA::DB::Result::Building::Permanent::EssentiaVein',1);
+ok($home->get_plan('KA::DB::Result::Building::Permanent::EssentiaVein',1), 'can add and get a plan');
 
 $result = $tester->post('essentiavein', 'build', [$session_id, $home->id, 5,5]);
 ok(exists $result->{result}{status}, 'can build a plan only building');
 
-$db->resultset('Lacuna::DB::Result::Building')->search({class=>'Lacuna::DB::Result::Building::Permanent::EssentiaVein'})->delete; # clean up for future builds
+$db->resultset('KA::DB::Result::Building')->search({class=>'KA::DB::Result::Building::Permanent::EssentiaVein'})->delete; # clean up for future builds
 
 # set up testing of large build queue
 $water->level(5);
@@ -208,9 +208,9 @@ ok(exists $result->{error}, 'non-integer string attack thwarted!');
 $result = $tester->post('waterpurification', 'build', [$session_id, $home_planet, 3.2, -3]);
 ok(exists $result->{error}, 'non-integer number attack thwarted!');
 
-$home->add_plan('Lacuna::DB::Result::Building::SpacePort',1,4);
-$home->add_plan('Lacuna::DB::Result::Building::SpacePort',1);
-$home->add_plan('Lacuna::DB::Result::Building::SpacePort',1,3);
+$home->add_plan('KA::DB::Result::Building::SpacePort',1,4);
+$home->add_plan('KA::DB::Result::Building::SpacePort',1);
+$home->add_plan('KA::DB::Result::Building::SpacePort',1,3);
 $home->update;
 
 $result = $tester->post('body', 'get_buildable', [$session_id, $home_planet, 4, 4, 'Ships']);

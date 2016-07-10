@@ -14,38 +14,38 @@ my $session_id = $tester->session->id;
 
 my $empire = $tester->empire;
 my $home = $empire->home_planet;
-my $db = Lacuna->db;
-my $tutorial = Lacuna::Tutorial->new(empire=>$empire);
+my $db = KA->db;
+my $tutorial = KA::Tutorial->new(empire=>$empire);
 
 is($tutorial->finish, 0, 'look at ui - not yet complete');
 $home->name(rand(1000000));
 is($tutorial->finish, 1, 'look at ui');
 
 is($empire->tutorial_stage, 'get_food', 'get_food');
-my $building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $building = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => -5,
     y               => -5,
-    class           => 'Lacuna::DB::Result::Building::Food::Malcud',
+    class           => 'KA::DB::Result::Building::Food::Malcud',
 });
 $home->build_building($building);
 $building->finish_upgrade;
 $home->tick;
 is($empire->tutorial_stage, 'drinking_water', 'drinking water');
 
-$building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+$building = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => -4,
     y               => -5,
-    class           => 'Lacuna::DB::Result::Building::Water::Purification',
+    class           => 'KA::DB::Result::Building::Water::Purification',
 });
 $home->build_building($building);
 $building->finish_upgrade;
 $home->tick;
 is($empire->tutorial_stage, 'keep_the_lights_on', 'keep the lights on');
 
-$building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+$building = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => -3,
     y               => -5,
-    class           => 'Lacuna::DB::Result::Building::Energy::Geo',
+    class           => 'KA::DB::Result::Building::Energy::Geo',
 });
 $home->build_building($building);
 $building->finish_upgrade;
@@ -53,10 +53,10 @@ $home->tick;
 is($empire->tutorial_stage, 'mine', 'mine');
 
 
-$building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+$building = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => -2,
     y               => -5,
-    class           => 'Lacuna::DB::Result::Building::Ore::Mine',
+    class           => 'KA::DB::Result::Building::Ore::Mine',
 });
 $home->build_building($building);
 $building->finish_upgrade;
@@ -72,19 +72,19 @@ $home->tick;
 is($empire->tutorial_stage,'university', 'university');
 
 
-$building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+$building = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => -1,
     y               => -5,
-    class           => 'Lacuna::DB::Result::Building::University',
+    class           => 'KA::DB::Result::Building::University',
 });
 $home->build_building($building);
 $building->finish_upgrade;
 $home->tick;
 is($empire->tutorial_stage, 'mission_command', 'mission_command');
-$building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+$building = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => -1, 
     y               => -5, 
-    class           => 'Lacuna::DB::Result::Building::MissionCommand',
+    class           => 'KA::DB::Result::Building::MissionCommand',
 });
 $home->build_building($building);
 $building->finish_upgrade;
@@ -95,34 +95,34 @@ $home->tick;
 is($empire->tutorial_stage, 'storage', 'university');
 
 
-$building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+$building = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 0,
     y               => -5,
-    class           => 'Lacuna::DB::Result::Building::Ore::Storage',
+    class           => 'KA::DB::Result::Building::Ore::Storage',
 });
 $home->build_building($building);
 $building->finish_upgrade;
 $home->tick;
-$building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+$building = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 0,
     y               => -4,
-    class           => 'Lacuna::DB::Result::Building::Energy::Reserve',
+    class           => 'KA::DB::Result::Building::Energy::Reserve',
 });
 $home->build_building($building);
 $building->finish_upgrade;
 $home->tick;
-$building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+$building = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 0,
     y               => -3,
-    class           => 'Lacuna::DB::Result::Building::Food::Reserve',
+    class           => 'KA::DB::Result::Building::Food::Reserve',
 });
 $home->build_building($building);
 $building->finish_upgrade;
 $home->tick;
-$building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+$building = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 0,
     y               => -2,
-    class           => 'Lacuna::DB::Result::Building::Water::Storage',
+    class           => 'KA::DB::Result::Building::Water::Storage',
 });
 $home->build_building($building);
 $building->finish_upgrade;
@@ -130,10 +130,10 @@ $home->tick;
 is($empire->tutorial_stage, 'fool', 'storage');
 
 
-$building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+$building = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 0,
     y               => -1,
-    class           => 'Lacuna::DB::Result::Building::Food::Wheat',
+    class           => 'KA::DB::Result::Building::Food::Wheat',
     level           => 2,
 });
 $home->build_building($building);
@@ -147,10 +147,10 @@ $empire->energy_boost($future);
 $empire->ore_boost($future);
 $home->tick;
 
-$building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+$building = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 1,
     y               => -5,
-    class           => 'Lacuna::DB::Result::Building::Energy::Geo',
+    class           => 'KA::DB::Result::Building::Energy::Geo',
     level           => 3,
 });
 $home->build_building($building);
@@ -159,19 +159,19 @@ $home->tick;
 is($tutorial->finish, 1, 'energy');
 
 
-$building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+$building = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 1,
     y               => -4,
-    class           => 'Lacuna::DB::Result::Building::Water::Purification',
+    class           => 'KA::DB::Result::Building::Water::Purification',
     level           => 2,
 });
 $home->build_building($building);
 $building->finish_upgrade;
 $home->tick;
-$building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+$building = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 1,
     y               => -3,
-    class           => 'Lacuna::DB::Result::Building::Ore::Mine',
+    class           => 'KA::DB::Result::Building::Ore::Mine',
     level           => 2,
 });
 $home->build_building($building);
@@ -180,10 +180,10 @@ $home->tick;
 is($empire->tutorial_stage, 'news', 'the 300');
 
 
-$building =Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+$building =KA->db->resultset('KA::DB::Result::Building')->new({
     x               => -5,
     y               => -5,
-    class           => 'Lacuna::DB::Result::Building::Network19',
+    class           => 'KA::DB::Result::Building::Network19',
     level           => 0,
 });
 $home->build_building($building);
@@ -196,10 +196,10 @@ $empire->description('i rule');
 is($tutorial->finish, 1, 'rogue');
 
 
-$building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+$building = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 1,
     y               => -2,
-    class           => 'Lacuna::DB::Result::Building::SpacePort',
+    class           => 'KA::DB::Result::Building::SpacePort',
 });
 $home->build_building($building);
 $building->finish_upgrade;
@@ -207,10 +207,10 @@ $home->tick;
 is($empire->tutorial_stage, 'shipyard', 'spaceport');
 
 
-$building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+$building = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 1,
     y               => -1,
-    class           => 'Lacuna::DB::Result::Building::Shipyard',
+    class           => 'KA::DB::Result::Building::Shipyard',
 });
 $home->build_building($building);
 $building->finish_upgrade;
@@ -218,10 +218,10 @@ $home->tick;
 is($empire->tutorial_stage, 'pawn', 'shipyard');
 
 
-$building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+$building = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 1,
     y               => 0,
-    class           => 'Lacuna::DB::Result::Building::Intelligence',
+    class           => 'KA::DB::Result::Building::Intelligence',
 });
 $home->build_building($building);
 $building->level( $building->level + 1 ); # extra upgrade level
@@ -243,10 +243,10 @@ $home->tick;
 
 is($empire->tutorial_stage, 'observatory', 'counter spy');
 
-$building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+$building = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 1,
     y               => 1,
-    class           => 'Lacuna::DB::Result::Building::Observatory',
+    class           => 'KA::DB::Result::Building::Observatory',
 });
 $home->build_building($building);
 $building->finish_upgrade;

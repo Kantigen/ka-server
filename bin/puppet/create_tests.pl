@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 use List::MoreUtils qw(uniq);
 $|=1;
@@ -18,18 +18,18 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 
 out('Creating empire...');
 for my $num (2..40) {
   my $name = sprintf("Test%02d",$num);
-  my $empire = Lacuna->db->resultset('Lacuna::DB::Result::Empire')->new({
+  my $empire = KA->db->resultset('KA::DB::Result::Empire')->new({
     name                => $name,
     stage               => 'founded',
     date_created        => DateTime->now,
     status_message      => 'Quick Test',
     description         => 'Soon will be gone',
-    password            => Lacuna::DB::Result::Empire->encrypt_password(rand(99999999)),
+    password            => KA::DB::Result::Empire->encrypt_password(rand(99999999)),
     sitter_password     => 'testsit',
     species_name            => 'CTD',
     species_description     => 'temp',
@@ -53,11 +53,11 @@ for my $num (2..40) {
   my $home = $empire->find_home_planet;
   $empire->found($home);
   out('Placing Embassy for '.$name.' on '.$home->name);
-  my $bld = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+  my $bld = KA->db->resultset('KA::DB::Result::Building')->new({
       body_id  => $home->id,
       x        => 1,
       y        => 0,
-      class    => 'Lacuna::DB::Result::Building::Embassy',
+      class    => 'KA::DB::Result::Building::Embassy',
       level    => 0,
    });
    $home->build_building($bld);

@@ -19,22 +19,22 @@ my $home = $empire->home_planet;
 my $result;
 
 my $forge_level = 5;
-my $forge = $tester->build_building('Lacuna::DB::Result::Building::Permanent::TheDillonForge', $forge_level);
-my $arch  = $tester->build_building('Lacuna::DB::Result::Building::Archaeology', 15);
-my $trade = $tester->build_building('Lacuna::DB::Result::Building::Trade', 15);
+my $forge = $tester->build_building('KA::DB::Result::Building::Permanent::TheDillonForge', $forge_level);
+my $arch  = $tester->build_building('KA::DB::Result::Building::Archaeology', 15);
+my $trade = $tester->build_building('KA::DB::Result::Building::Trade', 15);
 
 # create some plans to split and combine
 
 for (1..21) {
-    $home->add_plan('Lacuna::DB::Result::Building::SpacePort', 5);
+    $home->add_plan('KA::DB::Result::Building::SpacePort', 5);
 }
 
 for (1..21) {
-    $home->add_plan('Lacuna::DB::Result::Building::SpacePort', 1);
+    $home->add_plan('KA::DB::Result::Building::SpacePort', 1);
 }
 
-$home->add_plan('Lacuna::DB::Result::Building::Permanent::AlgaePond', 1);
-$home->add_plan('Lacuna::DB::Result::Building::Permanent::AlgaePond', 1, 5);
+$home->add_plan('KA::DB::Result::Building::Permanent::AlgaePond', 1);
+$home->add_plan('KA::DB::Result::Building::Permanent::AlgaePond', 1, 5);
 
 $result = $tester->post('thedillonforge', 'view', [$session_id, $forge->id]);
 
@@ -106,7 +106,7 @@ $result = $tester->post('thedillonforge', 'subsidize', [$session_id, $forge->id]
 
 my $plans_1 = $home->plans->search({
     level               => 1,
-    class               => 'Lacuna::DB::Result::Building::SpacePort',
+    class               => 'KA::DB::Result::Building::SpacePort',
     extra_build_level   => 0,
 })->count;
 
@@ -114,7 +114,7 @@ is($plans_1, 11, "We have consumed 10 level 1 plans");
 
 my $plans_5 = $home->plans->search({
     level               => 5,
-    class               => 'Lacuna::DB::Result::Building::SpacePort',
+    class               => 'KA::DB::Result::Building::SpacePort',
     extra_build_level   => 0,
 })->count;
 
@@ -139,7 +139,7 @@ $result = $tester->post('thedillonforge', 'subsidize', [$session_id, $forge->id]
 
 $plans_1 = $home->plans->search({
     level               => 1,
-    class               => 'Lacuna::DB::Result::Building::Permanent::AlgaePond',
+    class               => 'KA::DB::Result::Building::Permanent::AlgaePond',
     extra_build_level   => 5,
 })->count;
 

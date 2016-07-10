@@ -29,14 +29,14 @@ The id of the alliance you want to obtain data on.
  {
    "profile" : {
      "id" : "id-goes-here",
-     "name" : "Lacuna Expanse Allies",
+     "name" : "KA Expanse Allies",
      "description" : "Blah blah blah blah...",
      "leader_id" : "id-goes-here",
      "date_created" : "01 31 2010 13:09:05 +0600",
      "members" : [
        {
          "id" : "id-goes-here",
-         "name" : "Lacuna Expanse Corp"
+         "name" : "KA Expanse Corp"
        },
        ...
      ],
@@ -73,17 +73,17 @@ The name you are searching for. It's case insensitive, and partial names work fi
 
 =head3 RESPONSE
 
-So if you searched for "Lacuna" you might get back a result set that looks like this:
+So if you searched for "KA" you might get back a result set that looks like this:
 
  {
    "alliances" : [
      {
        "id" : "id-goes-here",
-       "name" : "Lacuna Expanse Allies"
+       "name" : "KA Expanse Allies"
      },
      {    
        "id" : "id-goes-here2",
-       "name" : "Lacuna Pirates"
+       "name" : "KA Pirates"
      }
    ],
    "status" : { ... }

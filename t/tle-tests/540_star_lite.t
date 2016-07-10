@@ -7,7 +7,7 @@ use DateTime;
 
 use TestHelper;
 
-my $db = Lacuna->db;
+my $db = KA->db;
 
 #my $rs = $db->resultset('Map::StarLite')->search({},
 #{ bind => [0,422,-10,10,-10,10] }

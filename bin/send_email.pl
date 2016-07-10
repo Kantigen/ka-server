@@ -1,10 +1,10 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
-use Lacuna::AI::DeLambert;
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
+use KA::AI::DeLambert;
 use Getopt::Long;
 use List::MoreUtils qw(uniq);
 
@@ -35,14 +35,14 @@ my $start = time;
 die "ERROR: Must specify a filename" if not $filename;
 die "ERROR: You must specify an empire to email from" if not $empire_name;
 
-my ($from_empire) = Lacuna->db->resultset('Lacuna::DB::Result::Empire')->search({
+my ($from_empire) = KA->db->resultset('KA::DB::Result::Empire')->search({
     name => $empire_name,
 });
 die "ERROR: Cannot find empire '$empire_name'" if not $from_empire;
 
 out('Loading DB');
-our $db = Lacuna->db;
-my $empires = Lacuna->db->resultset('Lacuna::DB::Result::Empire')->search;
+our $db = KA->db;
+my $empires = KA->db->resultset('KA::DB::Result::Empire')->search;
 
 while (my $empire = $empires->next) {
     my $send_email = 0;

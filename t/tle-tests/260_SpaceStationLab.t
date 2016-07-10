@@ -4,7 +4,7 @@ use Test::Deep;
 use Data::Dumper;
 use 5.010;
 use DateTime;
-use Lacuna::Constants qw(ORE_TYPES);
+use KA::Constants qw(ORE_TYPES);
 
 use TestHelper;
 TestHelper->clear_all_test_empires;
@@ -14,34 +14,34 @@ my $session_id = $tester->session->id;
 my $empire = $tester->empire;
 my $home = $empire->home_planet;
 
-my $ssla = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $ssla = KA->db->resultset('KA::DB::Result::Building')->new({
         x               => 4,
         y               => 4,
-        class           => 'Lacuna::DB::Result::Building::SSLa',
+        class           => 'KA::DB::Result::Building::SSLa',
     });
 $home->build_building($ssla);
 $ssla->finish_upgrade;
     
-my $sslb = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $sslb = KA->db->resultset('KA::DB::Result::Building')->new({
         x               => 5,
         y               => 4,
-        class           => 'Lacuna::DB::Result::Building::SSLb',
+        class           => 'KA::DB::Result::Building::SSLb',
     });
 $home->build_building($sslb);
 $sslb->finish_upgrade;
     
-my $sslc = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $sslc = KA->db->resultset('KA::DB::Result::Building')->new({
         x               => 5,
         y               => 5,
-        class           => 'Lacuna::DB::Result::Building::SSLc',
+        class           => 'KA::DB::Result::Building::SSLc',
     });
 $home->build_building($sslc);
 $sslc->finish_upgrade;
     
-my $ssld = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $ssld = KA->db->resultset('KA::DB::Result::Building')->new({
         x               => 4,
         y               => 5,
-        class           => 'Lacuna::DB::Result::Building::SSLd',
+        class           => 'KA::DB::Result::Building::SSLd',
     });
 $home->build_building($ssld);
 $ssld->finish_upgrade;

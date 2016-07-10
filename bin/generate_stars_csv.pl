@@ -1,7 +1,7 @@
 use 5.010;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
+use KA::DB;
+use KA;
 use DateTime;
 use Net::Amazon::S3;
 use Text::CSV_XS;
@@ -10,7 +10,7 @@ my $csv = Text::CSV_XS->new({binary => 1});
 $csv->combine(qw(id name x y color zone));
 $out .= $csv->string."\n";
 #say $csv->string;
-my $stars = Lacuna->db->resultset('Lacuna::DB::Result::Map::Star');
+my $stars = KA->db->resultset('KA::DB::Result::Map::Star');
 while (my $star = $stars->next) {
     if ($csv->combine( $star->id, $star->name, $star->x, $star->y, $star->color, $star->zone )) {
         $out .= $csv->string."\n";
@@ -21,7 +21,7 @@ while (my $star = $stars->next) {
     }
 }
 
-my $config = Lacuna->config;
+my $config = KA->config;
 my $s3 = Net::Amazon::S3->new(
     aws_access_key_id     => $config->get('access_key'), 
     aws_secret_access_key => $config->get('secret_key'),

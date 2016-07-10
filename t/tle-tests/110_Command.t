@@ -25,7 +25,7 @@ foreach my $bid (keys %{$result->{result}{buildings}}) {
 $result = $tester->post('planetarycommand', 'view', [$session_id, $id]);
 is($result->{result}{planet}{building_count}, 1, "got building count");
 
-$tester->empire->home_planet->add_plan('Lacuna::DB::Result::Building::SpacePort', 5);
+$tester->empire->home_planet->add_plan('KA::DB::Result::Building::SpacePort', 5);
 
 $result = $tester->post('planetarycommand', 'view_plans', [$session_id, $id]);
 is($result->{result}{plans}[0]{name}, 'Space Port', 'got plans list');

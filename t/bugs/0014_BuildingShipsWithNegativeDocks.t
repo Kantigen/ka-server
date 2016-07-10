@@ -16,17 +16,17 @@ my $session_id = $tester->session->id;
 my $empire = $tester->empire;
 my $home = $empire->home_planet;
 
-my $spaceport = $tester->build_building('Lacuna::DB::Result::Building::SpacePort', 1);
-my $shipyard = $tester->build_building('Lacuna::DB::Result::Building::Shipyard',5);
+my $spaceport = $tester->build_building('KA::DB::Result::Building::SpacePort', 1);
+my $shipyard = $tester->build_building('KA::DB::Result::Building::Shipyard',5);
 
 # Build a trade ministry so we can build dorys
-my $trade = $tester->build_building('Lacuna::DB::Result::Building::Trade',1);
+my $trade = $tester->build_building('KA::DB::Result::Building::Trade',1);
 
 # build as many ships as the space port can hold
 
 my @ships;
 for ( 0 .. 1 ) {
-    my $dory = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->new({type=>'dory'});
+    my $dory = KA->db->resultset('KA::DB::Result::Ships')->new({type=>'dory'});
     $shipyard->build_ship($dory);
     push @ships, $dory;
 }
@@ -36,7 +36,7 @@ my $result = $tester->post('shipyard', 'build_ship', [$session_id, $shipyard->id
 is($result->{error}{code}, 1009, 'Cannot build ships if there are zero docks available');
 
 # build more than the space port can hold
-my $dory = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->new({type=>'dory'});
+my $dory = KA->db->resultset('KA::DB::Result::Ships')->new({type=>'dory'});
 $shipyard->build_ship($dory);
 push @ships, $dory;
 

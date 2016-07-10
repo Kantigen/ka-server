@@ -2,9 +2,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 $|=1;
 our $quiet;
@@ -25,10 +25,10 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 
 my $search = {
-  class      => { like => 'Lacuna::DB::Result::Map::Body::Asteroid::%' },
+  class      => { like => 'KA::DB::Result::Map::Body::Asteroid::%' },
 };
 
 if ($target_zone ne '') {
@@ -40,7 +40,7 @@ if ($target_body_id ne '') {
 }
 
 out('Reviewing asteroids');
-my $rocks_rs = $db->resultset('Lacuna::DB::Result::Map::Body');
+my $rocks_rs = $db->resultset('KA::DB::Result::Map::Body');
 my @rocks = $rocks_rs->search(
                               $search,
                        )->get_column('id')->all;
@@ -53,12 +53,12 @@ foreach my $id (sort { 5 > rand(10) } @rocks) {
 
     my $orbit = $rock->orbit;
 
-    my $new_t = randint(1,Lacuna::DB::Result::Map::Body->planet_types);
-    my $class = 'Lacuna::DB::Result::Map::Body::Planet::P'.$new_t;
+    my $new_t = randint(1,KA::DB::Result::Map::Body->planet_types);
+    my $class = 'KA::DB::Result::Map::Body::Planet::P'.$new_t;
     my $size  = 30;
     my $old_class = $rock->class;
     $old_class =~ s/.*:://;
-    my $pcount = Lacuna->db->resultset('Lacuna::DB::Result::MiningPlatforms')
+    my $pcount = KA->db->resultset('KA::DB::Result::MiningPlatforms')
                 ->search({asteroid_id => $id })->count;
     out( sprintf("%30s %6d %3s -> P%3s o:%s (%4d,%4d) Z:%5s %d",
                  $rock->name, $rock->id,

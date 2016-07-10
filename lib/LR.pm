@@ -8,8 +8,8 @@ use 5.12.0;
 
 # Intended to be used from the command line to save a bunch of typing.
 
-# This "derives" off Lacuna::RPC, and is simply a shortcut for
-# Lacuna::RPC::...->new:
+# This "derives" off KA::RPC, and is simply a shortcut for
+# KA::RPC::...->new:
 # perl -ML -MData::Dump -e 'dd(LR->Empire->view_profile(LD->empire(2))'
 
 our $AUTOLOAD;
@@ -19,7 +19,7 @@ sub AUTOLOAD
     my $ns   = $AUTOLOAD;
     $ns =~ s/^.*:://;
 
-    $ns = load_first_existing_class "Lacuna::RPC::$ns", "Lacuna::RPC::Building::$ns";
+    $ns = load_first_existing_class "KA::RPC::$ns", "KA::RPC::Building::$ns";
 
     $ns->new();
 }
@@ -48,7 +48,7 @@ sub _clean(@)
                      {
                          $_ => $o->id;
                      }
-                     elsif ((ref $o) =~ /^Lacuna/)
+                     elsif ((ref $o) =~ /^KA/)
                      {
                          $_ => ref $o;
                      }
@@ -68,13 +68,13 @@ sub _clean(@)
 sub _session
 {
     my $session;
-    if (ref $_[0] eq 'Lacuna::DB::Result::Empire')
+    if (ref $_[0] eq 'KA::DB::Result::Empire')
     {
         # create a session for it.
         $session = $_[0]->start_session;
         $_[0] = $session->id;
     }
-    if (ref $_[0] eq 'HASH' && exists $_[0]->{session_id} && ref $_[0]->{session_id} eq 'Lacuna::DB::Result::Empire')
+    if (ref $_[0] eq 'HASH' && exists $_[0]->{session_id} && ref $_[0]->{session_id} eq 'KA::DB::Result::Empire')
     {
         # create a session for it.
         $session = $_[0]->{session_id}->start_session;
@@ -82,7 +82,7 @@ sub _session
     }
     if ($ENV{captcha})
     {
-        Lacuna->cache->set('captcha_valid', $session->id, 1, 60 * 30 );
+        KA->cache->set('captcha_valid', $session->id, 1, 60 * 30 );
     }
     @_
 }
@@ -94,7 +94,7 @@ sub call
     my $method= shift;
 
     require Data::Dump;
-    $type = load_first_existing_class "Lacuna::RPC::$type", "Lacuna::RPC::Building::$type";
+    $type = load_first_existing_class "KA::RPC::$type", "KA::RPC::Building::$type";
 
     print "REQUEST: ";
     Data::Dump::dd(_clean @_);
@@ -110,7 +110,7 @@ sub jcall
     my $method= shift;
     require JSON::XS;
 
-    $type = load_first_existing_class "Lacuna::RPC::$type", "Lacuna::RPC::Building::$type";
+    $type = load_first_existing_class "KA::RPC::$type", "KA::RPC::Building::$type";
 
 
     say "Class: $type";

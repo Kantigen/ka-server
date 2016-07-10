@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(format_date);
 use Getopt::Long;
 $|=1;
 
@@ -17,7 +17,7 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 
 check_sz();
 
@@ -33,7 +33,7 @@ out((($finish - $start)/60)." minutes have elapsed");
 
 
 sub check_sz {
-    my $sz_param = Lacuna->config->get('starter_zone');
+    my $sz_param = KA->config->get('starter_zone');
     unless ($sz_param and $sz_param->{max_colonies}) {
         out("No starter zone configured.");
         return;
@@ -41,7 +41,7 @@ sub check_sz {
 
     my $empires = $db->resultset('Empire')->search({ id => { '>' => 1 }});
 
-    my $cache = Lacuna->cache;
+    my $cache = KA->cache;
     while (my $empire = $empires->next)
     {
         my $bodies = $empire->planets;

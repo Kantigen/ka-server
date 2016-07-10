@@ -5,7 +5,7 @@ Well done. Build up your energy {energy} output so that you're producing %s per 
 Regards,
 
 Not Tou Re Ell (if he only knew what mailing lists I've signed him up for)
-Lacuna Expanse Corp
+KA Expanse Corp
 
 Task: Build energy to %s per hour.
 Reward: Free upgrade for Energy Reserve.

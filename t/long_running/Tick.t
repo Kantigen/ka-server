@@ -12,7 +12,7 @@ my $session_id = $tester->session->id;
 
 my $empire = $tester->empire;
 my $home = $empire->home_planet;
-my $db = Lacuna->db;
+my $db = KA->db;
 
 
 $home->bauxite_hour(1000);

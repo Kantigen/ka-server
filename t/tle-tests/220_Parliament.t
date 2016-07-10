@@ -4,7 +4,7 @@ use Test::Deep;
 use Data::Dumper;
 use 5.010;
 use DateTime;
-use Lacuna::Constants qw(ORE_TYPES);
+use KA::Constants qw(ORE_TYPES);
 
 use TestHelper;
 TestHelper->clear_all_test_empires;
@@ -20,10 +20,10 @@ my $friend2 = TestHelper->new(empire_name => 'TLE TEST Friend 2')->generate_test
 $friend2->empire->is_isolationist(0);
 $friend2->empire->update;
 
-my $emb = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $emb = KA->db->resultset('KA::DB::Result::Building')->new({
         x               => 4,
         y               => 4,
-        class           => 'Lacuna::DB::Result::Building::Embassy',
+        class           => 'KA::DB::Result::Building::Embassy',
     });
 $home->build_building($emb);
 $emb->finish_upgrade;
@@ -39,7 +39,7 @@ ok $empire->alliance_id, 'empire has alliance';
 $friend->empire->alliance_id($empire->alliance_id);
 $friend->empire->update;
 
-my $station = Lacuna->db->resultset('Map::Body')->search({class => {like => 'Lacuna::DB::Result::Map::Body::Planet::P%'}, empire_id => undef})->first;
+my $station = KA->db->resultset('Map::Body')->search({class => {like => 'KA::DB::Result::Map::Body::Planet::P%'}, empire_id => undef})->first;
 $station->convert_to_station($empire);
 $station->discard_changes; # just in case
 

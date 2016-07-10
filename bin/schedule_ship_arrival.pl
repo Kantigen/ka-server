@@ -2,9 +2,9 @@ use 5.010;
 use strict;
 use feature "switch";
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 use App::Daemon qw(daemonize );
 use Data::Dumper;
@@ -54,7 +54,7 @@ if ($initialize) {
     # existing jobs
     out('Reinitializing all jobs');
     out('Deleting existing jobs');
-    my $schedule_rs = Lacuna->db->resultset('Schedule')->search({
+    my $schedule_rs = KA->db->resultset('Schedule')->search({
         parent_table    => 'Fleet',
         task            => 'arrive',
     });
@@ -64,12 +64,12 @@ if ($initialize) {
     }
 
     out('Adding ship arrivals');
-    my $fleet_rs = Lacuna->db->resultset('Fleet')->search({
+    my $fleet_rs = KA->db->resultset('Fleet')->search({
         task => 'Travelling',
     });
     while (my $fleet = $fleet_rs->next) {
         # add to queue
-        my $schedule = Lacuna->db->resultset('Schedule')->create({
+        my $schedule = KA->db->resultset('Schedule')->create({
             delivery        => $fleet->date_available,
             queue           => 'reboot-arrive',
             parent_table    => 'Fleet',
@@ -90,9 +90,9 @@ else {
     out('Running in the foreground');
 }
 
-my $config = Lacuna->config;
+my $config = KA->config;
 
-my $queue = Lacuna::Queue->new({
+my $queue = KA::Queue->new({
     max_timeouts    => $config->get('beanstalk/max_timeouts'),
     max_reserves    => $config->get('beanstalk/max_reserves'),
     server          => $config->get('beanstalk/server'),

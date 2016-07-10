@@ -20,14 +20,14 @@ my $result;
 
 diag("Create a station");
 
-my $station = Lacuna->db->resultset('Map::Body')->search({
-    class => 'Lacuna::DB::Result::Map::Body::Planet::Station',
+my $station = KA->db->resultset('Map::Body')->search({
+    class => 'KA::DB::Result::Map::Body::Planet::Station',
     empire_id => $empire->id,
     })->first;
 
 if (not $station) {
-    $station = Lacuna->db->resultset('Map::Body')->search({
-        class => {like => 'Lacuna::DB::Result::Map::Body::Planet::P%'},
+    $station = KA->db->resultset('Map::Body')->search({
+        class => {like => 'KA::DB::Result::Map::Body::Planet::P%'},
         empire_id => undef,
         })->first;
 
@@ -45,8 +45,8 @@ $station->gold_stored(4500);
 $station->update;
 $station->tick;
 
-my $trade = Lacuna->db->resultset('Building')->search({
-    class => 'Lacuna::DB::Result::Building::Trade',
+my $trade = KA->db->resultset('Building')->search({
+    class => 'KA::DB::Result::Building::Trade',
     body_id => $home->id,
     })->first;
 

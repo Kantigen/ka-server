@@ -15,8 +15,8 @@ my $result;
 
 $tester->empire->add_essentia({ amount => 30, reason => 'test rename' });
 $tester->empire->update;
-my $capitol = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
-    class   => 'Lacuna::DB::Result::Building::Capitol',
+my $capitol = KA->db->resultset('KA::DB::Result::Building')->new({
+    class   => 'KA::DB::Result::Building::Capitol',
     x       => 1,
     y       => 1,
 });
@@ -27,7 +27,7 @@ $capitol->finish_upgrade;
 $result = $tester->post('capitol', 'view', [$session_id, $capitol->id]);
 is($result->{result}{rename_empire_cost}, 29, "got rename cost");
 
-$result = $tester->post('capitol', 'rename_empire', [$session_id, $capitol->id, 'Lacuna Expanse Corp']);
+$result = $tester->post('capitol', 'rename_empire', [$session_id, $capitol->id, 'KA Expanse Corp']);
 is($result->{error}{code}, 1000, "rename to an existing name errors out");
 
 

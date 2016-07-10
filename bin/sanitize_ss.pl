@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 $|=1;
 our $quiet;
@@ -16,12 +16,12 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 
 out('Sanitize derilict space stations');
 # sanitize derilict space stations
-my $stations_rs = $db->resultset('Lacuna::DB::Result::Map::Body');
-my @stations = $stations_rs->search({ class => 'Lacuna::DB::Result::Map::Body::Planet::Station' })->get_column('id')->all;
+my $stations_rs = $db->resultset('KA::DB::Result::Map::Body');
+my @stations = $stations_rs->search({ class => 'KA::DB::Result::Map::Body::Planet::Station' })->get_column('id')->all;
 foreach my $id (@stations) {
     my $station = $stations_rs->find($id);
     out('Checking '.$station->name);

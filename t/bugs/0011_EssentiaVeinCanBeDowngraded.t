@@ -16,7 +16,7 @@ my $tester_session_id = $tester->session->id;
 my $empire = $tester->empire;
 my $home = $empire->home_planet;
 
-my $essentia_vein = $tester->build_building('Lacuna::DB::Result::Building::Permanent::EssentiaVein', 2);
+my $essentia_vein = $tester->build_building('KA::DB::Result::Building::Permanent::EssentiaVein', 2);
 
 
 END {

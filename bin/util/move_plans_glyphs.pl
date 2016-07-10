@@ -27,7 +27,7 @@ use utf8;
   my $start = DateTime->now;
 
   out('Loading DB');
-  our $db = Lacuna->db;
+  our $db = KA->db;
 
   my $body_from = $db->body($from);
   my $body_dest = $db->body($to);

@@ -2,7 +2,7 @@ use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
 use Getopt::Long;
-use Lacuna::Cache;
+use KA::Cache;
 use Config::JSON;
 $|=1;
 our $online;
@@ -15,7 +15,7 @@ GetOptions(
 );
 
 my $config = Config::JSON->new('/home/keno/ka-server/etc/reboot.conf');
-my $cache = Lacuna::Cache->new(servers => $config->get('memcached'));
+my $cache = KA::Cache->new(servers => $config->get('memcached'));
 
 if ($online) {
     say "Setting Online...";

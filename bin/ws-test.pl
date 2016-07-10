@@ -13,7 +13,7 @@ use KA::Config;
 use KA::Redis;
 use KA::SDB;
 use KA::DB;
-use Lacuna;
+use KA;
 
 use Log::Log4perl;
 
@@ -52,7 +52,7 @@ KA::SDB->initialize({
     db => $db,
 });
 
-my $config = Lacuna->config->get();
+my $config = KA->config->get();
 my $client_url = $config->{client_url};
 my $condvar = AnyEvent->condvar;
 

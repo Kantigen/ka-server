@@ -25,19 +25,19 @@ $trader->empire->update;
 
 # Build an SST and a space port on both the tester and the trader empires
 
-my $tester_spaceport   = $tester->build_building('Lacuna::DB::Result::Building::SpacePort',   2);
-my $tester_shipyard    = $tester->build_building('Lacuna::DB::Result::Building::Shipyard',    2);
-my $tester_transporter = $tester->build_building('Lacuna::DB::Result::Building::Transporter', 10);
-my $tester_trade       = $tester->build_building('Lacuna::DB::Result::Building::Trade',       10);
+my $tester_spaceport   = $tester->build_building('KA::DB::Result::Building::SpacePort',   2);
+my $tester_shipyard    = $tester->build_building('KA::DB::Result::Building::Shipyard',    2);
+my $tester_transporter = $tester->build_building('KA::DB::Result::Building::Transporter', 10);
+my $tester_trade       = $tester->build_building('KA::DB::Result::Building::Trade',       10);
 
-my $trader_spaceport   = $trader->build_building('Lacuna::DB::Result::Building::SpacePort',   8);
-my $trader_shipyard    = $trader->build_building('Lacuna::DB::Result::Building::Shipyard',    8);
-my $trader_transporter = $trader->build_building('Lacuna::DB::Result::Building::Transporter', 10);
-my $trader_trade       = $trader->build_building('Lacuna::DB::Result::Building::Trade',       20);
+my $trader_spaceport   = $trader->build_building('KA::DB::Result::Building::SpacePort',   8);
+my $trader_shipyard    = $trader->build_building('KA::DB::Result::Building::Shipyard',    8);
+my $trader_transporter = $trader->build_building('KA::DB::Result::Building::Transporter', 10);
+my $trader_trade       = $trader->build_building('KA::DB::Result::Building::Trade',       20);
 
 # build just under the max ships the tester space port can hold
 for ( 0 .. 2 ) {
-    my $dory = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->new({type=>'dory'});
+    my $dory = KA->db->resultset('KA::DB::Result::Ships')->new({type=>'dory'});
     $tester_shipyard->build_ship($dory);
 }
 $tester->finish_ships($tester_shipyard->id);
@@ -50,11 +50,11 @@ exit;
 
 my @ships;
 for ( 0 .. 7 ) {
-    my $dory = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->new({type=>'dory'});
+    my $dory = KA->db->resultset('KA::DB::Result::Ships')->new({type=>'dory'});
     $trader_shipyard->build_ship($dory);
     push @ships, $dory;
 }
-my $freighter = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->new({type=>'freighter'});
+my $freighter = KA->db->resultset('KA::DB::Result::Ships')->new({type=>'freighter'});
 $trader_shipyard->build_ship($freighter);
 
 $trader->finish_ships($trader_shipyard->id);
@@ -79,7 +79,7 @@ $result = $trader->post('transporter', 'add_to_market', [$trader_session_id, $tr
 my $transporter_trade_id = $result->{result}{trade_id};
 ok($transporter_trade_id, 'there is a trade on the Transporter');
 
-Lacuna->cache->set('captcha', $tester_session_id, { guid => 1111, solution => 1111 }, 60 * 15 );
+KA->cache->set('captcha', $tester_session_id, { guid => 1111, solution => 1111 }, 60 * 15 );
 $tester->post('captcha', 'solve', [$tester_session_id, 1111, 1111]);
 
 $result = $tester->post('transporter', 'accept_from_market', [$tester_session_id, $tester_transporter->id, $transporter_trade_id]);

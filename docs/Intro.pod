@@ -1,6 +1,6 @@
 =head1 Introduction
 
-This document can introduce you to interacting with the Lacuna Expanse game server. 
+This document can introduce you to interacting with the KA Expanse game server. 
 
 =head1 SERVERS
 
@@ -24,7 +24,7 @@ server they want to interact with from this list.
 
 =head1 JSON-RPC
 
-The Lacuna Expanse uses a JSON-RPC 2.0 based API. You can read more about 
+The KA Expanse uses a JSON-RPC 2.0 based API. You can read more about 
 JSON-RPC 2.0 at L<http://www.jsonrpc.org/specification>.
 
 You can access these methods either as HTTP POSTs or GETs. 
@@ -34,7 +34,7 @@ You can access these methods either as HTTP POSTs or GETs.
 Many of the methods can be accessed using an HTTP GET request. Here's an 
 example URL:
 
- https://game.lacunaexpanse.com/empire?jsonrpc=2.0&id=1&method=is_name_available&params=["Lacuna Expanse Corp"]
+ https://game.lacunaexpanse.com/empire?jsonrpc=2.0&id=1&method=is_name_available&params=["KA Expanse Corp"]
 
 The C<https://game.lacunaexpanse.com/> part gets you to the server.
 
@@ -47,7 +47,7 @@ part.
 Then specify the method you wish to call with C<method=is_name_available>. 
 
 And finally pass in whatever parameters you need like 
-C<params=["Lacuna Expanse Corp"]>. Parameters need to be encoded in JSON. 
+C<params=["KA Expanse Corp"]>. Parameters need to be encoded in JSON. 
 Most requests now require a hash reference of parameters, this would look
 like C<params={"this":"that","foo":"bar"}>
 

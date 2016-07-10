@@ -2,8 +2,8 @@ use strict;
 use File::Find;
 use 5.010;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
+use KA::DB;
+use KA;
 use DateTime;
 use File::Slurp;
 use Net::Amazon::S3;
@@ -13,7 +13,7 @@ use DateTime::Format::HTTP;
 $|=1;
 
 our $quiet;
-our $start = '/data/Lacuna-Assets/';
+our $start = '/data/KA-Assets/';
 our @pushes;
 
 GetOptions(
@@ -23,7 +23,7 @@ GetOptions(
 );
 
 
-my $config = Lacuna->config;
+my $config = KA->config;
 my $s3 = Net::Amazon::S3->new(
     aws_access_key_id     => $config->get('access_key'), 
     aws_secret_access_key => $config->get('secret_key'),

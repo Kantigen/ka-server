@@ -18,8 +18,8 @@ my $command = $home->planetary_command;
 
 my $result;
 
-my $space_port = Lacuna->db->resultset('Building')->search({
-    class => 'Lacuna::DB::Result::Building::SpacePort',
+my $space_port = KA->db->resultset('Building')->search({
+    class => 'KA::DB::Result::Building::SpacePort',
     body_id => $home->id,
     },{
     rows => 1,
@@ -32,7 +32,7 @@ my ($sweepers) = grep {$_->{type} eq 'sweeper'} @{$result->{result}{ships}};
 
 diag Dumper(\$sweepers);
 
-Lacuna->cache->set('captcha', $session_id, { guid => 1111, solution => 1111 }, 60 * 30 );
+KA->cache->set('captcha', $session_id, { guid => 1111, solution => 1111 }, 60 * 30 );
 $result = $tester->post('captcha','solve', [$session_id, 1111, 1111]);
 is($result->{result}, 1, 'Solved captcha');
 

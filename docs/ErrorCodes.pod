@@ -1,6 +1,6 @@
 =head1 Error Codes
 
-The following game error codes may be thrown by the Lacuna game server.
+The following game error codes may be thrown by the KA game server.
 
 =head2 1000 Name not available.
 

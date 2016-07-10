@@ -1,11 +1,12 @@
 package KA::Queue::Job;
 
 use Moose;
-use JSON::XS;
+use YAML;
+
 
 has 'job' => (
     is          => 'ro',
-#    isa         => 'AnyEvent::Beanstalk::Job',
+    isa         => 'Beanstalk::Job',
     required    => 1,
     handles     => [qw(id buried reserved data error stats delete touch peek release bury args tube ttr priority)],
 );
@@ -13,7 +14,15 @@ has 'job' => (
 sub payload {
     my ($self) = @_;
 
-    my $payload =  decode_json($self->job->data);
+    my $args    = $self->job->args;
+
+    if (defined $args && $args->{parent_table}) {
+        my $class   = $args->{parent_table};
+        my $id      = $args->{parent_id};
+        my $thing   = KA->db->resultset($class)->find($id);
+        return $thing;
+    }
+    return {};
 }
 
 __PACKAGE__->meta->make_immutable;

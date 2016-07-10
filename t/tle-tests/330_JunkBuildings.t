@@ -14,15 +14,15 @@ my $home_planet = $tester->empire->home_planet_id;
 diag("home_planet: $home_planet");
 my $empire_id = $tester->empire->id;
 
-my $db = Lacuna->db;
-my $empire = $db->resultset('Lacuna::DB::Result::Empire')->find($empire_id);
+my $db = KA->db;
+my $empire = $db->resultset('KA::DB::Result::Empire')->find($empire_id);
 my $home = $empire->home_planet;
 
-#$db->resultset('Lacuna::DB::Result::Building')->search({class=>'Lacuna::DB::Result::Building::Permanent::JunkHengeSculpture'})->delete;
-#$db->resultset('Lacuna::DB::Result::Building')->search({class=>'Lacuna::DB::Result::Building::Permanent::GreatBallOfJunk'})->delete;
-#$db->resultset('Lacuna::DB::Result::Building')->search({class=>'Lacuna::DB::Result::Building::Permanent::MetalJunkArches'})->delete;
-#$db->resultset('Lacuna::DB::Result::Building')->search({class=>'Lacuna::DB::Result::Building::Permanent::SpaceJunkPark'})->delete;
-#$db->resultset('Lacuna::DB::Result::Building')->search({class=>'Lacuna::DB::Result::Building::Permanent::PyramidJunkSculpture'})->delete;
+#$db->resultset('KA::DB::Result::Building')->search({class=>'KA::DB::Result::Building::Permanent::JunkHengeSculpture'})->delete;
+#$db->resultset('KA::DB::Result::Building')->search({class=>'KA::DB::Result::Building::Permanent::GreatBallOfJunk'})->delete;
+#$db->resultset('KA::DB::Result::Building')->search({class=>'KA::DB::Result::Building::Permanent::MetalJunkArches'})->delete;
+#$db->resultset('KA::DB::Result::Building')->search({class=>'KA::DB::Result::Building::Permanent::SpaceJunkPark'})->delete;
+#$db->resultset('KA::DB::Result::Building')->search({class=>'KA::DB::Result::Building::Permanent::PyramidJunkSculpture'})->delete;
 
 my $construction_cost_reduction_bonus = (100 - $empire->effective_research_affinity * 5) / 100;
 diag("construction_cost_reduction_bonus is ", $construction_cost_reduction_bonus);
@@ -55,7 +55,7 @@ for my $build ( @builds ) {
 
 	is($last_waste, $amount, 'Correct waste is stored.');
 	$result = $tester->post($build->{type}, 'build', [$session_id, $home_planet, $build->{x} + 1, $build->{y}]);
-	$build->{building} = $db->resultset('Lacuna::DB::Result::Building')->find($result->{result}{building}{id});
+	$build->{building} = $db->resultset('KA::DB::Result::Building')->find($result->{result}{building}{id});
 
         my $final_waste = $result->{result}{status}{body}{waste_stored};
         is($final_waste, 0, "No waste left after build 1.");

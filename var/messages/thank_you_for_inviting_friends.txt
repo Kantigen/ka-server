@@ -1,9 +1,9 @@
 Thank You
 ~~~
-Your friend %s has just joined the Lacuna Expanse with an empire name of {Empire %s %s}.
+Your friend %s has just joined the KA Expanse with an empire name of {Empire %s %s}.
 
-You have invited many friends to the Lacuna Expanse, and %s of them have taken you up on your invitation. To say thank you, we have just awarded you %s on your home planet. You can use this gift to decorate your planet, or trade it to other players for something you really want. Thanks again for being a valued player.
+You have invited many friends to the KA Expanse, and %s of them have taken you up on your invitation. To say thank you, we have just awarded you %s on your home planet. You can use this gift to decorate your planet, or trade it to other players for something you really want. Thanks again for being a valued player.
 
 Warmest Regards,
 
-The Lacuna Expanse Team
+The KA Expanse Team

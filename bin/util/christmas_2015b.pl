@@ -20,11 +20,11 @@ my $bodies = LD->resultset('Map::Body')
     ->search(
              {
                  'me.notes' => { like => '%pyramid31%' },
-                 '_plans.class' => 'Lacuna::DB::Result::Building::Permanent::PyramidJunkSculpture',
+                 '_plans.class' => 'KA::DB::Result::Building::Permanent::PyramidJunkSculpture',
                  '_plans.level' => 31,
                  '_plans.extra_build_level' => 0,
                  '_plans.quantity' => { '>' => 0 },
-                 '_buildings.class' => 'Lacuna::DB::Result::Building::Permanent::PyramidJunkSculpture',
+                 '_buildings.class' => 'KA::DB::Result::Building::Permanent::PyramidJunkSculpture',
                  '_buildings.level' => 30,
              },
              {

@@ -6,10 +6,10 @@ use 5.010;
 use Config::JSON;
 
 
-use_ok('Lacuna::Cache');
+use_ok('KA::Cache');
 
-my $config = Config::JSON->new('/data/Lacuna-Server-Open/etc/reboot.conf');
-my $cache = Lacuna::Cache->new(servers => $config->get('memcached'));
+my $config = Config::JSON->new('/data/KA-Server-Open/etc/reboot.conf');
+my $cache = KA::Cache->new(servers => $config->get('memcached'));
 
 $cache->set('foo','bar',3);
 is($cache->get('foo','bar'), 3, 'get/set works');

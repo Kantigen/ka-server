@@ -4,10 +4,10 @@ use 5.10.0;
 
 # Intended to be used from the command line to save a bunch of typing.
 
-# This derives off Lacuna, thus can be used like Lacuna:
+# This derives off KA, thus can be used like KA:
 # perl -ML -E 'say L->cache->get(...)'
 
-use parent 'Lacuna';
+use parent 'KA';
 use LD;
 use LR;
 

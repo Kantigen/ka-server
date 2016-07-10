@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(format_date);
 use Getopt::Long;
 $|=1;
 our $quiet;
@@ -15,7 +15,7 @@ out('Started');
 my $start = time;
 
 out('Loading AI');
-my $ai = Lacuna::AI::Trelvestian->new;
+my $ai = KA::AI::Trelvestian->new;
 
 out('Running Updates');
 $ai->run_all_hourly_colony_updates; 

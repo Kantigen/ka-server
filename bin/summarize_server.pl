@@ -1,12 +1,12 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(format_date);
 use Getopt::Long;
 use JSON;
-use Lacuna::Constants qw(SHIP_TYPES ORE_TYPES);
+use KA::Constants qw(SHIP_TYPES ORE_TYPES);
 use utf8;
 
 
@@ -22,7 +22,7 @@ use utf8;
   my $start = DateTime->now;
 
   out('Loading DB');
-  our $db = Lacuna->db;
+  our $db = KA->db;
 
   summarize_colonies();
   my $mapping = summarize_empires();
@@ -93,10 +93,10 @@ sub generate_overview {
     # flesh out bodies
     out('Flesh Out Body Stats');
     my %body_types = (
-        gas_giants  => 'Lacuna::DB::Result::Map::Body::Planet::GasGiant%',
-        habitables  => 'Lacuna::DB::Result::Map::Body::Planet::P%',
-        stations    => 'Lacuna::DB::Result::Map::Body::Planet::Station',
-        asteroids   => 'Lacuna::DB::Result::Map::Body::Asteroid%',
+        gas_giants  => 'KA::DB::Result::Map::Body::Planet::GasGiant%',
+        habitables  => 'KA::DB::Result::Map::Body::Planet::P%',
+        stations    => 'KA::DB::Result::Map::Body::Planet::Station',
+        asteroids   => 'KA::DB::Result::Map::Body::Asteroid%',
     );
     foreach my $key (keys %body_types) {
         out($key);
@@ -164,7 +164,7 @@ sub generate_overview {
         $out{glyphs}{types}{$glyph->type} = $glyph->quantity;
     }
 
-    my $config = Lacuna->config;
+    my $config = KA->config;
     if ($config->get('access_key')) {
         require SOAP::Amazon::S3;
 
@@ -499,7 +499,7 @@ sub output_map {
 #  print OUT $map_txt;
 #  close(OUT);
   my %output;
-  my $star_map_size = Lacuna->config->get('map_size');
+  my $star_map_size = KA->config->get('map_size');
   $output{map} = {
     bounds => $star_map_size,
   };
@@ -533,7 +533,7 @@ sub output_map {
   }
   my $json_txt = JSON->new->utf8->encode(\%output);
 
-  my $config = Lacuna->config;
+  my $config = KA->config;
   if ($config->get('access_key')) {
       require SOAP::Amazon::S3;
 

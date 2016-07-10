@@ -21,11 +21,11 @@ perl server requires it.  But I expand LSO a little bit
 ### create the directories
 # mkdir /data
 # cd /data
-# mkdir Lacuna-Server-Open
-# cd Lacuna-Server-Open
+# mkdir KA-Server-Open
+# cd KA-Server-Open
 
 ### link in the contents
-# ln -s /path/to/git/repo/Lacuna-Server-Open/* .
+# ln -s /path/to/git/repo/KA-Server-Open/* .
 
 ### expand the etc directory
 # mv etc etc.link
@@ -39,13 +39,13 @@ perl server requires it.  But I expand LSO a little bit
 # cp log4perl.conf.template log4perl.conf
 ### edit the new files, they won't show up in your git repository
 
-Do the same thing for Lacuna-Web-Client, etc., except that you can get
+Do the same thing for KA-Web-Client, etc., except that you can get
 away without expanding subdirs:
 
 # cd /data
-# ln -s /path/to/git/repo/Lacuna-Web-Client
-# ln -s /path/to/git/repo/Lacuna-Assets
-# ln -s /path/to/git/repo/Lacuna-Mission
+# ln -s /path/to/git/repo/KA-Web-Client
+# ln -s /path/to/git/repo/KA-Assets
+# ln -s /path/to/git/repo/KA-Mission
 
 Then continue with setup_a_server until we get to configuring and
 starting nginx.  Here we configure apache.  You need to check how your
@@ -60,15 +60,15 @@ has the following:
 
 <VirtualHost *:80>
 	ServerName my.lacunaexpanse.com
-DocumentRoot /data/Lacuna-Web-Client/
-ServerRoot /data/Lacuna-Web-Client/
+DocumentRoot /data/KA-Web-Client/
+ServerRoot /data/KA-Web-Client/
 
-    <Directory "/data/Lacuna-Web-Client/">
+    <Directory "/data/KA-Web-Client/">
             Options Indexes MultiViews FollowSymLinks
             Require all granted
     </Directory>
 
-    <Directory "/data/Lacuna-Assets">
+    <Directory "/data/KA-Assets">
             Options Indexes MultiViews FollowSymlinks
             Require all granted
     </Directory>
@@ -77,15 +77,15 @@ ServerRoot /data/Lacuna-Web-Client/
             Options Indexes MultiViews FollowSymlinks
             Require all granted
     </Directory>
-    <Directory "/data/Lacuna-Server-Open/var/www/public">
+    <Directory "/data/KA-Server-Open/var/www/public">
             Options Indexes MultiViews FollowSymlinks
             Require all granted
     </Directory>
 
 
     alias /captcha "/data/captcha"
-    alias /assets  "/data/Lacuna-Assets"
-    alias /chiselchat "/data/Lacuna-Server-Open/var/www/public/chiselchat"
+    alias /assets  "/data/KA-Assets"
+    alias /chiselchat "/data/KA-Server-Open/var/www/public/chiselchat"
 
 ProxyPassMatch ^/([a-z][^.]*)$ http://localhost:5000/$1
 ProxyPreserveHost On
@@ -98,7 +98,7 @@ RemoteIPHeader X-Real-IP
 
 The only thing missing at this point is the index.html that you need. 
 According to the above configuration, that will be found in
-/data/Lacuna-Web_client/index.html - that will require you to copy it
+/data/KA-Web_client/index.html - that will require you to copy it
 from us1 and change it slightly.
 
 Restart apache.  Once you have the dev server running, you should be

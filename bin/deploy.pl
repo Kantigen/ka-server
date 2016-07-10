@@ -83,7 +83,7 @@ sub run {
     my @updated_files = $git->diff({name_only => 1}, $old_rev, 'HEAD');
 
     given ($repo) {
-        when ('Lacuna-Web-Client') {
+        when ('KA-Web-Client') {
             my $bucket      = $branch_config->{bucket};
             my $s3bucket    = $s3->bucket($bucket) or die $s3->err . ": " . $s3->errstr;
             my ($new_rev)   = $git->rev_parse({short => 1}, 'HEAD');
@@ -93,10 +93,10 @@ sub run {
 
             my $license_text = sprintf <<'END_TEXT', (localtime)[5] + 1900, $new_rev;
 /*
-Copyright (c) %s, Lacuna Expanse Corp. All rights reserved.
+Copyright (c) %s, KA Expanse Corp. All rights reserved.
 Code licensed under the BSD License:
-http://github.com/plainblack/Lacuna-Web-Client/blob/master/LICENSE
-Built from: http://github.com/plainblack/Lacuna-Web-Client/commit/%s
+http://github.com/plainblack/KA-Web-Client/blob/master/LICENSE
+Built from: http://github.com/plainblack/KA-Web-Client/commit/%s
 */
 END_TEXT
             # new gulp-based client.
@@ -152,14 +152,14 @@ END_TEXT
                 $s3bucket->delete_key($file);
             }
         }
-        when ('Lacuna-Server') {
+        when ('KA-Server') {
             # pull already done locally
         }
-        when ('Lacuna-Server-Open') {
+        when ('KA-Server-Open') {
             my $restart_server = 0;
             # Reboot code
             if ($branch eq "pt-reboot") {
-                chdir('/data/Lacuna-Server');
+                chdir('/data/KA-Server');
                 system("git", "pull", "origin", "pt-reboot");
                 $restart_server = 1;
             }
@@ -172,11 +172,11 @@ END_TEXT
             }
 
             if ($restart_server) {
-                chdir('/data/Lacuna-Server-Private/bin');
+                chdir('/data/KA-Server-Private/bin');
                 system("./startqa.sh");
             }
         }
-        when ('Lacuna-Assets') {
+        when ('KA-Assets') {
             my $bucket = $branch_config->{bucket};
             my $s3bucket = $s3->bucket($bucket);
             for my $file (@updated_files) {

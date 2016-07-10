@@ -9,7 +9,7 @@ use Test::Memory::Cycle;
 use Data::Dumper;
 use 5.010;
 use DateTime;
-use Lacuna;
+use KA;
 use TestHelper;
 
 my $empire_name     = 'TLE Test Empire';
@@ -19,9 +19,9 @@ my $tester  = TestHelper->new({empire_name => $empire_name});
 my $empire  = $tester->empire;
 my $session = $empire->start_session({api_key => 'tester'});
 
-my ($station) = Lacuna->db->resultset('Map::Body::Planet')->search({name => $station_name});
+my ($station) = KA->db->resultset('Map::Body::Planet')->search({name => $station_name});
 
-my $stars   = Lacuna->db->resultset('Map::Star')->search;
+my $stars   = KA->db->resultset('Map::Star')->search;
 
 # get all stars in this stations jurisdiction
 # give them a name we can sort by

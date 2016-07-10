@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 use List::MoreUtils qw(uniq);
 $|=1;
@@ -18,9 +18,9 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
-my $empires = Lacuna->db->resultset('Lacuna::DB::Result::Empire');
-my $config = Lacuna->config;
+our $db = KA->db;
+my $empires = KA->db->resultset('KA::DB::Result::Empire');
+my $config = KA->config;
 
 out('getting empires...');
 my $saben = $empires->find(-1);
@@ -28,7 +28,7 @@ my $lec = $empires->find(1);
 
 
 out('Send Network 19 messages....');
-my $news = $db->resultset('Lacuna::DB::Result::News');
+my $news = $db->resultset('KA::DB::Result::News');
 foreach my $x (int($config->get('map_size/x')->[0]/250) .. int($config->get('map_size/x')->[1]/250)) {
     foreach my $y (int($config->get('map_size/y')->[0]/250) .. int($config->get('map_size/y')->[1]/250)) {
         my $zone = $x.'|'.$y;
@@ -53,7 +53,7 @@ They will start by testing the strongest among us. When they have figured out ou
 Good Luck,
 
 Tou Re Ell
-Lacuna Expanse Corp};
+KA Expanse Corp};
 while (my $empire = $empires->next) {
     $empire->send_message(
         tag         => 'Correspondence',

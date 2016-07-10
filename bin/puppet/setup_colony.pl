@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 use JSON;
 $|=1;
@@ -28,13 +28,13 @@ our $quiet;
   my $start = time;
 
   out('Loading DB');
-  our $db = Lacuna->db;
+  our $db = KA->db;
 
-  my $empires = $db->resultset('Lacuna::DB::Result::Empire');
+  my $empires = $db->resultset('KA::DB::Result::Empire');
   my $empire = $empires->find($empire_id);
   print "Setting up for empire: $empire->name : $empire_id\n";
 
-  my $body = $db->resultset('Lacuna::DB::Result::Map::Body')->find($body_id);
+  my $body = $db->resultset('KA::DB::Result::Map::Body')->find($body_id);
   print "Found body!\n";
   unless ($body) {
     die "Cannot find body id $body_id\n";
@@ -64,7 +64,7 @@ our $quiet;
     next if ($build->{level} < 1 or $build->{level} > 30);
 #    my ($x, $y) = $body->find_free_space;
 #    next if $y > -1;
-    my $bld = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+    my $bld = KA->db->resultset('KA::DB::Result::Building')->new({
         body_id  => $body->id,
         x        => $build->{x},
         y        => $build->{y},

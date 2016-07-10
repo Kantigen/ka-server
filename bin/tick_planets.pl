@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use L;
 use Getopt::Long;
 use utf8;
@@ -18,10 +18,10 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 
 out('Ticking planets');
-my $planets_rs = $db->resultset('Lacuna::DB::Result::Map::Body')->search({empire_id => {'!=' => 0}})->get_column('id');
+my $planets_rs = $db->resultset('KA::DB::Result::Map::Body')->search({empire_id => {'!=' => 0}})->get_column('id');
 while (my $id = $planets_rs->next) {
     my $planet = LD->body($id);
     out('Ticking '.$planet->name.' : '.$planet->id);
