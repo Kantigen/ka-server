@@ -76,7 +76,7 @@ sub ws_getMapChunk {
     my $queue = KA::Queue->instance();
 
     my $job = $queue->publish({
-        queue   => 'ws_worker',
+        queue   => 'mq_worker',
         payload => {
             route   => '/starmap/getMapChunk',
             user_id => $user_hash->{id},

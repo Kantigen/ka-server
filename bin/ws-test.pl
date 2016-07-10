@@ -72,10 +72,11 @@ my $timer = AE::timer 0, 10, sub {
     $queue->publish({
         queue   => 'mq_worker', 
         payload => {
-            route   => '/user/hello',
+            route   => '/starmap/getMapChunk',
             user_id => 1,
             content => {
-                foo     => 'bar'
+                left    => 50,
+                bottom  => -50,
             }
         },
     });

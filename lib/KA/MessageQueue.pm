@@ -130,15 +130,15 @@ sub queue {
     $self->log->debug("JOB: ".Dumper($job->payload));
     my $payload = $job->payload;
    
-    $self->route_call('mq_', $job->payload);
-    $job->delete;
+    $self->route_call('mq_', $job);
 }
 
 
 sub route_call {
-    my ($self, $prefix, $payload) = @_;
+    my ($self, $prefix, $job) = @_;
 
     # Convert the route to a class and method
+    my $payload     = $job->payload;
     my $path        = $payload->{route};
     my $content     = $payload->{content} || {};
     my $user_id     = $payload->{user_id} || 0;
@@ -181,9 +181,11 @@ sub route_call {
     my @error;
     if ($@ and ref($@) eq 'ARRAY') {
         $self->log->error("ARRAY ERROR".Dumper($@));
+        die "Cannot process job [$@]";
     }
     elsif ($@) {
         $self->log->error("UNKNOWN ERROR [".$@."]");
+        die "Cannot process job [$@]";
     }
 }
 
