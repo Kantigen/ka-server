@@ -973,7 +973,7 @@ sub create_schedule {
     my ($self, $id, $route, $delivery) = @_;
 
     my $schedule = KA->db->resultset('Schedule')->create({
-        queue       => 'building',
+        queue       => 'bg_building',
         route       => $route,
         delivery    => $delivery,
         db_id       => $id,

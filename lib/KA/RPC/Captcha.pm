@@ -28,7 +28,7 @@ sub fetch {
 
     # Now trigger a new captcha generation
     my $job = KA->queue->publish({
-        queue   => 'reboot-captcha'
+        queue   => 'bg_captcha'
     });
     
     return {

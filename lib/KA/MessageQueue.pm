@@ -130,7 +130,7 @@ sub queue {
     $self->log->debug("JOB: ".Dumper($job->payload));
     my $payload = $job->payload;
    
-    $self->route_call('mq_', $job);
+    $self->route_call('bg_', $job);
 }
 
 

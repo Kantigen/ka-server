@@ -18,18 +18,18 @@ sub log {
 
 #--- Building finishes Upgrade
 #
-sub mq_finishUpgrade {
+sub bg_finishUpgrade {
     my ($self, $context) = @_;
 
-    $self->log->debug("MQ_Building finishUpgrade : ".Dumper($context));
+    $self->log->debug("BG_Building finishUpgrade : ".Dumper($context));
 }
 
 #--- Building finishes Work
 #
-sub mq_finishWork {
+sub bg_finishWork {
     my ($self, $context) = @_;
 
-    $self->log->debug("MQ_Building finishWork : ".Dumper($context));
+    $self->log->debug("BG_Building finishWork : ".Dumper($context));
 }
 
 1;

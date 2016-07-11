@@ -18,6 +18,54 @@ has 'hostile_action' => (
     default => 0,
 );
 
+sub delete_schedule {
+    my ($self, $id, $route) = @_;
+
+    my $schedule_rs = KA->db->resultset('Schedule')->search({
+        route       => $route,
+        db_id       => $id,
+    });
+
+    while (my $schedule = $schedule_rs->next) {
+        $schedule->delete;
+    }
+}
+
+sub create_schedule {
+    my ($self, $id, $route, $delivery) = @_;
+
+    my $schedule = KA->db->resultset('Schedule')->create({
+        queue       => 'bg_fleet',
+        route       => $route,
+        delivery    => $delivery,
+        db_id       => $id,
+        payload     => {
+            route       => $route,
+            content => {
+                fleet_id     => $id,
+            },
+        },
+    });
+    return $schedule;
+}
+
+# Change the date_available of the fleet
+sub re_schedule {
+    my ($self, $id, $date_available) = @_;
+
+    my $schedule_rs = KA->db->resultset('Schedule')->search({
+        route       => { like => '/fleet/%' },
+        db_id       => $id,
+    });
+    while (my $schedule = $schedule_rs->next) {
+        my $route = $schedule->route;
+        
+        $self->delete_schedule( $id, $route );
+        $self->create_schedule( $id, $route, $date_available );
+    }
+}
+
+
 # Fleet has that quantity of ships, or fractional
 # e.g. if fleet has 3.1 ships, quantity can be any of
 # 1,2,3,0.1,1.1,2.1,3.1, but nothing else.
@@ -220,24 +268,6 @@ foreach my $method (qw(insert update)) {
     };
 }
 
-# Schedule a future call to handle a fleet action
-#
-sub delete_me_schedule {
-    my ($self, $args) = @_;
-
-    my $schedule = KA->db->resultset('Schedule')->create({
-        queue       => 'fleet',
-        delivery    => $args->{delivery},
-        priority    => $args->{priority} ? $args->{priority} : 0,
-        parent_table=> 'fleet',
-        row_id      => $self->id,
-        task        => $args->{task},
-        args        => $args->{args} ? $args->{args} : {},
-    });
-    return $schedule;    
-}
-
-
 # Return the total combat strength of the fleet
 #
 sub fleet_combat {
@@ -320,13 +350,8 @@ before delete => sub {
 
     # delete any arrival or finish_construction jobs
     #
-    my $schedule_rs = KA->db->resultset('Schedule')->search({
-        parent_table    => 'Fleet',
-        parent_id       => $self->id,
-    });
-    while (my $schedule = $schedule_rs->next) {
-        $schedule->delete;
-    }
+    $self->delete_schedule($self->id, '/fleet/finishConstruction');
+    $self->delete_schedule($self->id, '/fleet/arrive');
 };
 
 before task => sub {
@@ -334,17 +359,12 @@ before task => sub {
 
     if ( $arg && $self->task ) {
         # to be safe, if a ship changes *from* either 'Travelling' or 'Building' we
-        # delete any Schedule (and hence any beanstalk job) for it.
+        # delete any schedules
         #
         if (($self->task eq 'Travelling' or $self->task eq 'Building') and $arg ne $self->task) {
-            # Then we need to delete the 'schedule' and beanstalk job
-            my $schedule_rs = KA->db->resultset('Schedule')->search({
-                parent_table    => 'Fleet',
-                parent_id       => $self->id,
-            });
-            while (my $schedule = $schedule_rs->next) {
-                $schedule->delete;
-            }
+            # Then delete the scheduled task
+            $self->delete_schedule($self->id, '/fleet/finishConstruction');
+            $self->delete_schedule($self->id, '/fleet/arrive');
         }
     }
 };
@@ -353,39 +373,14 @@ before date_available => sub {
     my ($self, $arg) = @_;
 
     if ($arg and $self->id) {
-        $self->re_schedule($arg);
+        $self->re_schedule($self->id, $arg);
     }
 };
-
-# Change the date_available of the fleet
-sub re_schedule {
-    my ($self, $date_available) = @_;
-
-    my $schedule_rs = KA->db->resultset('Schedule')->search({
-        parent_table    => 'Fleet',
-        parent_id       => $self->id,
-    });
-    while (my $schedule = $schedule_rs->next) {
-        my $new_schedule = KA->db->resultset('Schedule')->create({
-            parent_table    => 'Fleet',
-            queue           => $schedule->queue,
-            parent_id       => $self->id,
-            task            => $schedule->task,
-            delivery        => $date_available,
-        });
-        $schedule->delete;
-    }
-}
 
 sub arrive {
     my ($self) = @_;
 
-    my ($schedule) = KA->db->resultset('Schedule')->search({
-        parent_table    => 'Fleet',
-        parent_id       => $self->id,
-        task            => 'arrive',
-    });
-    $schedule->delete if defined $schedule;
+    $self->delete_schedule($self->id, '/fleet/arrive');
 
     if ($self->task eq 'Travelling') {
         eval {
@@ -559,13 +554,7 @@ sub turn_around {
     $self->date_available($arrival);
     $self->date_started(DateTime->now);
 
-    my $schedule = KA->db->resultset('Schedule')->create({
-        parent_table    => 'Fleet',
-        queue           => 'reboot-arrive',
-        parent_id       => $self->id,
-        task            => 'arrive',
-        delivery        => $arrival,
-    });
+    $self->create_schedule( $self->id, '/fleet/arrive', $arrival);
 
     return $self;
 }
@@ -611,13 +600,7 @@ sub send {
         confess [1002, 'You cannot send a ship to a non-existant target.'];
     }
     $self->update;
-    my $schedule = KA->db->resultset('Schedule')->create({
-        delivery        => $arrival,
-        queue           => 'reboot-arrive',
-        parent_table    => 'Fleet',
-        parent_id       => $self->id,
-        task            => 'arrive',
-    });
+    $self->create_schedule( $self->id, '/fleet/arrive', $arrival );
 
     return $self;
 }
@@ -625,13 +608,7 @@ sub send {
 sub start_construction {
     my ($self) = @_;
 
-    my $schedule = KA->db->resultset('Schedule')->create({
-        delivery        => $self->date_available,
-        queue           => 'reboot-build',
-        parent_table    => 'Fleet',
-        parent_id       => $self->id,
-        task            => 'finish_construction',
-    });
+    $self->create_schedule( $self->id, '/fleet/finishConstruction', $self->date_available );
 
     return $self;
 }
@@ -644,12 +621,7 @@ sub finish_construction {
     $self->shipyard_id(0);
     $self->update;
 
-    my ($schedule) = KA->db->resultset('Schedule')->search({
-        parent_table    => 'Fleet',
-        parent_id       => $self->id,
-        task            => 'finish_construction',
-    });
-    $schedule->delete if defined $schedule;
+    $self->delete_schedule( $self->id, '/fleet/finishConstruction');
 
     return $self;
 }
@@ -686,12 +658,8 @@ sub reschedule_queue {
         my $duration = $fleet_end_time->epoch - $start_time->epoch;
         # Don't bother to reschedule if it is a small period
         if ($duration > 5) {
-            my ($schedule) = KA->db->resultset('Schedule')->search({
-                parent_table    => 'Fleet',
-                parent_id       => $self->id,
-                task            => 'finish_construction',
-            });
-            $schedule->delete if defined $schedule;
+
+            $self->delete_schedule( $self->id, '/fleet/finishConstruction');
             $building_time = $start_time;
 
             # Change the scheduled time for all subsequent builds (if any)
@@ -701,13 +669,7 @@ sub reschedule_queue {
 
                 $fleet->date_available($construction_ends);
                 $fleet->update;
-                KA->db->resultset('Schedule')->reschedule({
-                    parent_table    => 'Fleet',
-                    queue           => 'reboot-build',
-                    parent_id       => $fleet->id,
-                    task            => 'finish_construction',
-                    delivery        => $construction_ends,
-                });
+                $self->re_schedule( $fleet->id, $construction_ends );
             }
         }
     }

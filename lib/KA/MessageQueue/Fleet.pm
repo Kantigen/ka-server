@@ -18,18 +18,18 @@ sub log {
 
 #--- Fleet arrives at destination
 #
-sub mq_arrives {
+sub bg_arrives {
     my ($self, $context) = @_;
 
-    $self->log->debug("MQ_Fleet arrives : ".Dumper($context));
+    $self->log->debug("BG_Fleet arrives : ".Dumper($context));
 }
 
 #--- Fleet finishes Construction Upgrade
 #
-sub mq_finishConstruction {
+sub bg_finishConstruction {
     my ($self, $context) = @_;
 
-    $self->log->debug("MQ_Fleet finishConstruction : ".Dumper($context));
+    $self->log->debug("BG_Fleet finishConstruction : ".Dumper($context));
 }
 
 1;
