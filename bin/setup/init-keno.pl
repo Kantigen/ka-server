@@ -1,4 +1,6 @@
-use lib '../../lib';
+#!/usr/bin/env perl
+
+use rlib '../../lib';
 use strict;
 use 5.010;
 use List::Util::WeightedChoice qw( choose_weighted );

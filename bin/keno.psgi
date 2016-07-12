@@ -54,12 +54,12 @@ eval {
         order_by => { -desc => [qw(major_version minor_version)]}
     });
     if (not defined $db_version) {
-        die "Please run the 'init_lacuna.pl' script to create your initial database (1)\n";
+        die "Please run the 'init-keno.pl' script to create your initial database (1)\n";
     }
 };
 my $error = $@;
 if ($@) {
-    die "Please run the 'init_lacuna.pl' script to create your initial database ($error)\n";
+    die "Please run the 'init-keno.pl' script to create your initial database ($error)\n";
 }
 
 print STDERR "Latest version is [".$db_version->major_version."] [".$db_version->minor_version."]\n";
@@ -75,7 +75,7 @@ if (defined $latest_file) {
     print STDERR "Latest patch file version is [$major_version.$minor_version]\n";
 
     if ($major_version > $db_version->major_version) {
-        die "Please run the 'init_lacuna.pl' script. Major version change\n";
+        die "Please run the 'init-keno.pl' script. Major version change\n";
     }
     if ($minor_version > $db_version->minor_version) {
         print STDERR "Please run the following scripts to update your database\n";
