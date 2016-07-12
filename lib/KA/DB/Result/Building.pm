@@ -9,6 +9,8 @@ use List::Util qw(shuffle min);
 use List::MoreUtils qw(first_index);
 
 use KA::Util qw(format_date);
+use KA::SDB;
+use KA::Cache;
 
 __PACKAGE__->load_components('DynamicSubclass');
 __PACKAGE__->table('building');
@@ -558,7 +560,7 @@ sub happiness_production_hour {
     my ($self) = @_;
     my $base = $self->happiness_production * $self->happy_production_hour;
     return 0 unless $self->body->empire;
-    return 0 if KA->cache->get('sz_exceeded', $self->body->id);
+    return 0 if KA::Cache->instance->get('sz_exceeded', $self->body->id);
     return 0 if $base == 0;
     return sprintf('%.0f', $base * $self->happiness_production_bonus);
 }
@@ -922,12 +924,12 @@ sub stats_after_upgrade {
 
 sub lock_upgrade {
     my ($self, $x, $y) = @_;
-    return KA->cache->set('upgrade_contention_lock', $self->id, $self->level + 1, 15); # lock it
+    return KA::Cache->instance->set('upgrade_contention_lock', $self->id, $self->level + 1, 15); # lock it
 }
 
 sub is_upgrade_locked {
     my ($self, $x, $y) = @_;
-    return KA->cache->get('upgrade_contention_lock', $self->id);
+    return KA::Cache->instance->get('upgrade_contention_lock', $self->id);
 }
 
 sub start_upgrade {
@@ -959,7 +961,7 @@ sub start_upgrade {
 sub delete_schedule {
     my ($self, $id, $route) = @_;
 
-    my $schedule_rs = KA->db->resultset('Schedule')->search({
+    my $schedule_rs = KA::SDB->db->resultset('Schedule')->search({
         route       => $route,
         db_id       => $id,
     });
@@ -972,7 +974,7 @@ sub delete_schedule {
 sub create_schedule {
     my ($self, $id, $route, $delivery) = @_;
 
-    my $schedule = KA->db->resultset('Schedule')->create({
+    my $schedule = KA::SDB->db->resultset('Schedule')->create({
         queue       => 'bg_building',
         route       => $route,
         delivery    => $delivery,
@@ -1022,7 +1024,7 @@ sub finish_upgrade {
         $body->update;
     }
     
-    KA->cache->delete('upgrade_contention_lock', $self->id);
+    KA::Cache->instance->delete('upgrade_contention_lock', $self->id);
 
     return $self;
 }
@@ -1052,7 +1054,7 @@ sub cancel_upgrade {
             $self->update;
         }
     }
-    KA->cache->delete('upgrade_contention_lock', $self->id);
+    KA::Cache->instance->delete('upgrade_contention_lock', $self->id);
     return $self;
 }
 

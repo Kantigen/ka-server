@@ -17,6 +17,7 @@ use KA::Constants qw(INFLATION_S INFLATION_F);
 use PerlX::Maybe qw(provided maybe);
 use Log::Any qw($log);
 use Data::Dumper;
+use KA::SDB;
 
 __PACKAGE__->table('empire');
 __PACKAGE__->add_columns(
@@ -226,12 +227,12 @@ has is_active => (
 
 sub _build_is_active {
     my ($self) = @_;
-    KA->cache->get('empire_active', $self->id);
+    KA::Cache->instance->get('empire_active', $self->id);
 }
 
 sub set_active {
     my ($self) = @_;
-    KA->cache->set('empire_active', $self->id, 1, 30 * 60);
+    KA::Cache->instance->set('empire_active', $self->id, 1, 30 * 60);
     $self->clear_is_active;
 }
 
@@ -276,7 +277,7 @@ around name => sub {
     if (@_) {
         my $new_name = $_[0];
         
-        KA->db->resultset('Log::EmpireNameChange')->new({
+        KA::SDB->resultset('Log::EmpireNameChange')->new({
             empire_id       => $self->id,
             empire_name     => $new_name,
             old_empire_name => $self->$orig,
@@ -290,7 +291,7 @@ around update => sub {
     my ($orig, $self) = (shift, shift);
     
     if ( @_ && exists $_[0]->{name} ) {
-        KA->db->resultset('Log::EmpireNameChange')->new({
+        KA::SDB->resultset('Log::EmpireNameChange')->new({
             empire_id       => $self->id,
             empire_name     => $_[0]->{name},
             old_empire_name => $self->name,
@@ -335,7 +336,7 @@ sub update_species {
 sub determine_species_limits {
     my ($self) = @_;
     my @colony_ids = $self->planets->get_column('id')->all;
-    my $colonies = KA->db->resultset('Map::Body')->search({ empire_id => $self->id, class => { '!=' => 'KA::DB::Result::Map::Body::Planet::Station'} });
+    my $colonies = KA::SDB->resultset('Map::Body')->search({ empire_id => $self->id, class => { '!=' => 'KA::DB::Result::Map::Body::Planet::Station'} });
     my $min_orbit = $colonies->get_column('orbit')->min;
     my $max_orbit = $colonies->get_column('orbit')->max;
     $max_orbit    = 7 if $max_orbit > 7;
@@ -344,7 +345,7 @@ sub determine_species_limits {
     if ($self->university_level > 19 and $self->university_level != 30) {
         $reason = 'Your university research level is too high to redefine your species. Build a Genetics Lab instead.';
     }
-    elsif (KA->cache->get('redefine_species_timeout', $self->id)) {
+    elsif (KA::Cache->instance->get('redefine_species_timeout', $self->id)) {
         $reason = 'You have already redefined your species in the past 30 days.';
     }
     return {
@@ -380,7 +381,7 @@ sub get_species_stats {
 
 sub has_medal {
     my ($self, $type) = @_;
-    return KA->db->resultset('Medals')->search({empire_id => $self->id, type => $type})->first;
+    return KA::SDB->resultset('Medals')->search({empire_id => $self->id, type => $type})->first;
 }
 
 sub add_medal {
@@ -391,7 +392,7 @@ sub add_medal {
         $medal->update;
     }
     else {
-        $medal = KA->db->resultset('Medals')->new({
+        $medal = KA::SDB->resultset('Medals')->new({
             datestamp   => DateTime->now,
             public      => 1,
             empire_id   => $self->id,
@@ -498,7 +499,7 @@ sub _adjust_essentia {
             $self->$type($residual);
         }
     }
-    KA->db->resultset('Log::Essentia')->new({
+    KA::SDB->resultset('Log::Essentia')->new({
         empire_id       => $self->id,
         empire_name     => $self->name,
         amount          => $value,
@@ -551,12 +552,12 @@ sub get_latest_message_id {
 # The number of times a RPC has been made to this empire
 sub rpc_count {
     my $self = shift;
-    KA->cache->get('rpc_count_'.format_date(undef,'%d'), $self->id);
+    KA::Cache->instance->get('rpc_count_'.format_date(undef,'%d'), $self->id);
 }
 
 sub inc_rpc_count {
     my $self = shift;
-    return KA->cache->incr('rpc_count_'.format_date(undef,'%d'), $self->id, 1, 60 * 60 * 30);
+    return KA::Cache->instance->incr('rpc_count_'.format_date(undef,'%d'), $self->id, 1, 60 * 60 * 30);
 }
 
 # Reseting the RPC count for an empire should be done only under dire
@@ -566,7 +567,7 @@ sub inc_rpc_count {
 # perl -I/home/keno/ka-server/lib -ML -e 'LD->empire(shift)->reset_rpc' 'Jandor Trading'
 sub reset_rpc {
     my ($self) = @_;
-    my $cache  = KA->cache;
+    my $cache  = KA::Cache->instance;
     my $id     = $self->id;
 
     printf "RPC count was: %d\n", $cache->get('rpc_count_'.format_date(undef,'%d'), $id);
@@ -582,7 +583,7 @@ has rpc_limit => (
     lazy    => 1,
     default => sub {
         my ($self) = @_;
-        return KA->cache->get('rpc_count_'.format_date(undef,'%d'), $self->id, 1, 60 * 60 * 30);
+        return KA::Cache->instance->get('rpc_count_'.format_date(undef,'%d'), $self->id, 1, 60 * 60 * 30);
     }
 );
 
@@ -592,7 +593,7 @@ has rpc_rate => (
     lazy    => 1,
     default => sub {
         my $self = shift;
-        return KA->cache->incr('rpc_rate_'.format_date(undef,'%M'), $self->id, 1, 60 * 2);
+        return KA::Cache->instance->incr('rpc_rate_'.format_date(undef,'%M'), $self->id, 1, 60 * 2);
     }
 );
 
@@ -602,7 +603,7 @@ sub get_status {
 
     my $planet_rs = $real_empire->planets;
     if ($self->alliance_id) {
-        $planet_rs = KA->db->resultset('Map::Body')->search({ 
+        $planet_rs = KA::SDB->resultset('Map::Body')->search({ 
             -or => { 
                 'me.empire_id'      => $real_empire->id, 
                 'me.alliance_id'    => $real_empire->alliance_id,
@@ -648,7 +649,7 @@ sub get_status {
 
     # shouldn't have to check this once sitter_password goes away.
     if ($self->current_session && !$self->current_session->_is_sitter) {
-        $planet_rs = KA->db->resultset('Map::Body')->search({
+        $planet_rs = KA::SDB->resultset('Map::Body')->search({
             'sitterauths.sitter_id' => $real_empire->id,
             'me.class'              => { '!=' => 'KA::DB::Result::Map::Body::Planet::Station' },
         },{
@@ -678,7 +679,7 @@ sub get_status {
             push @{$bodies{babies}{$empire->name}{planets}}, $gen_body_info->($planet);
         }
     }
-    my $travelling_ships = KA->db->resultset('Ships')->search({ 
+    my $travelling_ships = KA::SDB->resultset('Ships')->search({ 
         type                => { in => [qw(colony_ship short_range_colony_ship)]}, 
         task                => 'travelling', 
         direction           => 'out', 
@@ -743,7 +744,7 @@ sub set_password {
 
 sub attach_invite_code {
     my ($self, $invite_code) = @_;
-    my $invites = KA->db->resultset('Invite');
+    my $invites = KA::SDB->resultset('Invite');
     if (defined $invite_code && $invite_code ne '') {
         my $invite = $invites->search(
             {code    => $invite_code }
@@ -757,7 +758,7 @@ sub attach_invite_code {
                 $invite->accept_date(DateTime->now);
                 $invite->update;
             }
-            KA->cache->incr('friends_accepted', format_date(undef,'%F'), 1, 60 * 60 * 26);
+            KA::Cache->instance->incr('friends_accepted', format_date(undef,'%F'), 1, 60 * 60 * 26);
             my $inviter = $invite->inviter;
             if (defined $inviter) { # they may have deleted
                 my $accepts = $invites->search({inviter_id => $invite->inviter_id, invitee_id => {'>' => 0}})->count;
@@ -899,7 +900,7 @@ sub found {
 
 sub find_home_planet {
     my ($self) = @_;
-    my $planets = KA->db->resultset('Map::Body');
+    my $planets = KA::SDB->resultset('Map::Body');
     my %body_search = (
         'me.orbit'     => { between => [ $self->min_orbit, $self->max_orbit] },
         'me.empire_id' => undef,
@@ -908,29 +909,29 @@ sub find_home_planet {
     my %star_search = (
         station_id => undef,
     );
-    my $invite = KA->db->resultset('Invite')->search({invitee_id => $self->id})->first;
+    my $invite = KA::SDB->resultset('Invite')->search({invitee_id => $self->id})->first;
     my $sz_param = KA->config->get('starter_zone');
     my @stars;
     if (defined $invite) {
         $body_search{'me.zone'} = $invite->zone;
         $star_search{zone} = $invite->zone;
     }
-    elsif ($sz_param and $sz_param->{active}) {
-       if ($sz_param->{zone}) {
-           $body_search{'me.zone'} = { in => $sz_param->{zone_list} };
-           $star_search{zone} = { in => $sz_param->{zone_list} };
-       }
-       if ($sz_param->{coord}) {
-           $body_search{'me.x'} = { between => $sz_param->{x} };
-           $body_search{'me.y'} = { between => $sz_param->{y} };
-           $star_search{x} = { between => $sz_param->{x} };
-           $star_search{y} = { between => $sz_param->{y} };
-       }
-    }
-    else {
-         $body_search{'me.usable_as_starter_enabled'} = 1;
-    }
-    @stars  = KA->db->resultset('Map::Star')->search(\%star_search)->get_column('id')->all;
+#    elsif ($sz_param and $sz_param->{active}) {
+#       if ($sz_param->{zone}) {
+#           $body_search{'me.zone'} = { in => $sz_param->{zone_list} };
+#           $star_search{zone} = { in => $sz_param->{zone_list} };
+#       }
+#       if ($sz_param->{coord}) {
+#           $body_search{'me.x'} = { between => $sz_param->{x} };
+#           $body_search{'me.y'} = { between => $sz_param->{y} };
+#           $star_search{x} = { between => $sz_param->{x} };
+#           $star_search{y} = { between => $sz_param->{y} };
+#       }
+#    }
+#    else {
+#         $body_search{'me.usable_as_starter_enabled'} = 1;
+#    }
+    @stars  = KA::SDB->resultset('Map::Star')->search(\%star_search)->get_column('id')->all;
     $body_search{'me.star_id'} = { 'in' => \@stars };
     my @bodies = shuffle $planets->search( \%body_search, { join => 'star' } );
     
@@ -963,7 +964,7 @@ sub find_home_planet {
 sub get_invite_friend_url {
     my ($self) = @_;
     my $code = create_uuid_as_string(UUID_MD5, $self->id);
-    my $invites = KA->db->resultset('Invite');
+    my $invites = KA::SDB->resultset('Invite');
     my $invite = $invites->search({code => $code})->first;
     unless (defined $invite) {
         $invites->new({
@@ -981,7 +982,7 @@ sub invite_friend {
     unless (Email::Valid->address($email)) {
         confess [1009, $email.' does not appear to be a valid email address.'];
     }
-    my $invites = KA->db->resultset('Invite');
+    my $invites = KA::SDB->resultset('Invite');
     if ($invites->search({email => $email, inviter_id => $self->id })->count) {
         confess [1009, 'You have already invited '.$email.'.'];
     }
@@ -992,7 +993,7 @@ sub invite_friend {
         zone        => $self->home_planet->zone,
         email       => $email,
     })->insert;
-    KA->cache->incr('friends_invited', format_date(undef,'%F'), 1, 60 * 60 * 26);
+    KA::Cache->instance->incr('friends_invited', format_date(undef,'%F'), 1, 60 * 60 * 26);
     my $message = sprintf "%s\n\nMy name in the game is %s. Use the code below when you register and you'll be placed near me.\n\n%s\n\n%s\n\nIf you are unfamiliar with The KA Expanse, visit the web site at: http://www.lacunaexpanse.com/",
         $custom_message,
         $self->name,
@@ -1023,7 +1024,7 @@ sub send_message {
     unless (ref $recipients eq 'ARRAY' && @{$recipients}) {
         push @{$recipients}, $self->name;
     }
-    my $message = KA->db->resultset('Message')->new({
+    my $message = KA::SDB->resultset('Message')->new({
         date_sent   => DateTime->now,
         subject     => $params{subject},
         body        => $params{body},
@@ -1038,10 +1039,10 @@ sub send_message {
         attachments => $params{attachments},
     })->insert;
     if (exists $params{repeat_check}) {
-        KA->cache->set($params{repeat_check}, int(DateTime->now->hour / 6), 1, 60 * 60 * 6);
+        KA::Cache->instance->set($params{repeat_check}, int(DateTime->now->hour / 6), 1, 60 * 60 * 6);
     }
     if (exists $params{in_reply_to} && defined $params{in_reply_to} && $params{in_reply_to} ne '') {
-        my $original =  KA->db->resultset('Message')->find($params{in_reply_to});
+        my $original =  KA::SDB->resultset('Message')->find($params{in_reply_to});
         if (defined $original && !$original->has_replied) {
             $original->update({has_replied=>1});
         }
@@ -1051,7 +1052,7 @@ sub send_message {
 
 sub check_for_repeat_message {
     my ($self, $repeat) = @_;
-    return KA->cache->get($repeat, int(DateTime->now->hour / 6));
+    return KA::Cache->instance->get($repeat, int(DateTime->now->hour / 6));
 }
 
 sub send_predefined_message {
@@ -1088,7 +1089,7 @@ sub send_predefined_message {
 
 sub lacuna_expanse_corp {
     my $self = shift;
-    return KA->db->resultset('Empire')->find(1);
+    return KA::SDB->resultset('Empire')->find(1);
 }
 
 # Add a 'real' probe. One sent from an observatory.
@@ -1097,7 +1098,7 @@ sub add_observatory_probe {
     my ($self, $star_id, $body_id) = @_;
 
     # add probe
-    KA->db->resultset('Probes')->new({
+    KA::SDB->resultset('Probes')->new({
         empire_id   => $self->id,
         star_id     => $star_id,
         body_id     => $body_id,
@@ -1106,15 +1107,15 @@ sub add_observatory_probe {
     })->insert;
     
     # send notifications
-    my $star = KA->db->resultset('Map::Star')->find($star_id);
+    my $star = KA::SDB->resultset('Map::Star')->find($star_id);
     # Get all empires to be notified that have probes (real or virtual)
-    my %to_notify = map { $_->empire_id => 1 } KA->db->resultset('Probes')
+    my %to_notify = map { $_->empire_id => 1 } KA::SDB->resultset('Probes')
                                                ->search_any({
                                                    star_id => $star_id,
                                                    empire_id => {'!=', $self->id }
                                                });
     for my $eid (keys %to_notify) {
-        my $that_empire = KA->db->resultset('Empire')->find($eid);
+        my $that_empire = KA::SDB->resultset('Empire')->find($eid);
         next unless $that_empire;
         if (!$that_empire->skip_probe_detected) {
             $that_empire->send_predefined_message(
@@ -1140,7 +1141,7 @@ sub next_colony_cost {
 
         if (not defined $travelling_ships) {
         $count += $travelling_ships;
-            $travelling_ships = KA->db->resultset('Ships')->search(
+            $travelling_ships = KA::SDB->resultset('Ships')->search(
                 { type=> { in => [qw(colony_ship short_range_colony_ship)]}, task=>'travelling', direction=>'out', 'body.empire_id' => $self->id},
                 { join => 'body' }
             )->count;
@@ -1155,11 +1156,11 @@ sub next_colony_cost {
     }
     elsif ($type eq "space_station" and $self->alliance_id) {
         my $count = $self->alliance->stations->count;
-        my @allies = KA->db->resultset('Empire')->search(
+        my @allies = KA::SDB->resultset('Empire')->search(
             {
                 alliance_id => $self->alliance_id,
             })->get_column('id')->all;
-        $count += KA->db->resultset('Ships')->search(
+        $count += KA::SDB->resultset('Ships')->search(
             {
                 type=> 'space_station',
                 task=>'Travelling',
@@ -1196,7 +1197,7 @@ has probed_stars => (
                 alliance_id => $self->alliance_id,
             );
         }
-        my @stars = KA->db->resultset('Probes')->search_any(\%search)->get_column('star_id')->all;
+        my @stars = KA::SDB->resultset('Probes')->search_any(\%search)->get_column('star_id')->all;
         return \@stars;
     },
 );
@@ -1220,9 +1221,9 @@ before delete => sub {
     $self->votes->delete_all;
     $self->taxes->delete_all;
     $self->propositions->delete_all;
-    KA->db->resultset('Invite')->search({ -or => {invitee_id => $self->id, inviter_id => $self->id }})->delete;
+    KA::SDB->resultset('Invite')->search({ -or => {invitee_id => $self->id, inviter_id => $self->id }})->delete;
     $self->all_probes->delete;
-    KA->db->resultset('AllianceInvite')->search({empire_id => $self->id})->delete;
+    KA::SDB->resultset('AllianceInvite')->search({empire_id => $self->id})->delete;
     if ($self->alliance_id) {
         my $alliance = $self->alliance;
         if (defined $alliance) {
@@ -1250,7 +1251,7 @@ before delete => sub {
     while ( my $planet = $planets->next ) {
         $planet->sanitize if ($planet->empire_id == $self->id); #In case of a cached space station
     }
-    my $essentia_log = KA->db->resultset('Log::Essentia');
+    my $essentia_log = KA::SDB->resultset('Log::Essentia');
     my $essentia_code;
     my $config = KA->config;
     my $sum = $self->essentia - $essentia_log->search({empire_id => $self->id, description => 'tutorial' })->get_column('amount')->sum;
@@ -1343,13 +1344,13 @@ sub redeem_essentia_code {
 
 sub pay_taxes {
     my ($self, $station_id, $amount) = @_;
-    my $taxes = KA->db->resultset('Taxes')->search({empire_id=>$self->id,station_id=>$station_id})->first;
+    my $taxes = KA::SDB->resultset('Taxes')->search({empire_id=>$self->id,station_id=>$station_id})->first;
     if (defined $taxes) {
         $taxes->{paid_0} += $amount;
         $taxes->update;
     }
     else {
-        KA->db->resultset('Taxes')->new({
+        KA::SDB->resultset('Taxes')->new({
             empire_id   => $self->id,
             station_id  => $station_id,
             paid_0      => $amount,
@@ -1372,7 +1373,7 @@ sub _build_highest_embassy {
 sub next_highest_embassy {
     my ($self, $excluding_body_id) = @_;
 
-    my $search_rs = KA->db->resultset('Building')->search({
+    my $search_rs = KA::SDB->resultset('Building')->search({
         'body.empire_id'    => $self->id,
         'me.class'          => 'KA::DB::Result::Building::Embassy',
         'me.efficiency'     => { '>' => 0 },

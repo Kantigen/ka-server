@@ -14,6 +14,7 @@ use Email::Valid;
 use UUID::Tiny ':std';
 use KA::Constants qw(INFLATION);
 use Data::Dumper;
+use KA::Queue;
 
 extends 'KA::DB::Result';
 
@@ -56,7 +57,7 @@ after 'insert' => sub {
 before 'delete' => sub {
     my $self = shift;
    
-    my $queue = KA->queue;
+    my $queue = KA::Queue->instance;
     # Delete the job off the queue
     $queue->delete($self->job_id);
 };
@@ -73,7 +74,7 @@ sub queue_for_delivery {
     $delay          = 0 if $delay < 0;
     my $now         = DateTime->now;
 
-    my $queue       = KA->queue;
+    my $queue       = KA::Queue->instance;
     my $priority    = $self->priority || 2000;
     my $job = $queue->publish({
         queue       => $self->queue,
