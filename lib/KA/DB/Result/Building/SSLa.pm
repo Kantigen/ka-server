@@ -6,6 +6,8 @@ no warnings qw(uninitialized);
 extends 'KA::DB::Result::Building';
 use KA::Constants qw(ORE_TYPES INFLATION);
 
+use experimental "switch";
+
 around 'build_tags' => sub {
     my ($orig, $class) = @_;
     return ($orig->($class), qw(Construction Ships));

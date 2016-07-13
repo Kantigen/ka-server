@@ -5,6 +5,8 @@ use utf8;
 no warnings qw(uninitialized);
 extends 'KA::DB::Result::Building';
 
+use experimental "switch";
+
 around 'build_tags' => sub {
     my ($orig, $class) = @_;
     return ($orig->($class), qw(Infrastructure Intelligence Ships Trade));

@@ -7,6 +7,9 @@ extends 'KA::DB::Result::Building';
 use KA::Constants qw(ORE_TYPES FOOD_TYPES);
 use KA::Util qw(randint random_element);
 use Clone qw(clone);
+
+use experimental "switch";
+
 use feature 'switch';
 
 around 'build_tags' => sub {

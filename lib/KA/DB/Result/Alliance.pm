@@ -8,6 +8,8 @@ use KA::Util qw(format_date);
 use KA::Constants qw(FOOD_TYPES ORE_TYPES);
 use DateTime;
 
+use experimental "switch";
+
 __PACKAGE__->table('alliance');
 __PACKAGE__->add_columns(
     name                    => { data_type => 'varchar', size => 30, is_nullable => 0 },

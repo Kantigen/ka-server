@@ -6,6 +6,8 @@ no warnings qw(uninitialized);
 extends 'KA::DB::Result::Map';
 use KA::Util;
 
+use experimental "switch";
+
 __PACKAGE__->table('star');
 __PACKAGE__->add_columns(
     color                   => { data_type => 'varchar', size => 7, is_nullable => 0 },

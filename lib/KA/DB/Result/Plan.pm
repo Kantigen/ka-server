@@ -8,6 +8,8 @@ extends 'KA::DB::Result';
 use KA::Util qw(format_date);
 use DateTime;
 
+use experimental "switch";
+
 __PACKAGE__->table('plan');
 __PACKAGE__->add_columns(
     body_id                 => { data_type => 'int', size => 11, is_nullable => 0 },

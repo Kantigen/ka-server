@@ -9,6 +9,8 @@ use DateTime;
 use Digest::MD4 qw(md4_hex);
 use JSON;
 
+use experimental "switch";
+
 use feature "switch";
 
 has 'hostile_action' => (

@@ -7,6 +7,9 @@ use KA::Util qw(format_date commify randint consolidate_items);
 use UUID::Tiny ':std';
 use Config::JSON;
 use KA::Constants qw(ORE_TYPES FOOD_TYPES);
+
+use experimental "switch";
+
 use feature 'switch';
 use List::Util qw(sum first);
 
