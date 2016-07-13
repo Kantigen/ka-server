@@ -59,14 +59,14 @@ $tester->finish_ships( $shipyard->id );
 $result = $tester->post('spaceport', 'view', [$session_id, $spaceport->id]);
 is($result->{result}{docked_ships}{probe}, 2, "we have 2 probes built");
 
-my $ship = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->search({body_id => $home->id, type=>'probe'})->first;
+my $ship = KA->db->resultset('KA::DB::Result::Ships')->search({body_id => $home->id, type=>'probe'})->first;
 $result = $tester->post('spaceport', 'send_ship', [$session_id, $ship->id, {star_id=>6}]);
 ok($result->{result}{ship}{date_arrives}, "probe sent");
 
-$ship = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->search({id=>$ship->id})->first;
+$ship = KA->db->resultset('KA::DB::Result::Ships')->search({id=>$ship->id})->first;
 $ship->arrive;
 
-$empire = $tester->empire(Lacuna->db->resultset('Lacuna::DB::Result::Empire')->find($empire->id));
+$empire = $tester->empire(KA->db->resultset('KA::DB::Result::Empire')->find($empire->id));
 is($empire->count_probed_stars, 2, "2 stars probed!");
 
 $result = $tester->post('spaceport', 'view', [$session_id, $spaceport->id]);

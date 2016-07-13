@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(format_date);
 use Getopt::Long;
 use List::Util qw(max shuffle);
 use UUID::Tiny ':std';
@@ -16,13 +16,13 @@ GetOptions(
 out('Started');
 my $start = time;
 
-my $config = Lacuna->config;
+my $config = KA->config;
 my $server_url = $config->get('server_url');
 
 out('Loading Empires');
-my $empires = Lacuna->db->resultset('Lacuna::DB::Result::Empire');
-my $cache = Lacuna->cache;
-my $lec = Lacuna::DB::Result::Empire->lacuna_expanse_corp;
+my $empires = KA->db->resultset('KA::DB::Result::Empire');
+my $cache = KA->cache;
+my $lec = KA::DB::Result::Empire->lacuna_expanse_corp;
 
 # the tournaments will only run on servers that have the proper configuration
 my $tourney = $config->get('tournament');
@@ -55,7 +55,7 @@ sub out {
 
 sub set_announcement {
     my $message = shift;
-    my $cache = Lacuna->cache;
+    my $cache = KA->cache;
     my $announcement = $cache->get('announcement','message');
     $announcement .= '<br>' . $message;
     $cache->set('announcement','alert', create_uuid_as_string(UUID_V4), 60*60*24);
@@ -63,8 +63,8 @@ sub set_announcement {
 }
 
 sub start_new_twenty_stars {
-    my $cache = Lacuna->cache;
-    my $config = Lacuna->config;
+    my $cache = KA->cache;
+    my $config = KA->config;
 
     my $tourney20stars = $config->get('tournament/20Stars');
     my $zone = $cache->get('tournament', '20Stars');
@@ -121,8 +121,8 @@ sub start_new_twenty_stars {
 sub twenty_stars {
     out('Checking on the 20 Stars tournament');
 
-    my $cache = Lacuna->cache;
-    my $config = Lacuna->config;
+    my $cache = KA->cache;
+    my $config = KA->config;
 
     my $stars_cache = $cache->get('tournament', '20Stars');
 
@@ -133,13 +133,13 @@ sub twenty_stars {
         my $zone = $stars_cache;
         out("20 Stars tournament in progress in zone $zone") if ($zone);
 
-        my $search = { class => 'Lacuna::DB::Result::Map::Body::Planet::Station' };
+        my $search = { class => 'KA::DB::Result::Map::Body::Planet::Station' };
         $search->{zone} = $zone if $server_url =~ /us1/;
 
         out('Checking space stations.');
         my %victory_empire;
         my $victory_empire;
-        my $stations = Lacuna->db->resultset('Lacuna::DB::Result::Map::Body')->search($search);
+        my $stations = KA->db->resultset('KA::DB::Result::Map::Body')->search($search);
         my $message = '';
         while (my $station = $stations->next) {
             my $stars = $station->influence_spent;
@@ -160,7 +160,7 @@ sub twenty_stars {
                 out('victory empire id: ' . $victory_empire);
                 my $empire = $empires->find($victory_empire);
                 out('victory empire name: ' . $empire->name);
-                my $alliance = Lacuna->db->resultset('Lacuna::DB::Result::Alliance')->find($empire->alliance_id);
+                my $alliance = KA->db->resultset('KA::DB::Result::Alliance')->find($empire->alliance_id);
                 if (defined $alliance) {
                     out('victory alliance: ' . $alliance->name);
                     my @allies = $alliance->members->get_column('id')->all;

@@ -18,14 +18,14 @@ my $home = $empire->home_planet;
 
 # add an assortment of plans of different names and levels
 
-$home->add_plan('Lacuna::DB::Result::Building::Permanent::Ravine', 1);
-$home->add_plan('Lacuna::DB::Result::Building::Permanent::Ravine', 1, 2);
-$home->add_plan('Lacuna::DB::Result::Building::Permanent::Ravine', 4);
-$home->add_plan('Lacuna::DB::Result::Building::Permanent::Ravine', 1);
-$home->add_plan('Lacuna::DB::Result::Building::Permanent::Ravine', 3);
-$home->add_plan('Lacuna::DB::Result::Building::Permanent::Ravine', 1,1);
-$home->add_plan('Lacuna::DB::Result::Building::Permanent::Lake', 1);
-$home->add_plan('Lacuna::DB::Result::Building::Permanent::AlgaePond', 1);
+$home->add_plan('KA::DB::Result::Building::Permanent::Ravine', 1);
+$home->add_plan('KA::DB::Result::Building::Permanent::Ravine', 1, 2);
+$home->add_plan('KA::DB::Result::Building::Permanent::Ravine', 4);
+$home->add_plan('KA::DB::Result::Building::Permanent::Ravine', 1);
+$home->add_plan('KA::DB::Result::Building::Permanent::Ravine', 3);
+$home->add_plan('KA::DB::Result::Building::Permanent::Ravine', 1,1);
+$home->add_plan('KA::DB::Result::Building::Permanent::Lake', 1);
+$home->add_plan('KA::DB::Result::Building::Permanent::AlgaePond', 1);
 
 my ($pcc) = $home->buildings_of_class('PlanetaryCommand');
 

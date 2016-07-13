@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 use AnyEvent;
 $|=1;
@@ -25,10 +25,10 @@ my $start = time;
 
 
 out('Loading DB');
-our $db = Lacuna->db;
-our $ai = Lacuna::AI::Trelvestian->new;
+our $db = KA->db;
+our $ai = KA::AI::Trelvestian->new;
 
-my $config = Lacuna->config;
+my $config = KA->config;
 
 out('Looping through colonies...');
 my $colonies = $ai->empire->planets;

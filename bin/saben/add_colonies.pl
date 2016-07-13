@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(format_date);
 use Getopt::Long;
 
 $|=1;
@@ -19,7 +19,7 @@ GetOptions(
 out('Started');
 my $start = time;
 
-my $ai = Lacuna::AI::Saben->new;
+my $ai = KA::AI::Saben->new;
 $ai->add_colonies($add_one);
 
 

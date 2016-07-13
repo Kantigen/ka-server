@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(format_date);
 use Getopt::Long;
 $|=1;
 our $quiet;
@@ -15,25 +15,25 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
-our $ai = Lacuna::AI::Trelvestian->new;
-my $config = Lacuna->config;
+our $db = KA->db;
+our $ai = KA::AI::Trelvestian->new;
+my $config = KA->config;
 
 out('Looping through colonies...');
 my $colonies = $ai->empire->planets;
 while (my $colony = $colonies->next) {
     out('Found colony '.$colony->name);
-    my $vein = $colony->get_building_of_class('Lacuna::DB::Result::Building::Permanent::EssentiaVein');
+    my $vein = $colony->get_building_of_class('KA::DB::Result::Building::Permanent::EssentiaVein');
     if (defined $vein) {
         my $ends = DateTime->now->add(seconds => 60*60*24*60);
         $vein->level(28);
         $vein->reschedule_work($ends)->update;
     }
     else {
-        my $buildings = $db->resultset('Lacuna::DB::Result::Building');
+        my $buildings = $db->resultset('KA::DB::Result::Building');
         my ($x, $y) = $colony->find_free_space;
         my $building = $buildings->new({
-            class   => 'Lacuna::DB::Result::Building::Permanent::EssentiaVein',
+            class   => 'KA::DB::Result::Building::Permanent::EssentiaVein',
             level   => 28,
             x       => $x,
             y       => $y,

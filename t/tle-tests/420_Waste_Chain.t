@@ -20,10 +20,10 @@ my $command = $home->command;
 
 my $result;
 
-my $uni = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $uni = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 0,
     y               => -1,
-    class           => 'Lacuna::DB::Result::Building::University',
+    class           => 'KA::DB::Result::Building::University',
     level           => 5,
 });
 $home->build_building($uni);
@@ -31,19 +31,19 @@ $uni->finish_upgrade;
 $empire->university_level(5);
 $empire->update;
 
-my $seq = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $seq = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 0,
     y               => -2,
-    class           => 'Lacuna::DB::Result::Building::Waste::Sequestration',
+    class           => 'KA::DB::Result::Building::Waste::Sequestration',
     level           => 29,
 });
 $home->build_building($seq);
 $seq->finish_upgrade;
 
-my $trade = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $trade = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 0,
     y               => -3,
-    class           => 'Lacuna::DB::Result::Building::Trade',
+    class           => 'KA::DB::Result::Building::Trade',
     level           => 5,
 });
 
@@ -77,10 +77,10 @@ $result = $tester->post('spaceport', 'build', [$session_id, $home->id, 0, 1]);
 my $spaceport = $tester->get_building($result->{result}{building}{id});
 $spaceport->finish_upgrade;
 
-my $shipyard = Lacuna::db->resultset('Lacuna::DB::Result::Building')->new({
+my $shipyard = KA::db->resultset('KA::DB::Result::Building')->new({
 	x       => 0,
 	y       => 2,
-	class   => 'Lacuna::DB::Result::Building::Shipyard',
+	class   => 'KA::DB::Result::Building::Shipyard',
 	level   => 20,
 });
 $home->build_building($shipyard);
@@ -90,18 +90,18 @@ $home->discard_changes;
 $home->waste_stored(1000000);
 $home->update;
 
-my $scow = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->new({type=>'scow'});
+my $scow = KA->db->resultset('KA::DB::Result::Ships')->new({type=>'scow'});
 $shipyard->build_ship($scow);
-my $scow_large = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->new({type=>'scow_large'});
+my $scow_large = KA->db->resultset('KA::DB::Result::Ships')->new({type=>'scow_large'});
 $shipyard->build_ship($scow_large);
 
 my $finish = DateTime->now;
 
-Lacuna->db->resultset('Lacuna::DB::Result::Ships')->search({shipyard_id=>$shipyard->id})->update({date_available=>$finish});
+KA->db->resultset('KA::DB::Result::Ships')->search({shipyard_id=>$shipyard->id})->update({date_available=>$finish});
 
 $result = $tester->post('spaceport', 'view', [$session_id, $spaceport->id]);
 
-Lacuna->cache->set('captcha', $session_id, { guid => 1111, solution => 1111 }, 60 * 30 );
+KA->cache->set('captcha', $session_id, { guid => 1111, solution => 1111 }, 60 * 30 );
 
 $result = $tester->post('spaceport', 'send_ship', [$session_id, $scow->id, { star_id => $home->star_id } ] );
 ok($result->{result}{ship}{date_arrives}, "scow sent to star id " . $home->star_id);
@@ -171,10 +171,10 @@ $result = $tester->post('trade','add_waste_ship_to_fleet',[$session_id, $trade->
 is($result->{error}{code}, 1009, "Scow large not allowed with berth level");
 
 # Increase Space Port level and try again
-$spaceport = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+$spaceport = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 1,
     y               => -1,
-    class           => 'Lacuna::DB::Result::Building::SpacePort',
+    class           => 'KA::DB::Result::Building::SpacePort',
     level           => 15,
 });
 

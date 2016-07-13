@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 use List::MoreUtils qw(uniq);
 $|=1;
@@ -21,8 +21,8 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
-my $empires = $db->resultset('Lacuna::DB::Result::Empire');
+our $db = KA->db;
+my $empires = $db->resultset('KA::DB::Result::Empire');
 
 
 out('getting empires...');
@@ -33,7 +33,7 @@ die 'Could not find target player.' unless defined $target_player;
 
 
 out('Finding colony...');
-my $body = $db->resultset('Lacuna::DB::Result::Map::Body')->search(
+my $body = $db->resultset('KA::DB::Result::Map::Body')->search(
     { zone => $target_player->home_planet->zone, empire_id => undef, size => { between => [30,35]}}
     )->first;
 die 'Could not find a colony to occupy.' unless defined $body;
@@ -49,7 +49,7 @@ $body->found_colony($saben);
 
 
 out('Setting target...');
-$db->resultset('Lacuna::DB::Result::SabenTarget')->new({
+$db->resultset('KA::DB::Result::SabenTarget')->new({
     saben_colony_id     => $body->id,
     target_empire_id    => $target_player->id,
 })->insert;
@@ -62,37 +62,37 @@ my $quarter_level = int( ($max_level + 1) / 4 );
 
 out('Placing structures on '.$body->name);
 my @plans = (
-    ['Lacuna::DB::Result::Building::Permanent::Ravine',$quarter_level, -2, 2],
-    ['Lacuna::DB::Result::Building::Intelligence', $max_level, -1, 2],
-    ['Lacuna::DB::Result::Building::Security', $two_thirds_level, 0, 2],
-    ['Lacuna::DB::Result::Building::Espionage', $max_level, 1, 2],
-    ['Lacuna::DB::Result::Building::Permanent::CitadelOfKnope',$one_third_level, 2, 2],
+    ['KA::DB::Result::Building::Permanent::Ravine',$quarter_level, -2, 2],
+    ['KA::DB::Result::Building::Intelligence', $max_level, -1, 2],
+    ['KA::DB::Result::Building::Security', $two_thirds_level, 0, 2],
+    ['KA::DB::Result::Building::Espionage', $max_level, 1, 2],
+    ['KA::DB::Result::Building::Permanent::CitadelOfKnope',$one_third_level, 2, 2],
 
-    ['Lacuna::DB::Result::Building::Permanent::OracleOfAnid',1, -2, 1],
-    ['Lacuna::DB::Result::Building::Shipyard',2, -1, 1],
-    ['Lacuna::DB::Result::Building::EntertainmentDistrict',$two_thirds_level, 0, 1],
-    ['Lacuna::DB::Result::Building::Permanent::Volcano',$half_level, 1, 1],
-    ['Lacuna::DB::Result::Building::Waste::Sequestration',10, 2, 1],
+    ['KA::DB::Result::Building::Permanent::OracleOfAnid',1, -2, 1],
+    ['KA::DB::Result::Building::Shipyard',2, -1, 1],
+    ['KA::DB::Result::Building::EntertainmentDistrict',$two_thirds_level, 0, 1],
+    ['KA::DB::Result::Building::Permanent::Volcano',$half_level, 1, 1],
+    ['KA::DB::Result::Building::Waste::Sequestration',10, 2, 1],
 
-    ['Lacuna::DB::Result::Building::MunitionsLab',5, -2, 0],
-    ['Lacuna::DB::Result::Building::SpacePort',$two_thirds_level, -1, 0],
+    ['KA::DB::Result::Building::MunitionsLab',5, -2, 0],
+    ['KA::DB::Result::Building::SpacePort',$two_thirds_level, -1, 0],
     # PCC 0,0
-    ['Lacuna::DB::Result::Building::Permanent::NaturalSpring',$half_level, 1, 0],
-    ['Lacuna::DB::Result::Building::Permanent::InterDimensionalRift',$half_level, 2, 0],
+    ['KA::DB::Result::Building::Permanent::NaturalSpring',$half_level, 1, 0],
+    ['KA::DB::Result::Building::Permanent::InterDimensionalRift',$half_level, 2, 0],
 
-    ['Lacuna::DB::Result::Building::Observatory',1, -2, -1],
-    ['Lacuna::DB::Result::Building::Shipyard',2, -1, -1],
-    ['Lacuna::DB::Result::Building::Trade',10, 0, -1],
-    ['Lacuna::DB::Result::Building::Permanent::GeoThermalVent',$half_level, 1, -1],
-    ['Lacuna::DB::Result::Building::Permanent::MalcudField',$one_third_level, 2, -1],
+    ['KA::DB::Result::Building::Observatory',1, -2, -1],
+    ['KA::DB::Result::Building::Shipyard',2, -1, -1],
+    ['KA::DB::Result::Building::Trade',10, 0, -1],
+    ['KA::DB::Result::Building::Permanent::GeoThermalVent',$half_level, 1, -1],
+    ['KA::DB::Result::Building::Permanent::MalcudField',$one_third_level, 2, -1],
 
-    ['Lacuna::DB::Result::Building::Permanent::LibraryOfJith',1, -2, -2],
-    ['Lacuna::DB::Result::Building::SpacePort',$two_thirds_level, -1, -2],
-    ['Lacuna::DB::Result::Building::Permanent::CrashedShipSite',$one_third_level, 0, -2],
-    ['Lacuna::DB::Result::Building::Permanent::AlgaePond',$half_level, 1, -2],
-    ['Lacuna::DB::Result::Building::Food::Syrup',$two_thirds_level, 2, -2],
+    ['KA::DB::Result::Building::Permanent::LibraryOfJith',1, -2, -2],
+    ['KA::DB::Result::Building::SpacePort',$two_thirds_level, -1, -2],
+    ['KA::DB::Result::Building::Permanent::CrashedShipSite',$one_third_level, 0, -2],
+    ['KA::DB::Result::Building::Permanent::AlgaePond',$half_level, 1, -2],
+    ['KA::DB::Result::Building::Food::Syrup',$two_thirds_level, 2, -2],
 );
-$buildings = $db->resultset('Lacuna::DB::Result::Building');
+$buildings = $db->resultset('KA::DB::Result::Building');
 foreach my $plan (@plans) {
     my $building = $buildings->new({
         class   => $plan->[0],

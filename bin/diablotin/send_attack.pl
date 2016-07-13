@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 use AnyEvent;
 $|=1;
@@ -32,16 +32,16 @@ my $start = time;
 
 
 out('Loading DB');
-our $db = Lacuna->db;
-our $ai = Lacuna::AI::Diablotin->new;
+our $db = KA->db;
+our $ai = KA::AI::Diablotin->new;
 
-my $config = Lacuna->config;
-my $cache = Lacuna->cache;
+my $config = KA->config;
+my $cache = KA->cache;
 
 out('Looping through colonies...');
 my $colonies = $ai->empire->planets;
 my @attacks;
-my @zones = Lacuna->db->resultset('Map::Star')->search(
+my @zones = KA->db->resultset('Map::Star')->search(
         undef,
         { distinct => 1 }
     )->get_column('zone')->all;
@@ -51,7 +51,7 @@ while (my $attacking_colony = $colonies->next) {
     out('Found colony to attack from named '.$attacking_colony->name);
     my @tzones = adjacent_zones($attacking_colony->zone, \@zones);
     out(sprintf("Find body to attack from %s into %s", $attacking_colony->zone, join(",",@tzones)));
-    my $targets = $db->resultset('Lacuna::DB::Result::Map::Body')->search({
+    my $targets = $db->resultset('KA::DB::Result::Map::Body')->search({
         empire_id                   => { '>' => 1 },
         'empire.is_isolationist'    => 0,
         zone => { 'in' => \@tzones },

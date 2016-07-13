@@ -19,10 +19,10 @@ $empire->is_isolationist(0);
 $empire->update;
 my $home = $empire->home_planet;
 
-$tester->build_building('Lacuna::DB::Result::Building::Permanent::PyramidJunkSculpture',   25);
+$tester->build_building('KA::DB::Result::Building::Permanent::PyramidJunkSculpture',   25);
 # build halls
 for (0 .. 30) {
-    $tester->build_building('Lacuna::DB::Result::Building::Permanent::HallsOfVrbansk', 1);
+    $tester->build_building('KA::DB::Result::Building::Permanent::HallsOfVrbansk', 1);
 }
 
 

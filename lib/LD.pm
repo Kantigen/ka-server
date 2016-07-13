@@ -2,10 +2,10 @@ package LD;
 
 # Intended to be used from the command line to save a bunch of typing.
 
-# This "derives" off Lacuna::DB, and is simply a shortcut for
-# typing Lacuna->db:
+# This "derives" off KA::DB, and is simply a shortcut for
+# typing KA->db:
 # perl -ML -E 'say LD->empire(2)->name'
-# perl -ML -MData::Dump -e 'dd(Lacuna::RPC::Empire->new->view_profile(LD->empire(2))'
+# perl -ML -MData::Dump -e 'dd(KA::RPC::Empire->new->view_profile(LD->empire(2))'
 
 use L;
 
@@ -24,7 +24,7 @@ sub AUTOLOAD
     }
     else
     {
-        die "Lacuna::DB cannot $func\n";
+        die "KA::DB cannot $func\n";
     }
 }
 

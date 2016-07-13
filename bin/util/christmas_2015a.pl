@@ -7,7 +7,7 @@ use L;
 use List::Util qw(sum);
 use Getopt::Long;
 
-LD->class('Empire')->has_many('selflogins', 'Lacuna::DB::Result::Log::Login', sub {
+LD->class('Empire')->has_many('selflogins', 'KA::DB::Result::Log::Login', sub {
     my $args = shift;
     return (
             {
@@ -115,7 +115,7 @@ while (my $e = $empires->next)
     $target->update;
 
     out("   Pyramid 31+0");
-    $target->add_plan('Lacuna::DB::Result::Building::Permanent::PyramidJunkSculpture',31,0,1);
+    $target->add_plan('KA::DB::Result::Building::Permanent::PyramidJunkSculpture',31,0,1);
 
     $e->send_message(
         tag         => 'Correspondence',

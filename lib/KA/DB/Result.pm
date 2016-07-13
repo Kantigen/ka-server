@@ -3,9 +3,7 @@ package KA::DB::Result;
 no warnings qw(uninitialized);
 use namespace::autoclean -except => ['meta'];
 
-use base 'DBIx::Class::Core';
-
-__PACKAGE__->load_components('TimeStamp', 'InflateColumn::DateTime', 'InflateColumn::Serializer', 'Core');
+use base 'KA::DB::ResultBase';
 
 __PACKAGE__->table('noexist_basetable');
 __PACKAGE__->add_columns(
@@ -13,17 +11,4 @@ __PACKAGE__->add_columns(
 );
 __PACKAGE__->set_primary_key('id');
 
-# override default DBIx::Class constructor to set defaults from schema
-sub new {
-    my $class = shift;
-
-    my $self = $class->SUPER::new(@_);
-    foreach my $col ($self->result_source->columns) {
-        my $default = $self->result_source->column_info($col)->{default_value};
-        $self->$col($default) if (defined $default && !defined $self->$col());
-    }
-    return $self;
-}
-
 1;
-

@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 use List::MoreUtils qw(uniq);
 $|=1;
@@ -16,9 +16,9 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
-my $empires = Lacuna->db->resultset('Lacuna::DB::Result::Empire');
-my $config = Lacuna->config;
+our $db = KA->db;
+my $empires = KA->db->resultset('KA::DB::Result::Empire');
+my $config = KA->config;
 
 out('getting empires...');
 my $lec = $empires->find(1);
@@ -33,7 +33,7 @@ Back to my interesting news; we have recently discovered that Trelvestivð have 
 Your Trading Partner,
 
 Tou Re Ell
-Lacuna Expanse Corp
+KA Expanse Corp
 
 PS
 

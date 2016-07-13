@@ -9,7 +9,7 @@ Now we need to get you gathering some of the precious ore {ore} on your planet. 
 Regards,
 
 Tou Re Ell
-Lacuna Expanse Corp
+KA Expanse Corp
 
 Task: Build a Mine.
 Reward: Free resources.

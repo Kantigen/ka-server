@@ -15,19 +15,19 @@ my $home = $empire->home_planet;
 
 my $result;
 
-my $uni = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $uni = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 0,
     y               => -1,
-    class           => 'Lacuna::DB::Result::Building::University',
+    class           => 'KA::DB::Result::Building::University',
     level           => 2,
 });
 $home->build_building($uni);
 $uni->finish_upgrade;
 
-my $intelligence = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $intelligence = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 0,
     y               => -2,
-    class           => 'Lacuna::DB::Result::Building::Intelligence',
+    class           => 'KA::DB::Result::Building::Intelligence',
     level           => 1,
 });
 $home->build_building($intelligence);
@@ -55,7 +55,7 @@ my $security = $tester->get_building($result->{result}{building}{id});
 $security->finish_upgrade;
 
 my $lacunans = $empire->lacuna_expanse_corp;
-my $spy = Lacuna->db->resultset('Spies')->new({
+my $spy = KA->db->resultset('Spies')->new({
     empire_id       => $lacunans->id,
     from_body_id    => $lacunans->home_planet_id,
     on_body_id      => $home->id,

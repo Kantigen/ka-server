@@ -2,9 +2,9 @@ use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
 use Data::Dumper;
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date random_element);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date random_element);
 use Getopt::Long;
 $|=1;
 our $quiet;
@@ -17,10 +17,10 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 
 my %has_fissures = map { $_->body_id => 1 } $db->resultset('Building')->search({
-    class => 'Lacuna::DB::Result::Building::Permanent::Fissure',
+    class => 'KA::DB::Result::Building::Permanent::Fissure',
     })->all;
 
 my $num_body = scalar keys %has_fissures;
@@ -32,7 +32,7 @@ my %body_alert;
 
 for my $body_id (sort keys %has_fissures) {
     my $body = $db->resultset('Map::Body')->find($body_id);
-    my @fissures = $body->get_buildings_of_class('Lacuna::DB::Result::Building::Permanent::Fissure');
+    my @fissures = $body->get_buildings_of_class('KA::DB::Result::Building::Permanent::Fissure');
 
 # First check to see how many fissures we have active.
 # If 3 or more fissures are at zero efficiency, the planet will explode.
@@ -150,7 +150,7 @@ sub fissure_alert {
     $range = 120 if ($range > 120);
     my $minus_x = 0 - $body->x;
     my $minus_y = 0 - $body->y;
-    my $alert = Lacuna->db->resultset('Map::Body')->search({
+    my $alert = KA->db->resultset('Map::Body')->search({
         -and => [
             {empire_id => { '!=' => 'Null' }}
         ],
@@ -215,7 +215,7 @@ sub fissure_spawn {
     out("    adding fissure!!!");
 # Then add a second fissure
 # If there is a BHG then convert that!
-    my $building = $body->get_building_of_class("Lacuna::DB::Result::Building::Permanent::BlackHoleGenerator");
+    my $building = $body->get_building_of_class("KA::DB::Result::Building::Permanent::BlackHoleGenerator");
     my $fissure_level = 1;
     if ($building) {
         $fissure_level = $building->level > 0 ? $building->level : 1;
@@ -231,7 +231,7 @@ sub fissure_spawn {
 # otherwise any random building (except the PCC or the Fissure)
         my @buildings = grep {
             ($_->x != 0 or $_->y != 0)            # anything except the PCC
-            and ($_->class ne 'Lacuna::DB::Result::Building::Permanent::Fissure')   # Not a Fissure!
+            and ($_->class ne 'KA::DB::Result::Building::Permanent::Fissure')   # Not a Fissure!
         } @{$body->building_cache};
 
         $building = random_element(\@buildings);                                       
@@ -250,7 +250,7 @@ sub fissure_spawn {
         }
         $building->update({
             level           => $fissure_level,
-            class           => 'Lacuna::DB::Result::Building::Permanent::Fissure',
+            class           => 'KA::DB::Result::Building::Permanent::Fissure',
             efficiency      => 100,
             is_working      => 0,
             work_ends       => $now,
@@ -267,10 +267,10 @@ sub fissure_spawn {
         }
         out("    using free plot $x,$y");
 
-        $building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+        $building = KA->db->resultset('KA::DB::Result::Building')->new({
             x               => $x,
             y               => $y,
-            class           => 'Lacuna::DB::Result::Building::Permanent::Fissure',
+            class           => 'KA::DB::Result::Building::Permanent::Fissure',
             level           => $fissure_level,
             is_upgrading    => 0,
         });
@@ -344,7 +344,7 @@ sub fissure_explode {
                 my @bodies = $db->resultset('Map::Body')->search({
                     'me.empire_id'      => undef,
                     'stars.station_id'   => undef,
-                    'me.class'          => { like => 'Lacuna::DB::Result::Map::Body::Planet::P%' },
+                    'me.class'          => { like => 'KA::DB::Result::Map::Body::Planet::P%' },
                     'me.orbit'          => { between => [$empire->min_orbit, $empire->max_orbit] },
                 },{
                     join                => 'stars',
@@ -382,7 +382,7 @@ sub fissure_explode {
     $body->delete_buildings($body->building_cache);
     my $new_size = randint(1,10);
     $body->update({
-        class                       => 'Lacuna::DB::Result::Map::Body::Asteroid::A'.randint(1,Lacuna::DB::Result::Map::Body->asteroid_types),
+        class                       => 'KA::DB::Result::Map::Body::Asteroid::A'.randint(1,KA::DB::Result::Map::Body->asteroid_types),
         size                        => $new_size,
         needs_recalc                => 1,
         usable_as_starter_enabled   => 0,
@@ -391,9 +391,9 @@ sub fissure_explode {
 # Grow closest Gas Giants
     my $minus_x = 0 - $body->x;
     my $minus_y = 0 - $body->y;
-    my $gas_giants = Lacuna->db->resultset('Map::Body')->search({
+    my $gas_giants = KA->db->resultset('Map::Body')->search({
         -and => [
-            { class     => { like => 'Lacuna::DB::Result::Map::Body::Planet::G%' }},
+            { class     => { like => 'KA::DB::Result::Map::Body::Planet::G%' }},
         ],
         },{
             '+select' => [
@@ -429,7 +429,7 @@ sub fissure_explode {
     }
 # Damage planets in range (damage depends upon distance from the event)
 # get 10 closest planets
-    my $closest = Lacuna->db->resultset('Map::Body')->search({
+    my $closest = KA->db->resultset('Map::Body')->search({
         -and => [
             { empire_id => { '!=' => undef}},
         ],
@@ -461,7 +461,7 @@ sub fissure_explode {
         }
         my $damage  = int(100 - $distance);
         $damage = int($damage/2) if ($to_damage->get_type eq 'gas giant'); # Gas Giants are more resiliant or more spread out.
-        my $citadel = $to_damage->get_building_of_class("Lacuna::DB::Result::Building::Permanent::CitadelOfKnope");
+        my $citadel = $to_damage->get_building_of_class("KA::DB::Result::Building::Permanent::CitadelOfKnope");
         if ($citadel) {
             my $reduction = 2 * $citadel->level;
             $damage -= $reduction;

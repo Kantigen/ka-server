@@ -486,7 +486,7 @@ Returns a list of the laws.
         {
             "id" : "id-goes-here",
             "name" : "Censure of Jamie Vrbsky",
-            "description" : "Jamie Vrbsky is bad at playing Lacuna!",
+            "description" : "Jamie Vrbsky is bad at playing KA!",
             "date_enacted" : "01 31 2010 13:09:05 +0600"
         },
         ...

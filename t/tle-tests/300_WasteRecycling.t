@@ -8,7 +8,7 @@ use TestHelper;
 TestHelper->clear_all_test_empires;
 
 my $tester = TestHelper->new->generate_test_empire->build_infrastructure;
-my $db = Lacuna->db;
+my $db = KA->db;
 my $empire = $tester->empire;
 my $session_id = $tester->session->id;
 my $home = $empire->home_planet;
@@ -16,7 +16,7 @@ my $result;
 
 $result = $tester->post('wasterecycling', 'build', [$session_id, $home->id, 3, 3]);
 
-my $building = $db->resultset('Lacuna::DB::Result::Building')->find($result->{result}{building}{id});
+my $building = $db->resultset('KA::DB::Result::Building')->find($result->{result}{building}{id});
 $building->finish_upgrade;
 
 $result = $tester->post('wasterecycling', 'recycle', [$session_id, $building->id, 999990000,5,5]);
@@ -32,7 +32,7 @@ cmp_ok($result->{result}{recycle}{seconds_remaining}, '>', 0, "timer is started"
 
 my $water_stored = $building->body->water_stored;
 
-$building = $db->resultset('Lacuna::DB::Result::Building')->find($building->id);
+$building = $db->resultset('KA::DB::Result::Building')->find($building->id);
 $building->finish_work;
 cmp_ok($building->body->water_stored, '>=', $water_stored + 5, "resources increased");
 

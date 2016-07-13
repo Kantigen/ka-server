@@ -11,14 +11,14 @@ my $tester = TestHelper->new->generate_test_empire;
 my $session_id = $tester->session->id;
 my $empire = $tester->empire;
 my $home = $empire->home_planet;
-my $db = Lacuna->db;
+my $db = KA->db;
 
 my $result;
 
-my $uni = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $uni = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 0,
     y               => -1,
-    class           => 'Lacuna::DB::Result::Building::University',
+    class           => 'KA::DB::Result::Building::University',
     level           => 5,
 });
 $home->build_building($uni);
@@ -40,7 +40,7 @@ $home->update;
 
 $result = $tester->post('park', 'build', [$session_id, $empire->home_planet_id, 3, 3]);
 
-my $building = $db->resultset('Lacuna::DB::Result::Building')->find($result->{result}{building}{id});
+my $building = $db->resultset('KA::DB::Result::Building')->find($result->{result}{building}{id});
 $building->finish_upgrade;
 
 $result = $tester->post('park', 'throw_a_party', [$session_id, $building->id]);
@@ -57,7 +57,7 @@ $result = $tester->post('park', 'view', [$session_id, $building->id]);
 cmp_ok($result->{result}{status}{planets}[0]{food_stored}, '<', 20_000, "food gets spent");
 my $happy = $result->{result}{status}{planets}[0]{happiness};
 
-$building = $db->resultset('Lacuna::DB::Result::Building')->find($result->{result}{building}{id});
+$building = $db->resultset('KA::DB::Result::Building')->find($result->{result}{building}{id});
 $building->finish_work;
 cmp_ok($result->{result}{status}{planets}[0]{happiness}, '<', $building->body->happiness, "happiness is increased");
 

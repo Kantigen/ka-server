@@ -9,7 +9,7 @@ use Test::Memory::Cycle;
 use Data::Dumper;
 use 5.010;
 use DateTime;
-use Lacuna;
+use KA;
 use TestHelper;
 
 my $empire_name     = 'icydee';
@@ -26,8 +26,8 @@ diag("Session @{[$tester->session]}");
 
 my $session_id = $tester->session->id;
 
-my ($planet) = Lacuna->db->resultset('Map::Body::Planet')->search({name => $planet_name});
-my ($bhg)    = $planet->get_building_of_class('Lacuna::DB::Result::Building::Permanent::BlackHoleGenerator');
+my ($planet) = KA->db->resultset('Map::Body::Planet')->search({name => $planet_name});
+my ($bhg)    = $planet->get_building_of_class('KA::DB::Result::Building::Permanent::BlackHoleGenerator');
 
 diag("BHG = $bhg");
 

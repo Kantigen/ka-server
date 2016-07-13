@@ -1,10 +1,10 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna::DB::Result::Spies;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA::DB::Result::Spies;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 $|=1;
 our $quiet;
@@ -17,10 +17,10 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 
 out('Ticking spies');
-Lacuna::DB::Result::Spies->tick_all_spies($quiet ? 0 : 1);
+KA::DB::Result::Spies->tick_all_spies($quiet ? 0 : 1);
 
 #my $spies = $db->resultset('Spies')->search({
 #    task    => {'!=' => 'Idle'},

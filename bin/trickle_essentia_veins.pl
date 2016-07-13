@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(format_date);
 use Getopt::Long;
 $|=1;
 
@@ -17,7 +17,7 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 
 trickle();
 
@@ -40,7 +40,7 @@ sub trickle {
     my $empires = $db->resultset('Empire')
         ->search(
                  {
-                     '_buildings.class' => "Lacuna::DB::Result::Building::Permanent::EssentiaVein",
+                     '_buildings.class' => "KA::DB::Result::Building::Permanent::EssentiaVein",
                  }, {
                      join => { 'bodies' => '_buildings' },
                      group_by => 'me.id',

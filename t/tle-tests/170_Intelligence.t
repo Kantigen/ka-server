@@ -14,7 +14,7 @@ my $session_id = $tester->session->id;
 my $empire = $tester->empire;
 my $home = $empire->home_planet;
 
-Lacuna->cache->set('captcha', $session_id, { guid => 1111, solution => 1111 }, 60 * 30 );
+KA->cache->set('captcha', $session_id, { guid => 1111, solution => 1111 }, 60 * 30 );
 
 my $result;
 
@@ -45,19 +45,19 @@ is($result->{result}{spies}[0]{name}, 'Waldo', "spy naming works");
 $result = $tester->post('intelligence', 'burn_spy', [$session_id, $intelligence->id, $spy_id]);
 ok(exists$result->{result}, "burn a spy");
 
-my $shipyard = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $shipyard = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 1,
     y               => 1,
-    class           => 'Lacuna::DB::Result::Building::Shipyard',
+    class           => 'KA::DB::Result::Building::Shipyard',
     level           => 5,
 });
 $home->build_building($shipyard);
 $shipyard->finish_upgrade;
 
-my $spaceport = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+my $spaceport = KA->db->resultset('KA::DB::Result::Building')->new({
     x               => 1,
     y               => 2,
-    class           => 'Lacuna::DB::Result::Building::SpacePort',
+    class           => 'KA::DB::Result::Building::SpacePort',
     level           => 5,
 });
 
@@ -67,7 +67,7 @@ $home->build_building($spaceport);
 $spaceport->finish_upgrade;
 
 # need a spy done right now
-Lacuna->db->resultset('Lacuna::DB::Result::Spies')->new({
+KA->db->resultset('KA::DB::Result::Spies')->new({
     from_body_id    => $home->id,
     on_body_id      => $home->id,
     task            => 'Idle',
@@ -75,20 +75,20 @@ Lacuna->db->resultset('Lacuna::DB::Result::Spies')->new({
     empire_id       => $empire->id,    
 })->insert;
 
-my $spy_pod = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->new({type=>'spy_pod'});
+my $spy_pod = KA->db->resultset('KA::DB::Result::Ships')->new({type=>'spy_pod'});
 $shipyard->build_ship($spy_pod);
 
 my $finish = DateTime->now;
-Lacuna->db->resultset('Lacuna::DB::Result::Ships')->search({shipyard_id=>$shipyard->id})->update({date_available=>$finish});
+KA->db->resultset('KA::DB::Result::Ships')->search({shipyard_id=>$shipyard->id})->update({date_available=>$finish});
 
 $result = $tester->post('spaceport', 'view', [$session_id, $spaceport->id]);
 is($result->{result}{docked_ships}{spy_pod}, 1, "we have 1 spy_pod built");
 
-$result = $tester->post('spaceport', 'send_ship', [$session_id, $spy_pod->id, {body_name=>'Lacuna'}]);
+$result = $tester->post('spaceport', 'send_ship', [$session_id, $spy_pod->id, {body_name=>'KA'}]);
 is($result->{error}{code}, 1013, "leave isolationsts alone");
 
 for my $count ( 1 .. 5 ) {
-    Lacuna->db->resultset('Lacuna::DB::Result::Spies')->new({
+    KA->db->resultset('KA::DB::Result::Spies')->new({
         from_body_id    => $home->id,
         on_body_id      => $home->id,
         task            => 'Idle',
@@ -101,7 +101,7 @@ my $enemy = TestHelper->new(empire_name => 'TLE Test Enemy')->generate_test_empi
 $enemy->empire->is_isolationist(0);
 $enemy->empire->update;
 
-Lacuna->cache->set('captcha', $session_id, { guid => 1111, solution => 1111 }, 60 * 30 );
+KA->cache->set('captcha', $session_id, { guid => 1111, solution => 1111 }, 60 * 30 );
 
 $result = $tester->post('spaceport', 'prepare_send_spies', [$session_id, $home->id, $enemy->empire->home_planet->id ]);
 is( ref $result->{result}{spies}, 'ARRAY', "can prepare for send spies" );

@@ -8,10 +8,10 @@ $|=1;
 
 use TestHelper;
 
-my @medals = keys %{Lacuna::DB::Result::Medals::MEDALS()};
+my @medals = keys %{KA::DB::Result::Medals::MEDALS()};
 plan tests => scalar @medals;
 
-my $assets = '/data/Lacuna-Assets/medal/';
+my $assets = '/data/KA-Assets/medal/';
 
 opendir(my $dir, $assets);
 my @images = readdir $dir;

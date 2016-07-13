@@ -68,14 +68,16 @@ sub run {
     my $config          = KA::Config->instance;
     my $queue           = KA::Queue->instance;
     my $message_queue   = KA::MessageQueue->new({
-        name    => 'mq_worker',
+        name    => 'bg_worker',
     });
 
     #--- Hard code the queues to watch, they should come
     # TODO from the command line
     #
     $self->out('Started');
-    $queue->watch('mq_worker');
+    $queue->watch('bg_building');
+    $queue->watch('bg_fleet');
+    $queue->watch('bg_captcha');
 
     while (1) {
         my $job = $queue->consume;

@@ -13,7 +13,7 @@ out("Started");
 
 my $rs = LD->bodies(
                     {
-                        class => 'Lacuna::DB::Result::Map::Body::Planet::Station',
+                        class => 'KA::DB::Result::Map::Body::Planet::Station',
                     }
                    );
 

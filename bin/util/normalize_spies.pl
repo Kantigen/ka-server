@@ -2,10 +2,10 @@ use 5.010;
 use strict;
 use feature "switch";
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
+use KA::DB;
+use KA;
 use List::Util qw(shuffle);
-use Lacuna::Util qw(randint format_date);
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 $|=1;
 our $quiet;
@@ -20,17 +20,17 @@ out('Started');
 my $start = DateTime->now;
 
 out('Loading DB');
-our $db = Lacuna->db;
-my $empires = $db->resultset('Lacuna::DB::Result::Empire');
-my $bodies  = $db->resultset('Lacuna::DB::Result::Map::Body');
+our $db = KA->db;
+my $empires = $db->resultset('KA::DB::Result::Empire');
+my $bodies  = $db->resultset('KA::DB::Result::Map::Body');
 
 out('Withdrawing all spies in merc market');
-my $merc_market = $db->resultset('Lacuna::DB::Result::MercenaryMarket')->search;
+my $merc_market = $db->resultset('KA::DB::Result::MercenaryMarket')->search;
 while (my $offer = $merc_market->next) {
     $offer->withdraw($offer->body);
 }
 my $now = DateTime->now;
-my $spy_pods = $db->resultset('Lacuna::DB::Result::Ships')->search({type => 'spy_pod', task => 'Travelling'});
+my $spy_pods = $db->resultset('KA::DB::Result::Ships')->search({type => 'spy_pod', task => 'Travelling'});
 my %ship_involved;
 while (my $pod = $spy_pods->next) {
     out('Zooming ship '.$pod->id);
@@ -60,7 +60,7 @@ while (my $planet = $planets->next) {
     }
 }
 
-my $spies   = $db->resultset('Lacuna::DB::Result::Spies');
+my $spies   = $db->resultset('KA::DB::Result::Spies');
 out('Updating spy level');
 while (my $spy = $spies->next) {
   if ($spy->task eq 'Captured') {
@@ -72,7 +72,7 @@ while (my $spy = $spies->next) {
   $spy->update;
 }
 out('Culling Spies');
-$spies   = $db->resultset('Lacuna::DB::Result::Spies');
+$spies   = $db->resultset('KA::DB::Result::Spies');
 while (my $empire = $empires->next) {
     next if $empire->id < 2;
     my $emp_spies = $spies->search({empire_id=>$empire->id}, {order_by => { -desc => 'level'}});
@@ -82,7 +82,7 @@ while (my $empire = $empires->next) {
     my $int_min_stat = {};
     while (my $body = $emp_bodies->next) {
         my $bid = $body->id;
-        my $int_min = $body->get_building_of_class('Lacuna::DB::Result::Building::Intelligence');
+        my $int_min = $body->get_building_of_class('KA::DB::Result::Building::Intelligence');
         if (defined($int_min)) {
             $total_allowed_spies += $int_min->max_spies;
             $total_spies += $int_min->spy_count;

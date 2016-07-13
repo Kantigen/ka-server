@@ -1,11 +1,11 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(format_date);
 use Getopt::Long;
-use Lacuna::AI::Trelvestian;
+use KA::AI::Trelvestian;
 $|=1;
 our $quiet;
 our $add_one;
@@ -21,11 +21,11 @@ GetOptions(
 out('Started');
 my $start = time;
 
-my $config = Lacuna->config;
+my $config = KA->config;
 my $server_url = $config->get('server_url');
 say "Running on $server_url";
 
-my $ai = Lacuna::AI::Trelvestian->new;
+my $ai = KA::AI::Trelvestian->new;
 
 if ($tournament) {
     say 'Tournament mode';

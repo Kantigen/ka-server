@@ -8,7 +8,7 @@ use TestHelper;
 TestHelper->clear_all_test_empires;
 
 my $tester = TestHelper->new->generate_test_empire->build_infrastructure;
-my $db = Lacuna->db;
+my $db = KA->db;
 my $empire = $tester->empire;
 my $session_id = $tester->session->id;
 my $home = $empire->home_planet;
@@ -16,7 +16,7 @@ my $result;
 
 $result = $tester->post('distributioncenter', 'build', [$session_id, $home->id, 3, 3]);
 
-my $building = $db->resultset('Lacuna::DB::Result::Building')->find($result->{result}{building}{id});
+my $building = $db->resultset('KA::DB::Result::Building')->find($result->{result}{building}{id});
 $building->finish_upgrade;
 
 $home->water_stored(500);

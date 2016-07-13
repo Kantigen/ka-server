@@ -3,8 +3,8 @@ package TestHelper;
 use Moose;
 use utf8;
 no warnings qw(uninitialized);
-use Lacuna::DB;
-use Lacuna;
+use KA::DB;
+use KA;
 use LWP::UserAgent;
 use JSON qw(to_json from_json);
 use Data::Dumper::Perltidy;
@@ -31,7 +31,7 @@ has empire_password => (
 has empire => (
     is  => 'rw',
     lazy => 1,
-    default => sub { my $self = shift; return Lacuna->db->resultset('Lacuna::DB::Result::Empire')->search({name=>$self->empire_name})->first; },
+    default => sub { my $self = shift; return KA->db->resultset('KA::DB::Result::Empire')->search({name=>$self->empire_name})->first; },
 );
 
 has session => (
@@ -58,7 +58,7 @@ sub clear_all_test_empires {
 
     $name = 'TLE Test%' unless $name;
 
-    my $empires = Lacuna->db->resultset('Empire')->search({
+    my $empires = KA->db->resultset('Empire')->search({
         name => {like => $name},
     });
     while (my $empire = $empires->next) {
@@ -73,7 +73,7 @@ sub clear_all_test_empires {
             $planet->delete_buildings(\@buildings);
         }
 
-        Lacuna->db->resultset('Log::Essentia')->search({empire_id => $empire->id})->delete;
+        KA->db->resultset('Log::Essentia')->search({empire_id => $empire->id})->delete;
         $empire->delete;
 
     }
@@ -83,7 +83,7 @@ sub use_existing_test_empire {
     my ($self) = @_;
 
     say "use_existing_test_empire [".$self->empire_name."]";
-    my ($empire) = Lacuna->db->resultset('Empire')->search({
+    my ($empire) = KA->db->resultset('Empire')->search({
         name => $self->empire_name,
     });
     #print STDERR "EMPIRE = [$empire]\n";
@@ -97,7 +97,7 @@ sub use_existing_test_empire {
         $empire = $self->empire;
         # Generate a colony
         say "Generate a colony orbit [".$home->orbit."] zone [".$home->zone."]";
-        my ($colony) = Lacuna->db->resultset('Map::Body')->search({
+        my ($colony) = KA->db->resultset('Map::Body')->search({
             empire_id => undef,
             size      => {'>' => 45},
             orbit     => $home->orbit,
@@ -118,18 +118,18 @@ sub use_existing_test_empire {
 sub generate_test_empire {
     my $self = shift;
     # Make sure no other test empires are still around
-    my $empires = Lacuna->db->resultset('Empire')->search({
+    my $empires = KA->db->resultset('Empire')->search({
         name                => $self->empire_name,
     });
     while (my $empire = $empires->next) {
         $empire->delete;
     }
 
-    my $empire = Lacuna->db->resultset('Empire')->new({
+    my $empire = KA->db->resultset('Empire')->new({
         name                => $self->empire_name,
         date_created        => DateTime->now,
-        status_message      => 'Making Lacuna a better Expanse.',
-        password            => Lacuna::DB::Result::Empire->encrypt_password($self->empire_password),
+        status_message      => 'Making KA a better Expanse.',
+        password            => KA::DB::Result::Empire->encrypt_password($self->empire_password),
     })->insert;
     $empire->found;
     $self->session($empire->start_session({api_key => 'tester'}));
@@ -174,7 +174,7 @@ sub build_building {
     my $home = $self->empire->home_planet;
     $self->find_empty_plot;
 
-    my $building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+    my $building = KA->db->resultset('KA::DB::Result::Building')->new({
         x               => $self->x,
         y               => $self->y,
         class           => $class,
@@ -188,16 +188,16 @@ sub build_building {
 sub build_infrastructure {
     my $self = shift;
     my $home = $self->empire->home_planet;
-    foreach my $type ('Lacuna::DB::Result::Building::Food::Algae','Lacuna::DB::Result::Building::Energy::Hydrocarbon',
-        'Lacuna::DB::Result::Building::Water::Purification','Lacuna::DB::Result::Building::Water::Purification','Lacuna::DB::Result::Building::Water::Purification','Lacuna::DB::Result::Building::Ore::Mine','Lacuna::DB::Result::Building::Ore::Mine','Lacuna::DB::Result::Building::Ore::Mine','Lacuna::DB::Result::Building::Food::Algae','Lacuna::DB::Result::Building::Food::Algae','Lacuna::DB::Result::Building::Energy::Hydrocarbon','Lacuna::DB::Result::Building::Energy::Hydrocarbon') {
+    foreach my $type ('KA::DB::Result::Building::Food::Algae','KA::DB::Result::Building::Energy::Hydrocarbon',
+        'KA::DB::Result::Building::Water::Purification','KA::DB::Result::Building::Water::Purification','KA::DB::Result::Building::Water::Purification','KA::DB::Result::Building::Ore::Mine','KA::DB::Result::Building::Ore::Mine','KA::DB::Result::Building::Ore::Mine','KA::DB::Result::Building::Food::Algae','KA::DB::Result::Building::Food::Algae','KA::DB::Result::Building::Energy::Hydrocarbon','KA::DB::Result::Building::Energy::Hydrocarbon') {
 
         $self->build_building($type, 20);
     }
     $home->empire->university_level(30);
     $home->empire->update;
-    foreach my $type ('Lacuna::DB::Result::Building::Energy::Reserve',
-        'Lacuna::DB::Result::Building::Food::Reserve','Lacuna::DB::Result::Building::Ore::Storage',
-        'Lacuna::DB::Result::Building::Water::Storage') {
+    foreach my $type ('KA::DB::Result::Building::Energy::Reserve',
+        'KA::DB::Result::Building::Food::Reserve','KA::DB::Result::Building::Ore::Storage',
+        'KA::DB::Result::Building::Water::Storage') {
 
         $self->build_building($type, 20);
 
@@ -239,7 +239,7 @@ sub post {
         params      => $params,
     };
     say "REQUEST: ".to_json($content);
-    my $response = $self->ua->post(Lacuna->config->get('server_url').$url,
+    my $response = $self->ua->post(KA->config->get('server_url').$url,
         Content_Type    => 'application/json',
         Content         => to_json($content),
         Accept          => 'application/json',
@@ -252,7 +252,7 @@ sub post {
 
 sub cleanup {
     my $self = shift;
-    my $empires = Lacuna->db->resultset('Lacuna::DB::Result::Empire')->search({name=>$self->empire_name});
+    my $empires = KA->db->resultset('KA::DB::Result::Empire')->search({name=>$self->empire_name});
     while (my $empire = $empires->next) {
         # delete any permanent buildings
         
@@ -272,7 +272,7 @@ sub build_big_colony {
     my $empire = $planet->empire;
     $planet->delete_buildings($planet->building_cache);
     $planet->fleets->delete_all;
-    Lacuna->db->resultset('Spies')->search({from_body_id => $planet->id})->delete_all;
+    KA->db->resultset('Spies')->search({from_body_id => $planet->id})->delete_all;
 
     my $layout = {
         'PlanetaryCommand' => [
@@ -401,10 +401,10 @@ sub build_big_colony {
     diag("Generating buildings");
     for my $class (keys %$layout ) {
         for my $location (@{$layout->{$class}}) {
-            my $building = Lacuna->db->resultset('Building')->new({
+            my $building = KA->db->resultset('Building')->new({
                 x               => $location->{x},
                 y               => $location->{y},
-                class           => "Lacuna::DB::Result::Building::$class",
+                class           => "KA::DB::Result::Building::$class",
                 level           => $location->{level} - 1,
             });
             $planet->build_building($building);
@@ -423,7 +423,7 @@ sub build_big_colony {
 
     $planet->discard_changes;
 
-    my ($shipyard) = grep {$_->class eq 'Lacuna::DB::Result::Building::Shipyard'} @{$planet->building_cache};
+    my ($shipyard) = grep {$_->class eq 'KA::DB::Result::Building::Shipyard'} @{$planet->building_cache};
     diag("Generating ships [".$self->session->id."][".$shipyard->id."]");
     my $fleets = {
         excavator               => 30,
@@ -445,7 +445,7 @@ sub build_big_colony {
         while ($quantity) {
             my $to_build = min($quantity, 1000);
 
-            my $fleet = Lacuna->db->resultset('Fleet')->new({
+            my $fleet = KA->db->resultset('Fleet')->new({
                 type        => $fleet_type,
                 quantity    => $to_build,
             });

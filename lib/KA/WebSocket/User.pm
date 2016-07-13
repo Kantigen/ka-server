@@ -120,7 +120,7 @@ sub ws_register {
     # Create a Job to send a registration email
     my $queue = KA::Queue->instance;
     $queue->publish({
-        queue       => 'email_register',
+        queue       => 'bg_email',
         payload     => {
             username    => $user->username,
             email       => $user->email,
@@ -163,7 +163,7 @@ sub ws_forgotPassword {
         # Create a Job to send a forgotten password email
         my $queue = KA::Queue->instance;
         $queue->publish({
-            queue       => 'email_forgot_password',
+            queue       => 'bg_email',
             payload     => {
                 username    => $user->username,
                 email       => $user->email,

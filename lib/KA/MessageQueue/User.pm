@@ -18,11 +18,11 @@ sub log {
 
 #--- Receive a Message Queue message
 #
-sub mq_hello {
+sub bg_hello {
     my ($self, $context) = @_;
 
     my $log = Log::Log4perl->get_logger('KA::WebSocket::User');
-    $log->debug("MQ_HELLO: ".Dumper($context));
+    $log->debug("BG_HELLO: ".Dumper($context));
 }
 
 1;

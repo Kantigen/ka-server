@@ -10,7 +10,7 @@ TestHelper->clear_all_test_empires;
 my $tester = TestHelper->new->generate_test_empire;
 my $session_id = $tester->session->id;
 
-my $alliances = Lacuna->db->resultset('Lacuna::DB::Result::Alliance');
+my $alliances = KA->db->resultset('KA::DB::Result::Alliance');
 
 my $result;
 

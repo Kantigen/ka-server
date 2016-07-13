@@ -1,11 +1,11 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
-use Lacuna::Constants qw(ORE_TYPES);
+use KA::Constants qw(ORE_TYPES);
 $|=1;
 our $quiet;
 GetOptions(
@@ -17,8 +17,8 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
-my $empires = $db->resultset('Lacuna::DB::Result::Empire');
+our $db = KA->db;
+my $empires = $db->resultset('KA::DB::Result::Empire');
 my $lec = $empires->find(1);
 
 my $message = q{I hope this message finds you well in the new year. In our short time together we have learned much from each other. I have one more thing to teach you about our culture.
@@ -31,7 +31,7 @@ Your Trading Partner,
 
 Tou Re Ell
 
-Lacuna Expanse Corp};
+KA Expanse Corp};
 
 out('Giving Glyphs');
 my @types = ORE_TYPES;

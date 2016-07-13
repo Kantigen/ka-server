@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(format_date);
 use Getopt::Long;
 $|=1;
 
@@ -17,8 +17,8 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
-my $winners = $db->resultset('Lacuna::DB::Result::Log::WeeklyMedalWinner');
+our $db = KA->db;
+my $winners = $db->resultset('KA::DB::Result::Log::WeeklyMedalWinner');
 
 $winners->delete;
 
@@ -37,7 +37,7 @@ out((($finish - $start)/60)." minutes have elapsed");
 
 
 sub colonies {
-    my $colonies = $db->resultset('Lacuna::DB::Result::Log::Colony');
+    my $colonies = $db->resultset('KA::DB::Result::Log::Colony');
     
     # fastest growing
     my $colony = $colonies->search(undef, {order_by => [{ -desc => 'population_delta'},'rand()']})->first;
@@ -54,7 +54,7 @@ sub colonies {
 }
 
 sub empires {
-    my $empires = $db->resultset('Lacuna::DB::Result::Log::Empire');
+    my $empires = $db->resultset('KA::DB::Result::Log::Empire');
     
     # best attacker in the game 
     my $empire_log = $empires->search(undef, {order_by => [{ -desc => 'offense_success_rate'},'rand()']})->first;
@@ -95,7 +95,7 @@ sub empires {
 }
 
 sub spies {
-    my $spies = $db->resultset('Lacuna::DB::Result::Log::Spies');
+    my $spies = $db->resultset('KA::DB::Result::Log::Spies');
     
     # best in the game
     my $spy = $spies->search(undef,{order_by => [{ -desc => 'success_rate'}, 'rand()']})->first;
@@ -147,7 +147,7 @@ sub spies {
 sub add_medal {
     my ($empire_id, $medal_name) = @_;
     printf "%s -> %s\n", $empire_id, $medal_name;
-    my $empire = $db->resultset('Lacuna::DB::Result::Empire')->find($empire_id);
+    my $empire = $db->resultset('KA::DB::Result::Empire')->find($empire_id);
     return 0 unless $empire;
     my $medal = $empire->add_medal($medal_name, 1);
     $winners->new({

@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 $|=1;
 our $quiet;
@@ -18,7 +18,7 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 my $empires = $db->resultset('Empire');
 
 my $lec = $empires->find(1);
@@ -47,7 +47,7 @@ Your Trading Partner,
 
 Tou Re Ell
 
-Lacuna Expanse Corp};
+KA Expanse Corp};
 
 out('Sending Messages');
 while (my $empire = $empires->next) {
@@ -61,9 +61,9 @@ while (my $empire = $empires->next) {
         body        => $message,
     );
 
-    Lacuna->db->resultset('Plan')->create({
+    KA->db->resultset('Plan')->create({
         body_id     => $home->id,
-        class       => 'Lacuna::DB::Result::Building::SubspaceSupplyDepot',
+        class       => 'KA::DB::Result::Building::SubspaceSupplyDepot',
         level       => 1,
         extra_build_level   => 0,
         quantity    => 2,

@@ -1,6 +1,6 @@
 #!/bin/bash
 export PATH=/data/apps/bin:$PATH
-cd /data/Lacuna-Server/bin
+cd /data/KA-Server/bin
 perl generate_docs.pl > /dev/null
 memcached -d -u nobody -m 512
 fuser -k 5002/tcp

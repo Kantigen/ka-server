@@ -2,9 +2,9 @@ use 5.010;
 use strict;
 use feature "switch";
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 $|=1;
 our $quiet;
@@ -16,10 +16,10 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 
 out('Complete all ships being built');
-my $ships = $db->resultset('Lacuna::DB::Result::Ships')->search({
+my $ships = $db->resultset('KA::DB::Result::Ships')->search({
     task => 'Building',
 });
 my $now = DateTime->now;
@@ -31,7 +31,7 @@ while (my $ship = $ships->next) {
 }
 
 out('Zip all ships to their destination');
-my $ships = $db->resultset('Lacuna::DB::Result::Ships')->search({
+my $ships = $db->resultset('KA::DB::Result::Ships')->search({
     task => 'Travelling'
 });
 while (my $ship = $ships->next) {
@@ -42,13 +42,13 @@ while (my $ship = $ships->next) {
 }
 
 out('Withdraw all trades');
-my $trades = $db->resultset('Lacuna::DB::Result::Market')->search;
+my $trades = $db->resultset('KA::DB::Result::Market')->search;
 while (my $trade = $trades->next) {
     $trade->withdraw($trade->body);
 }
 
 out('Do a final tick of all planets');
-my $planets_rs = $db->resultset('Lacuna::DB::Result::Map::Body');
+my $planets_rs = $db->resultset('KA::DB::Result::Map::Body');
 my $planets = $planets_rs->search({ empire_id   => {'!=' => 0} });
 while (my $planet = $planets->next) {
     out('Ticking '.$planet->name);
@@ -66,19 +66,19 @@ while (my $planet = $planets->next) {
 }
 
 out('Group ships into fleets');
-$ships = $db->resultset('Lacuna::DB::Result::Ships')->search({},{
+$ships = $db->resultset('KA::DB::Result::Ships')->search({},{
     group_by    => [qw(body_id type task name speed stealth combat hold_size berth_level foreign_body_id foreign_star_id)],
     '+select'   => [{count => 'id'}],
     '+as'       => [ qw(quantity) ],
 });
 
 out('Delete existing fleets');
-my $fleet = $db->resultset('Lacuna::DB::Result::Fleet')->delete_all;
+my $fleet = $db->resultset('KA::DB::Result::Fleet')->delete_all;
 
 out('Create new fleets');
 while (my $ship = $ships->next) {
     my $mark = 'one';
-    my $fleet = $db->resultset('Lacuna::DB::Result::Fleet')->create({
+    my $fleet = $db->resultset('KA::DB::Result::Fleet')->create({
         body_id	        => $ship->body_id,
         shipyard_id     => 0,
         date_started    => $now,

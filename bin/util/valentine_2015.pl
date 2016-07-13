@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 $|=1;
 our $quiet;
@@ -18,7 +18,7 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 my $empires = $db->resultset('Empire');
 
 my $lec = $empires->find(1);
@@ -32,7 +32,7 @@ $empires = $empires->search({ id => {'>' => 1}});
 my $message = q{
 Greetings, I am Cupid! ♥ ♥ ♥
 
-I was invited here to The Lacuna Expase by The Lacuna Council.  Since this is the month of Love in the expanse, TLE has asked me to distribute 10 Game Essentia to every player!
+I was invited here to The KA Expase by The KA Council.  Since this is the month of Love in the expanse, TLE has asked me to distribute 10 Game Essentia to every player!
 
 Make sure you enter the TLE Love Fest Contest and the TLE For The Love of the Game Contest in your Contest Forum.  Spread the love all month long!
 

@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 use JSON;
 $|=1;
@@ -25,7 +25,7 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 
 
 my $phash;
@@ -44,7 +44,7 @@ my $json = JSON->new->utf8(1);
 say $json->pretty->canonical->encode($phash) if ($verbose);
 
 for my $bid (sort @body_id) {
-  my $body = $db->resultset('Lacuna::DB::Result::Map::Body')->find($bid);
+  my $body = $db->resultset('KA::DB::Result::Map::Body')->find($bid);
   unless ($body) {
       say "Cannot find body id $bid : $phash->{$bid}->{name}\n";
       next;

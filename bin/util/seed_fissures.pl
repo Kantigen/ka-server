@@ -2,9 +2,9 @@ use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
 use Data::Dumper;
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date random_element);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date random_element);
 use Getopt::Long;
 $|=1;
 our $quiet;
@@ -22,7 +22,7 @@ GetOptions(
 out("Putting ".$number." fissures in ".$target_zone." on ".$target_body_id.".");
 
 my $search = {
-  class      => { like => 'Lacuna::DB::Result::Map::Body::Planet::P%' },
+  class      => { like => 'KA::DB::Result::Map::Body::Planet::P%' },
 };
 
 if ($target_zone ne '') {
@@ -40,11 +40,11 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 
 my $placed = 0;
 while ($placed < $number) {
-  my $target = Lacuna->db->resultset('Lacuna::DB::Result::Map::Body')->search(
+  my $target = KA->db->resultset('KA::DB::Result::Map::Body')->search(
                   $search,
                   { order_by => 'rand()' }
                 )->first;
@@ -62,13 +62,13 @@ while ($placed < $number) {
   elsif ($btype eq 'habitable planet') {
     my ($x, $y) = eval { $target->find_free_space};
     unless ($@) {
-        my $building = Lacuna->db->resultset('Lacuna::DB::Result::Building')->new({
+        my $building = KA->db->resultset('KA::DB::Result::Building')->new({
             x            => $x,
             y            => $y,
             level        => randint(1, 30),
             body_id      => $target->id,
             body         => $target,
-            class        => 'Lacuna::DB::Result::Building::Permanent::Fissure',
+            class        => 'KA::DB::Result::Building::Permanent::Fissure',
         });
         $target->build_building($building, undef, 1);
         out(sprintf('Level %s Fissure formed on %s:%s in zone %s.', $building->level, $target->id, $target->name, $target->zone ));
@@ -93,7 +93,7 @@ sub check_bhg_neutralized {
     $tname = $check->{name};
   }
   else {
-    if ($check->isa('Lacuna::DB::Result::Map::Star')) {
+    if ($check->isa('KA::DB::Result::Map::Star')) {
       $tstar   = $check;
       $tname   = $check->name;
     }

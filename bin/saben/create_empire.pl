@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 use List::MoreUtils qw(uniq);
 $|=1;
@@ -18,17 +18,17 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 
 out('Creating empire...');
-my $empire = Lacuna->db->resultset('Lacuna::DB::Result::Empire')->new({
+my $empire = KA->db->resultset('KA::DB::Result::Empire')->new({
     id                  => -1,
     name                => 'Sābēn Demesne',
     stage               => 'founded',
     date_created        => DateTime->now,
     status_message      => 'Waging war!',
     description         => 'We see you looking at our description. Know this, we have looked at your description as well, and found it lacking. You do not deserve to share our Demesne.',
-    password            => Lacuna::DB::Result::Empire->encrypt_password(rand(99999999)),
+    password            => KA::DB::Result::Empire->encrypt_password(rand(99999999)),
     species_name            => 'Sābēn',
     species_description     => 'A solitary people who wish to be left alone.',
     min_orbit               => 1,
@@ -47,7 +47,7 @@ my $empire = Lacuna->db->resultset('Lacuna::DB::Result::Empire')->new({
 });
 
 out('Find home planet...');
-my $bodies = $db->resultset('Lacuna::DB::Result::Map::Body');
+my $bodies = $db->resultset('KA::DB::Result::Map::Body');
 my $zone = $bodies->get_column('zone')->max;
 my $home = $bodies->search({size => 35, zone => $zone })->first;
 $empire->insert;

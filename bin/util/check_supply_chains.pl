@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 $|=1;
 our $quiet;
@@ -16,14 +16,14 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 
 out('Getting Supply Chains');
-my $chains = $db->resultset('Lacuna::DB::Result::SupplyChain')->search;
+my $chains = $db->resultset('KA::DB::Result::SupplyChain')->search;
 
 while ( my $chain = $chains->next) {
-    my $supply_body = $db->resultset('Lacuna::DB::Result::Map::Body')->find($chain->planet_id);
-    my $target_body = $db->resultset('Lacuna::DB::Result::Map::Body')->find($chain->target_id);
+    my $supply_body = $db->resultset('KA::DB::Result::Map::Body')->find($chain->planet_id);
+    my $target_body = $db->resultset('KA::DB::Result::Map::Body')->find($chain->target_id);
 
     if ($supply_body->empire->alliance_id != $target_body->empire->alliance_id) {
         my $saname = "";

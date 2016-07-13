@@ -2,10 +2,10 @@ use 5.010;
 use strict;
 use feature "switch";
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
+use KA::DB;
+use KA;
 use List::Util qw(shuffle);
-use Lacuna::Util qw(randint format_date);
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 $|=1;
 our $quiet;
@@ -19,10 +19,10 @@ my $start = time;
 my $date_ended = DateTime->now->subtract( hours => 168);
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 
 out('Deleting Outdated Market Items');
-my $market = $db->resultset('Lacuna::DB::Result::Market');
+my $market = $db->resultset('KA::DB::Result::Market');
 my @to_be_deleted = $market->search({ date_offered => { '<' => $date_ended }})->get_column('id')->all;
 foreach my $id (@to_be_deleted) {
     out('Withdrawing '.$id);

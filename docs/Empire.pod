@@ -163,12 +163,12 @@ functions like password recovery.
 
 =head3 facebook_uid
 
-A Facebook user id passed in through Lacuna's Facebook integration system. 
+A Facebook user id passed in through KA's Facebook integration system. 
 Optional, but required with the use of C<facebook_token>.
 
 =head3 facebook_token
 
-A Facebook access token passed in through Lacuna's Facebook integration 
+A Facebook access token passed in through KA's Facebook integration 
 system. Optional, but required with the use of C<facebook_uid>.
 
 =head3 invite_code
@@ -350,7 +350,7 @@ The email address of your friend, or a comma separated string of email addresses
 
 An optional text message that the user can type to invite their friend. This is the default message that will get sent if none is specified:
 
- I'm having a great time with this new game called Lacuna Expanse. Come play with me.
+ I'm having a great time with this new game called KA Expanse. Come play with me.
 
 After the message, the user's empire name in the game, the friend code, and URI to the server will be attached.
 
@@ -676,8 +676,8 @@ The id of the empire for which you'd like to retrieve the public profile.
  {
    "public_profile" : {
      "id"               : 1,
-     "name"             : "Lacuna Expanse Corp",
-     "description"      : "We are the original inhabitants of the Lacuna Expanse.",
+     "name"             : "KA Expanse Corp",
+     "description"      : "We are the original inhabitants of the KA Expanse.",
      "status_message"   : "Looking for Essentia.",
      "colony_count"     : 1,
      "medals" : [
@@ -697,7 +697,7 @@ The id of the empire for which you'd like to retrieve the public profile.
      "player_name"      : "Joe User",
      "last_login"       : "2013 01 31 12:34:45 +0600",
      "date_founded"     : "2013 01 31 12:34:45 +0600",
-     "species"          : "Lacunan",
+     "species"          : "KAn",
      "alliance" : {
        "id"             : "2",
        "name"           : "The Confederacy"
@@ -816,7 +816,7 @@ Retyping the password again. This must match C<password1> to succeed.
 
  {
    "session_id" : "9eea6721-3326-4c1f-817d-a4e82b54818e",
-   "name"       : "Lacuna"
+   "name"       : "KA"
  }
 
 Search for all empires that start with C<name>
@@ -831,17 +831,17 @@ The name you are searching for. It's case insensitive, and partial names work fi
 
 =head3 RESPONSE
 
-Returns a hash reference containing empire ids and empire names. So if you searched for "Lacuna" you might get back a result set that looks like this:
+Returns a hash reference containing empire ids and empire names. So if you searched for "KA" you might get back a result set that looks like this:
 
  {
    "empires" : [
      {
        "id" : "1",
-       "name" : "Lacuna Expanse Corp"
+       "name" : "KA Expanse Corp"
      },
      {    
        "id" : "365",
-       "name" : "Lacuna Pirates"
+       "name" : "KA Pirates"
      }
    ],
    "status" : { ... }

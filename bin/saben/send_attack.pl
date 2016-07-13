@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(randint format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 use AnyEvent;
 $|=1;
@@ -32,11 +32,11 @@ my $start = time;
 
 
 out('Loading DB');
-our $db = Lacuna->db;
-our $ai = Lacuna::AI::Saben->new;
+our $db = KA->db;
+our $ai = KA::AI::Saben->new;
 
-my $config = Lacuna->config;
-my $cache = Lacuna->cache;
+my $config = KA->config;
+my $cache = KA->cache;
 
 out('Looping through colonies...');
 my $colonies = $ai->empire->planets;
@@ -56,7 +56,7 @@ while (my $attacking_colony = $colonies->next) {
     $ai->destroy_world($attacking_colony);
     out('Finding target body to attack...');
 
-    my $targets = $db->resultset('Lacuna::DB::Result::Map::Body')->search({
+    my $targets = $db->resultset('KA::DB::Result::Map::Body')->search({
         empire_id                   => { '>' => 1 },
         is_isolationist             => 0,
         university_level            => { '>=' => 16 },

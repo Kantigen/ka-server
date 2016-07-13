@@ -2,10 +2,10 @@ use 5.010;
 use strict;
 use feature "switch";
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
+use KA::DB;
+use KA;
 use List::Util qw(shuffle);
-use Lacuna::Util qw(randint format_date);
+use KA::Util qw(randint format_date);
 use Getopt::Long;
 $|=1;
 our $quiet;
@@ -19,11 +19,11 @@ my $start = time;
 my $date_ended = DateTime->now->subtract( days => 7 );
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 
 out('Deleting AI Mail Items older than a day');
 my $date_ended = DateTime->now->subtract( days => 1 );
-my $mail = $db->resultset('Lacuna::DB::Result::Message');
+my $mail = $db->resultset('KA::DB::Result::Message');
 $mail->search({ to_id => { '<=' => 1 }, date_sent => { '<' => $date_ended }})->delete;
 
 out('Deleting Trashed Player Mail Items');

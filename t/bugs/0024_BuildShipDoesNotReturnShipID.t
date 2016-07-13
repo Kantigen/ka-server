@@ -16,11 +16,11 @@ my $session_id = $tester->session->id;
 my $empire = $tester->empire;
 my $home = $empire->home_planet;
 
-my $spaceport = $tester->build_building('Lacuna::DB::Result::Building::SpacePort', 1);
-my $shipyard = $tester->build_building('Lacuna::DB::Result::Building::Shipyard',5);
+my $spaceport = $tester->build_building('KA::DB::Result::Building::SpacePort', 1);
+my $shipyard = $tester->build_building('KA::DB::Result::Building::Shipyard',5);
 
 # Build a trade ministry so we can build dorys
-my $trade = $tester->build_building('Lacuna::DB::Result::Building::Trade',1);
+my $trade = $tester->build_building('KA::DB::Result::Building::Trade',1);
 
 # now build a new ship
 my $result = $tester->post('shipyard', 'build_ship', [$session_id, $shipyard->id, 'dory']);
@@ -33,7 +33,7 @@ is($first_ship->{type}, 'dory', 'ship is a Dory');
 isnt($ship_id, undef, 'ship ID is defined');
 
 # check that the ship exists
-my $ship = Lacuna->db->resultset('Lacuna::DB::Result::Ships')->find($ship_id);
+my $ship = KA->db->resultset('KA::DB::Result::Ships')->find($ship_id);
 is($ship->type, 'dory', 'ship is in the database');
 
 END {

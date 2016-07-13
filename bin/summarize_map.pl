@@ -2,9 +2,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(format_date);
 use Getopt::Long;
 use JSON;
 use utf8;
@@ -24,7 +24,7 @@ use utf8;
   my $start = DateTime->now;
 
   out('Loading DB');
-  our $db = Lacuna->db;
+  our $db = KA->db;
 
   my $map_data = summarize_map();
   output_map($map_data, $map_file );
@@ -41,11 +41,11 @@ exit;
 sub summarize_map {
 
     my %map_data;
-    my $star_map_size = Lacuna->config->get('map_size');
+    my $star_map_size = KA->config->get('map_size');
     $map_data{map} = {
       bounds => $star_map_size,
     };
-#    my $bodies = $db->resultset('Lacuna::DB::Result::Map::Body');
+#    my $bodies = $db->resultset('KA::DB::Result::Map::Body');
 #    out('Getting Occupied Bodies');
 #    my $occupied = $bodies->search({empire_id => { '!=' => 'Null' }});
 #    $map_data{colonies} = {};
@@ -63,7 +63,7 @@ sub summarize_map {
 #        $map_data{colonies}->{$body->id} = $bdata;
 #    }
     out('Getting Seized Stars');
-    my $stars  = $db->resultset('Lacuna::DB::Result::Map::Star');
+    my $stars  = $db->resultset('KA::DB::Result::Map::Star');
     my $seized_stars = $stars->search({station_id => { '!=' => 'Null' }});
     $map_data{seized} = {};
     while (my $star = $seized_stars->next) {
@@ -81,7 +81,7 @@ sub summarize_map {
     out('Getting Fissured planets');
     $map_data{fissure} = {};
     my %has_fissures = map { $_->body_id => 1 } $db->resultset('Building')->search({
-        class => 'Lacuna::DB::Result::Building::Permanent::Fissure',
+        class => 'KA::DB::Result::Building::Permanent::Fissure',
     })->all;
     for my $body_id (sort keys %has_fissures) {
         my $body = $db->resultset('Map::Body')->find($body_id);

@@ -17,10 +17,10 @@ sub log {
 
 #--- Receive a getMapChunk request
 #
-sub mq_getMapChunk {
+sub bg_getMapChunk {
     my ($self, $context) = @_;
 
-    $self->log->debug("MQ - getStarMap: ".Dumper($context));
+    $self->log->debug("BG - getStarMap: ".Dumper($context));
 
 
 

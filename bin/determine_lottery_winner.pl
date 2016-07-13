@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(format_date randint);
+use KA::DB;
+use KA;
+use KA::Util qw(format_date randint);
 use Getopt::Long;
 $|=1;
 
@@ -17,11 +17,11 @@ out('Started');
 my $start = time;
 
 out('Loading DB');
-our $db = Lacuna->db;
-our $config = Lacuna->config;
-our $cache = Lacuna->cache;
-our $news = $db->resultset('Lacuna::DB::Result::News');
-our $empires = $db->resultset('Lacuna::DB::Result::Empire');
+our $db = KA->db;
+our $config = KA->config;
+our $cache = KA->cache;
+our $news = $db->resultset('KA::DB::Result::News');
+our $empires = $db->resultset('KA::DB::Result::Empire');
 my $ymd = DateTime->now->subtract(days=>1)->ymd;
 X: foreach my $x (int($config->get('map_size/x')->[0]/250) .. int($config->get('map_size/x')->[1]/250)) {
     Y: foreach my $y (int($config->get('map_size/y')->[0]/250) .. int($config->get('map_size/y')->[1]/250)) {

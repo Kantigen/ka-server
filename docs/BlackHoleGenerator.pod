@@ -184,10 +184,10 @@ Returns success, failure, and side effect results.
   "fail" : { ... },
   "side" : { ... },
   "target" : {
-    "class" : "Lacuna::DB::Result::Map::Body::Asteroid::A2",
+    "class" : "KA::DB::Result::Map::Body::Asteroid::A2",
     "id" : "body id",
     "name" : "name of planet effected",
-    "old_class" : "Lacuna::DB::Result::Map::Body::Planet::P9",
+    "old_class" : "KA::DB::Result::Map::Body::Planet::P9",
     "old_size" : Size before change,
     "message" : "Made Asteroid",
     "size" : Size of body after effect

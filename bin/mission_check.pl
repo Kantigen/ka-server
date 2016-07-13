@@ -1,13 +1,13 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(format_date);
 use Getopt::Long;
 use JSON;
 use SOAP::Amazon::S3;
-use Lacuna::Constants qw(SHIP_TYPES ORE_TYPES);
+use KA::Constants qw(SHIP_TYPES ORE_TYPES);
 use utf8;
 
 
@@ -32,7 +32,7 @@ use utf8;
   my $start = DateTime->now;
 
   out('Loading DB');
-  our $db = Lacuna->db;
+  our $db = KA->db;
 
   my $emp = $db->resultset('Empire')->find($empire_id);
 
@@ -40,12 +40,12 @@ use utf8;
 
   my $missions;
   if ($zone) {
-      $missions = Lacuna->db->resultset('Lacuna::DB::Result::Mission')->search({
+      $missions = KA->db->resultset('KA::DB::Result::Mission')->search({
           zone                    => $zone,
       });
   }
   else {
-      $missions = Lacuna->db->resultset('Lacuna::DB::Result::Mission');
+      $missions = KA->db->resultset('KA::DB::Result::Mission');
   }
   my %mission_name;
 
@@ -53,7 +53,7 @@ use utf8;
       unless ($mission_name{$mission->mission_file_name}) {
           $mission_name{$mission->mission_file_name} = 1;
           my $done = 0;
-          $done = 1 if Lacuna->cache->get($mission->mission_file_name, $empire_id);
+          $done = 1 if KA->cache->get($mission->mission_file_name, $empire_id);
           next if ($mission->max_university_level < $level);
           next if ($done == 1 and !$show);
           out(sprintf("%40s %2d %5s %1d",

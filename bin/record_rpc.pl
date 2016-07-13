@@ -2,9 +2,9 @@ use 5.010;
 use strict;
 use feature "switch";
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(format_date);
 use Getopt::Long;
 $|=1;
 our $quiet;
@@ -16,7 +16,7 @@ out('Started');
 my $start = DateTime->now;
 
 out('Loading DB');
-our $db = Lacuna->db;
+our $db = KA->db;
 my $empire_rs = $db->resultset('Empire');
 
 out('Recording each empires previous day RPC count.');
@@ -31,8 +31,8 @@ my $total_rpc       = 0;
 my $total_limits    = 0;
 
 while (my $empire = $empire_rs->next) {
-    my $rpc = Lacuna->cache->get('rpc_count_'.$yesterday_formatted, $empire->id) || 0;
-    my $limits = Lacuna->cache->get('rpc_limit_'.$yesterday_formatted, $empire->id) || 0;
+    my $rpc = KA->cache->get('rpc_count_'.$yesterday_formatted, $empire->id) || 0;
+    my $limits = KA->cache->get('rpc_limit_'.$yesterday_formatted, $empire->id) || 0;
 
     out("Empire [".$empire->name."] had [$rpc] RPC and [$limits] rate limits yesterday");
 

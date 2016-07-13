@@ -1,6 +1,6 @@
 Welcome
 ~~~
-Allow me to introduce myself. I am Tou Re Ell, diplomat for {Empire 1 Lacuna Expanse Corp}. We welcome %s to The Lacuna Expanse! We are the original inhabitants of the Expanse, but we are so happy to see it growing. 
+Allow me to introduce myself. I am Tou Re Ell, diplomat for {Empire 1 KA Expanse Corp}. We welcome %s to The KA Expanse! We are the original inhabitants of the Expanse, but we are so happy to see it growing. 
 
 Since you are new I'd like to offer you an arrangement to help get your empire started. In return for completing some simple tasks, I will assist you in building the necessary components to ensure your survival.
 
@@ -10,7 +10,7 @@ You can also find out about your home system by going into the starmap. You'll n
 Regards,
 
 Tou Re Ell
-Lacuna Expanse Corp
+KA Expanse Corp
 
 Task: Rename your planet.
 Reward: A free building.

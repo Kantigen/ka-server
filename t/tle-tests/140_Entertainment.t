@@ -12,7 +12,7 @@ my $tester = TestHelper->new->generate_test_empire->build_infrastructure;
 my $session_id = $tester->session->id;
 my $empire = $tester->empire;
 my $home = $empire->home_planet;
-my $cache = Lacuna->cache;
+my $cache = KA->cache;
 my $ymd = DateTime->now->ymd;
 
 my $result;
@@ -23,7 +23,7 @@ my $ed = $tester->get_building($result->{result}{building}{id});
 $ed->finish_upgrade;
 
 $result = $tester->post('entertainment', 'get_lottery_voting_options', [$session_id, $ed->id]);
-is($result->{result}{options}[0]{name}, Lacuna->config->get('voting_sites')->[0]{name}, "got lottery voting options");
+is($result->{result}{options}[0]{name}, KA->config->get('voting_sites')->[0]{name}, "got lottery voting options");
 
 my $ua = $tester->ua;
 $ua->requests_redirectable([]);

@@ -1,11 +1,11 @@
 use lib '../lib';
 use Test::More tests => 54;
 
-use_ok('Lacuna::Verify');
+use_ok('KA::Verify');
 
-my $foo = Lacuna::Verify->new(content=>\'foo', throws=>'NO');
+my $foo = KA::Verify->new(content=>\'foo', throws=>'NO');
 
-isa_ok($foo, 'Lacuna::Verify');
+isa_ok($foo, 'KA::Verify');
 
 ok($foo->ok(1), 'ok');
 is(eval{$foo->ok(0)}, undef, 'ok - fail');
@@ -29,64 +29,64 @@ is(eval{$foo->length_lt(3)}, undef, 'length_lt - fail');
 like($@, qr/^NO/, 'length lt exception');
 
 ok($foo->no_restricted_chars, 'no_restricted_chars');
-my $at = Lacuna::Verify->new(content=>\'foo@bar', throws=>'NO');
+my $at = KA::Verify->new(content=>\'foo@bar', throws=>'NO');
 is(eval{$at->no_restricted_chars}, undef, 'no_restricted_chars - @');
 like($@, qr/^NO/, 'rc @ exception');
-my $gt = Lacuna::Verify->new(content=>\'foo>bar', throws=>'NO');
+my $gt = KA::Verify->new(content=>\'foo>bar', throws=>'NO');
 is(eval{$gt->no_restricted_chars}, undef, 'no_restricted_chars - >');
 like($@, qr/^NO/, 'rc >  exception');
-my $lt = Lacuna::Verify->new(content=>\'foo<bar', throws=>'NO');
+my $lt = KA::Verify->new(content=>\'foo<bar', throws=>'NO');
 is(eval{$lt->no_restricted_chars}, undef, 'no_restricted_chars - <');
 like($@, qr/^NO/, 'rc < exception');
-my $amp = Lacuna::Verify->new(content=>\'foo&bar', throws=>'NO');
+my $amp = KA::Verify->new(content=>\'foo&bar', throws=>'NO');
 is(eval{$amp->no_restricted_chars}, undef, 'no_restricted_chars - &');
 like($@, qr/^NO/, 'rc & exception');
-my $semi = Lacuna::Verify->new(content=>\'foo;bar', throws=>'NO');
+my $semi = KA::Verify->new(content=>\'foo;bar', throws=>'NO');
 is(eval{$semi->no_restricted_chars}, undef, 'no_restricted_chars - ;');
 like($@, qr/^NO/, 'rc ; exception');
 
-$gt = Lacuna::Verify->new(content=>\'foo>bar', throws=>'NO');
+$gt = KA::Verify->new(content=>\'foo>bar', throws=>'NO');
 is(eval{$gt->no_tags}, undef, 'no_tags - >');
 like($@, qr/^NO/, 'rc >  exception');
-$lt = Lacuna::Verify->new(content=>\'foo<bar', throws=>'NO');
+$lt = KA::Verify->new(content=>\'foo<bar', throws=>'NO');
 is(eval{$lt->no_tags}, undef, 'no_tags - <');
 like($@, qr/^NO/, 'rc < exception');
 
-my $empty = Lacuna::Verify->new(content=>\'', throws=>'NO');
+my $empty = KA::Verify->new(content=>\'', throws=>'NO');
 ok($empty->empty, 'empty');
 is(eval{$foo->empty}, undef, 'empty - fail');
 like($@, qr/^NO/, 'empty exception');
 ok($foo->not_empty, 'not_empty');
 is(eval{$empty->not_empty}, undef, 'not_empty - fail');
 like($@, qr/^NO/, 'not empty exception');
-$empty = Lacuna::Verify->new(content=>\" \t", throws=>'NO');
+$empty = KA::Verify->new(content=>\" \t", throws=>'NO');
 is(eval{$empty->not_empty}, undef, 'not_empty whitespace - fail');
 like($@, qr/^NO/, 'not empty whitespace exception');
 
-my $shit = Lacuna::Verify->new(content=>\'shit', throws=>'NO');
+my $shit = KA::Verify->new(content=>\'shit', throws=>'NO');
 ok($foo->no_profanity, 'no_profanity');
 is(eval{$shit->no_profanity}, undef, 'no_profanity - fail');
 like($@, qr/^NO/, 'np exception');
 
-my $fuck = Lacuna::Verify->new(content=>\'Fuck', throws=>'NO');
+my $fuck = KA::Verify->new(content=>\'Fuck', throws=>'NO');
 is(eval{$fuck->no_profanity}, undef, 'no_profanity - uppercase fuck triggers exception');
 like($@, qr/^NO/, 'np exception');
 
-my $double_carriage_returns = Lacuna::Verify->new(content=>\"foo\n\nbar", throws=>'NO');
+my $double_carriage_returns = KA::Verify->new(content=>\"foo\n\nbar", throws=>'NO');
 ok($double_carriage_returns->no_tags, '\n\n no_tags');
 ok($double_carriage_returns->no_profanity, '\n\n no_profanity');
 ok($double_carriage_returns->not_empty, '\n\n not_empty');
 
-$double_carriage_returns = Lacuna::Verify->new(content=>\"foo\n\n", throws=>'NO');
+$double_carriage_returns = KA::Verify->new(content=>\"foo\n\n", throws=>'NO');
 ok($double_carriage_returns->not_empty, 'after \n\n not_empty');
 
-$double_carriage_returns = Lacuna::Verify->new(content=>\"\n\nfoo", throws=>'NO');
+$double_carriage_returns = KA::Verify->new(content=>\"\n\nfoo", throws=>'NO');
 ok($double_carriage_returns->not_empty, 'before \n\n not_empty');
 
-my $email = Lacuna::Verify->new(content => \'jt@lacunaexpanse.com', throws => 'NO');
+my $email = KA::Verify->new(content => \'jt@lacunaexpanse.com', throws => 'NO');
 ok($email->is_email, 'is_email works');
 
 # I can't see where code for this test is implemented.
-#my $not_email = Lacuna::Verify->new(content => \'<script jt@lacunaexpanse.com>', throws => 'NO');
+#my $not_email = KA::Verify->new(content => \'<script jt@lacunaexpanse.com>', throws => 'NO');
 #like($@, qr/^NO/, 'is_email finds hacks');
 

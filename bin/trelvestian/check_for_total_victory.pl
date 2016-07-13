@@ -1,9 +1,9 @@
 use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
-use Lacuna::DB;
-use Lacuna;
-use Lacuna::Util qw(format_date);
+use KA::DB;
+use KA;
+use KA::Util qw(format_date);
 use Getopt::Long;
 use UUID::Tiny ':std';
 $|=1;
@@ -15,23 +15,23 @@ GetOptions(
 out('Started');
 my $start = time;
 
-my $config = Lacuna->config;
+my $config = KA->config;
 my $server_url = $config->get('server_url');
 
 out('Loading AI');
-my $ai = Lacuna::AI::Trelvestian->new;
+my $ai = KA::AI::Trelvestian->new;
 
 out('Loading Empires');
-my $empires = Lacuna->db->resultset('Lacuna::DB::Result::Empire');
-my $cache = Lacuna->cache;
-my $lec = Lacuna::DB::Result::Empire->lacuna_expanse_corp;
+my $empires = KA->db->resultset('KA::DB::Result::Empire');
+my $cache = KA->cache;
+my $lec = KA::DB::Result::Empire->lacuna_expanse_corp;
 
 if ($cache->get('tournament', 'FourTrel') ne 'Tournament Over') {
 	out('Checking victory planets.');
 	my %victory_points;
 	my $victory_empire;
-	my $bodies = Lacuna->db->resultset('Lacuna::DB::Result::Map::Body');
-	foreach my $id (@{Lacuna->config->get('win/alliance_control')}) {
+	my $bodies = KA->db->resultset('KA::DB::Result::Map::Body');
+	foreach my $id (@{KA->config->get('win/alliance_control')}) {
 	    my $planet = $bodies->find($id);
 	    if ($planet->empire_id eq '' || $planet->empire_id > 1) {
             if ($cache->get('victory_planet'.$id) ne $planet->empire_id) {
@@ -62,7 +62,7 @@ if ($cache->get('tournament', 'FourTrel') ne 'Tournament Over') {
             elsif ($server_url =~ /us1/) {
                 $cache->set('tournament', 'FourTrel','Tournament Over', 60 * 60 * 24 * 30);
                 out('victory empire: ' . $victory_empire->name);
-                my $alliance = Lacuna->db->resultset('Lacuna::DB::Result::Alliance')->find($victory_empire->alliance_id);
+                my $alliance = KA->db->resultset('KA::DB::Result::Alliance')->find($victory_empire->alliance_id);
                 if (defined $alliance) {
                     out('victory alliance: ' . $alliance->name);
                     my @allies = $alliance->members->get_column('id')->all;
@@ -111,7 +111,7 @@ sub out {
 
 sub set_announcement {
     my $message = shift;
-    my $cache = Lacuna->cache;
+    my $cache = KA->cache;
     my $announcement = $cache->get('announcement','message');
     $announcement .= '<br>' . $message;
     $cache->set('announcement','alert', create_uuid_as_string(UUID_V4), 60*60*24);

@@ -27,7 +27,7 @@ my $empire = {
 };
 my $e2;
 
-Lacuna->cache->set('create_empire_captcha', '127.0.0.1', { guid => 1111, solution => 1111 }, 60 * 15 );
+KA->cache->set('create_empire_captcha', '127.0.0.1', { guid => 1111, solution => 1111 }, 60 * 15 );
 
 $empire->{name} = 'XX>';
 $result = $tester->post('empire', 'create', $empire);
@@ -156,7 +156,7 @@ $empire->{password1} = 'dddddd';
 $result = $tester->post('empire', 'create', $empire);
 ok(exists $result->{error}, 'cannot create a second time with a different password');
 
-my $empire_obj = Lacuna->db->resultset('Lacuna::DB::Result::Empire')->find($empire_id);
+my $empire_obj = KA->db->resultset('KA::DB::Result::Empire')->find($empire_id);
 is($empire_obj->species_name, 'Borg', 'species getting set properly');
 is($empire_obj->home_planet->command->level, 7, 'growth affinity works');
 
@@ -217,7 +217,7 @@ $empire2{email} = 'test@example.com';
 $result = $tester->post('empire', 'create', \%empire2);
 $empire2{id} = $result->{result};
 $result = $tester->post('empire', 'found', [$empire2{id},'Anonymous']);
-$e2 = Lacuna->db->resultset('Lacuna::DB::Result::Empire')->find($empire2{id});
+$e2 = KA->db->resultset('KA::DB::Result::Empire')->find($empire2{id});
 $e2->add_essentia({ amount => 200, reason => 'test'});
 $e2->update;
 my $session2 = $result->{result}{session_id};
@@ -234,7 +234,7 @@ is($result->{result}{species}{name}, 'The BORGinator', 'get renamed species name
 is($result->{result}{status}{empire}{essentia}, '100.0', 'essentia spent');
 
 # as far as I can tell, we don't create an EssentiaCode in this test.
-#my $code = Lacuna->db->resultset('Lacuna::DB::Result::EssentiaCode')->search({description=>'essentia code deleted'})->first;
+#my $code = KA->db->resultset('KA::DB::Result::EssentiaCode')->search({description=>'essentia code deleted'})->first;
 #is($result->{result}{status}{empire}{essentia}, $code->amount, 'you get a proper essentia code');
 
 END {

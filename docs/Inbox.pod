@@ -159,7 +159,7 @@ Retrieves a message. Marks it read if it hasn't been already.
                 "link" : "http://www.lacunaexpanse.com/", # optional link to somewhere
             "link" : {
                 "url" : "http://www.lacunaexpanse.com/",
-                "label" : "The Lacuna Expanse Website"
+                "label" : "The KA Expanse Website"
             }
             "table" : [
                 [ "Hostname", "IP Address" ], # first row is always a header
@@ -637,7 +637,7 @@ Or
 
 =item *
 
-In short, HTML is long, tedious, ugly, vulnerable, and a terrible language for the types of applications we have in Lacuna.
+In short, HTML is long, tedious, ugly, vulnerable, and a terrible language for the types of applications we have in KA.
 
 =back
 
