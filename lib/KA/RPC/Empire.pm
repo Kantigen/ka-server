@@ -274,6 +274,10 @@ sub fetch_captcha {
 
     my $job = KA->queue->publish({
         queue   => 'bg_captcha',
+        payload => {
+            route   => '/captcha/generate',
+            content => {},
+        }
     });
 
     return {

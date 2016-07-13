@@ -28,9 +28,13 @@ sub fetch {
 
     # Now trigger a new captcha generation
     my $job = KA->queue->publish({
-        queue   => 'bg_captcha'
+        queue   => 'bg_captcha',
+        payload => {
+            route   => '/captcha/generate',
+            content => {},
+        }
     });
-    
+
     return {
         guid    => $captcha->guid,
         url     => $captcha->uri,
