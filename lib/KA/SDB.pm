@@ -7,8 +7,12 @@ has db => (
     is          => 'rw',
     required    => 1,
     isa         => 'KA::DB',
-    handles     => [qw(resultset)],
+           #handles     => [qw(resultset)],
 );
+
+sub resultset {
+    __PACKAGE__->instance->resultset(@_);
+}
 
 __PACKAGE__->meta->make_immutable;
 
