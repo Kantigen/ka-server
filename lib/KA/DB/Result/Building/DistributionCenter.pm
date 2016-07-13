@@ -6,6 +6,8 @@ no warnings qw(uninitialized);
 use KA::Constants qw(ORE_TYPES FOOD_TYPES GROWTH_F INFLATION_F CONSUME_N WASTE_S TINFLATE_F);
 extends 'KA::DB::Result::Building';
 
+use experimental "switch";
+
 around 'build_tags' => sub {
     my ($orig, $class) = @_;
     return ($orig->($class), qw(Infrastructure Storage));

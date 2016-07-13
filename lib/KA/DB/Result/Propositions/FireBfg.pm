@@ -5,6 +5,8 @@ use utf8;
 no warnings qw(uninitialized);
 extends 'KA::DB::Result::Propositions';
 
+use experimental "switch";
+
 before pass => sub {
     my ($self) = @_;
     my $body    = KA->db->resultset('KA::DB::Result::Map::Body')->find($self->scratch->{body_id});

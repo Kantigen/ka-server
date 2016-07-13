@@ -13,6 +13,7 @@ use Scalar::Util qw(weaken);
 use feature "switch";
 use KA::Constants qw(ORE_TYPES FOOD_TYPES SHIP_TYPES);
 
+use experimental "switch";
 
 __PACKAGE__->table('spies');
 __PACKAGE__->add_columns(
@@ -2358,7 +2359,7 @@ sub prevent_insurrection {
     my ($self, $defender) = @_;
     return $self->get_spooked->id unless (defined $defender);
     $self->on_body->add_news(20,
-                             'Officials prevented a coup d\'Žtat today on on %s by capturing %s and comrades.',
+                             'Officials prevented a coup d\'ï¿½tat today on on %s by capturing %s and comrades.',
                              $self->on_body->name,
                              $self->name);
     $self->go_to_jail;

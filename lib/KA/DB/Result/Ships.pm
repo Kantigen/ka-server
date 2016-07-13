@@ -7,6 +7,9 @@ extends 'KA::DB::Result';
 use KA::Util qw(format_date randint);
 use DateTime;
 use Scalar::Util qw(weaken);
+
+use experimental "switch";
+
 use feature "switch";
 
 has 'hostile_action' => (

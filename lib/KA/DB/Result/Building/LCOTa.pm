@@ -7,6 +7,8 @@ extends 'KA::DB::Result::Building';
 use KA::Constants qw(GROWTH);
 with 'KA::Role::LCOT';
 
+use experimental "switch";
+
 use constant controller_class => 'KA::RPC::Building::LCOTa';
 use constant image => 'lcota';
 use constant name => 'Lost City of Tyleon (A)';

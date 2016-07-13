@@ -6,6 +6,8 @@ no warnings qw(uninitialized);
 use KA::Util qw(randint);
 extends 'KA::DB::Result::Building';
 
+use experimental "switch";
+
 around 'build_tags' => sub {
     my ($orig, $class) = @_;
     return ($orig->($class), qw(Infrastructure));

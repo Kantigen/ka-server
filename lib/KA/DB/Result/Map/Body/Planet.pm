@@ -14,6 +14,8 @@ use Scalar::Util qw(weaken);
 
 no warnings 'uninitialized';
 
+use experimental "switch";
+
 __PACKAGE__->has_many('fleets','KA::DB::Result::Fleet','body_id');
 __PACKAGE__->has_many('_plans','KA::DB::Result::Plan','body_id');
 __PACKAGE__->has_many('glyph','KA::DB::Result::Glyph','body_id');

@@ -6,6 +6,8 @@ no warnings qw(uninitialized);
 extends 'KA::DB::Result::Building';
 use KA::Constants qw(FOOD_TYPES ORE_TYPES);
 
+use experimental "switch";
+
 with 'KA::Role::Trader','KA::Role::Fleet::Trade';
 
 
