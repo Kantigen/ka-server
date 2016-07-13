@@ -11,7 +11,7 @@ has db => (
 );
 
 sub resultset {
-    __PACKAGE__->instance->resultset(@_);
+    __PACKAGE__->instance->db->resultset(@_);
 }
 
 __PACKAGE__->meta->make_immutable;

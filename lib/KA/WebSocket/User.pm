@@ -29,7 +29,7 @@ sub log {
 
 #--- Receive a Message Queue message
 #
-sub mq_hello {
+sub fg_hello {
     my ($self, $context) = @_;
 
     my $log = Log::Log4perl->get_logger('KA::WebSocket::User');

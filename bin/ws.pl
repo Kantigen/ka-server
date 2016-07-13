@@ -78,10 +78,10 @@ my $queue = KA::Queue->instance;
 
 while (1) {
     print STDERR "Reserving Job...\n";
-    my $job = $queue->consume('ws_receive');
+    my $job = $queue->consume('fg_websocket');
     print STDERR "Deleting Job...[".Dumper($job->payload)."]\n";
 
-    # The ws_receive queue is handled by the WebSocket queue router
+    # The fg_websocket queue is handled by the WebSocket queue router
     $web_socket->queue($job);
 }
 
