@@ -22,6 +22,16 @@ sub bg_arrives {
     my ($self, $context) = @_;
 
     $self->log->debug("BG_Fleet arrives : ".Dumper($context));
+    my $db = KA::SDB->instance->db;
+
+    my $fleet_id = $context->content->{fleet_id};
+    my $fleet = $db->resultset('Fleet')->find({ $fleet_id });
+    if (defined $fleet) {
+        $fleet->arrive;
+    }
+    else {
+        $self->log->error("Cannot find fleet - $fleet_id");
+    }
 }
 
 #--- Fleet finishes Construction Upgrade
@@ -30,6 +40,16 @@ sub bg_finishConstruction {
     my ($self, $context) = @_;
 
     $self->log->debug("BG_Fleet finishConstruction : ".Dumper($context));
+    my $db = KA::SDB->instance->db;
+
+    my $fleet_id = $context->content->{fleet_id};
+    my $fleet = $db->resultset('Fleet')->find({ $fleet_id });
+    if (defined $fleet) {
+        $fleet->finish_construction;
+    }
+    else {
+        $self->log->error("Cannot find fleet - $fleet_id");
+    }
 }
 
 1;
