@@ -19,7 +19,7 @@ my $start = time;
 
 out('Loading DB');
 our $db = KA->db;
-my $empires = KA->db->resultset('KA::DB::Result::Empire');
+my $empires = KA->db->resultset('Empire');
 my $config = KA->config;
 
 out('getting empires...');
@@ -28,7 +28,7 @@ my $lec = $empires->find(1);
 
 
 out('Send Network 19 messages....');
-my $news = $db->resultset('KA::DB::Result::News');
+my $news = $db->resultset('News');
 foreach my $x (int($config->get('map_size/x')->[0]/250) .. int($config->get('map_size/x')->[1]/250)) {
     foreach my $y (int($config->get('map_size/y')->[0]/250) .. int($config->get('map_size/y')->[1]/250)) {
         my $zone = $x.'|'.$y;

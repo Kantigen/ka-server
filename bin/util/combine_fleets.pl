@@ -19,7 +19,7 @@ out('Loading DB');
 our $db = KA->db;
 
 out('Touch all fleets');
-my $fleets = $db->resultset('KA::DB::Result::Fleet')->search;
+my $fleets = $db->resultset('Fleet')->search;
 
 while (my $fleet = $fleets->next) {
     eval {

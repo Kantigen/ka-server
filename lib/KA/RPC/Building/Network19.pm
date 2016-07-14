@@ -26,7 +26,7 @@ sub view_news {
         last if !@all;
         push @zones, shift @all;
     }
-    my $news = KA->db->resultset('KA::DB::Result::News')->search(
+    my $news = KA->db->resultset('News')->search(
         {
             zone        => {'in' => \@zones},
         },

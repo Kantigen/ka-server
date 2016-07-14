@@ -48,7 +48,7 @@ my $have_exception = [1011, 'You cannot offer to trade something you do not have
 my $offer_nothing_exception = [1013, 'It appears that you have offered nothing.'];
 
 sub market {
-    return KA->db->resultset('KA::DB::Result::MercenaryMarket');
+    return KA->db->resultset('MercenaryMarket');
 }
 
 sub my_market { 
@@ -79,7 +79,7 @@ sub add_to_market {
     unless ($self->effective_level > $self->my_market->count) {
         confess [1009, "This Mercenaries Guild can only support ".$self->effective_level." spies at one time."];
     }
-    my $spy = KA->db->resultset('KA::DB::Result::Spies')->find($spy_id);
+    my $spy = KA->db->resultset('Spies')->find($spy_id);
     confess $have_exception unless (defined $spy && $self->body_id eq $spy->on_body_id && $spy->task ~~ ['Counter Espionage','Idle']);
     $spy->task('Mercenary Transport');
     $spy->update;
@@ -93,7 +93,7 @@ sub add_to_market {
         cost            => $cost,
         payload         => $payload,
     );
-    return KA->db->resultset('KA::DB::Result::MercenaryMarket')->new(\%trade)->insert;
+    return KA->db->resultset('MercenaryMarket')->new(\%trade)->insert;
 }
 
 sub trade_ships {
@@ -120,7 +120,7 @@ sub next_available_trade_ship {
 
 before delete => sub {
   my ($self) = @_;
-  my $market = KA->db->resultset('KA::DB::Result::MercenaryMarket');
+  my $market = KA->db->resultset('MercenaryMarket');
   my @to_be_deleted = $market->search({body_id => $self->body_id})->get_column('id')->all;
   foreach my $id (@to_be_deleted) {
     my $trade = $market->find($id);

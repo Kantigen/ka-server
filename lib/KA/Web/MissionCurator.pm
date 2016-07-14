@@ -14,7 +14,7 @@ use Text::CSV_XS;
 
 sub www_add_essentia {
     my ($self, $request) = @_;
-    my $empires = KA->db->resultset('KA::DB::Result::Empire');
+    my $empires = KA->db->resultset('Empire');
     my $empire = $empires->find($request->param('id'));
     unless (defined $empire) {
         confess [404, 'Empire not found.'];
@@ -40,7 +40,7 @@ sub www_add_essentia {
     );
     my $dt_parser = KA->db->storage->datetime_parser;
     my $seven_days_ago = $dt_parser->format_datetime( DateTime->now->subtract(days => 7) );
-    my $recent = KA->db->resultset('KA::DB::Result::Log::Essentia')->search({
+    my $recent = KA->db->resultset('Log::Essentia')->search({
         empire_id => $curator->id, 
         description => 'Mission Curator', 
         date_stamp => { '>' => $seven_days_ago},
@@ -58,7 +58,7 @@ sub www_add_essentia {
 sub www_stats {
     my ($self, $request) = @_;
     my $csv = Text::CSV_XS->new({binary => 1});
-    my $logs = KA->db->resultset('KA::DB::Result::Log::Mission');
+    my $logs = KA->db->resultset('Log::Mission');
     $csv->combine('filename','number of times offered','number of incompletes','number of completes','completes university level','seconds to complete','number of skips','skips university level');
     my $out = $csv->string."\n";
     while (my $log = $logs->next) {
@@ -79,7 +79,7 @@ sub www_stats {
 
 sub www_payouts {
     my ($self, $request) = @_;
-    my $payouts = KA->db->resultset('KA::DB::Result::Log::Essentia')->search(
+    my $payouts = KA->db->resultset('Log::Essentia')->search(
         {description => [{ '=' => 'Mission Curator' }, { like => 'Mission Pack Approved By%'} ] },
         {order_by => { -desc => 'date_stamp' } }
     );
@@ -95,7 +95,7 @@ sub www_payouts {
 sub www_default {
     my ($self, $request, $message) = @_;
     my $page_number = $request->param('page_number') || 1;
-    my $empires = KA->db->resultset('KA::DB::Result::Empire')->search(undef, {order_by => ['name'], rows => 25, page => $page_number });
+    my $empires = KA->db->resultset('Empire')->search(undef, {order_by => ['name'], rows => 25, page => $page_number });
     my $name = $request->param('name') || '';
     if ($name) {
         $empires = $empires->search({name => { like => $name.'%' }});

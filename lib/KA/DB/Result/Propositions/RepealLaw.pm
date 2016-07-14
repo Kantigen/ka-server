@@ -7,7 +7,7 @@ extends 'KA::DB::Result::Propositions';
 
 before pass => sub {
     my ($self) = @_;
-    my $law = KA->db->resultset('KA::DB::Result::Laws')->find($self->scratch->{law_id});
+    my $law = KA->db->resultset('Laws')->find($self->scratch->{law_id});
     if (defined $law) {
         $law->delete;
     }

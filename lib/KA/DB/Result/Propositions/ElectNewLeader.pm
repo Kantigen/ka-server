@@ -9,7 +9,7 @@ before pass => sub {
     my ($self) = @_;
     my $station = $self->station;
     my $alliance = $station->alliance;
-    my $new_leader = KA->db->resultset('KA::DB::Result::Empire')->find($self->scratch->{empire_id});
+    my $new_leader = KA->db->resultset('Empire')->find($self->scratch->{empire_id});
     if (defined $new_leader) {
         if ($new_leader->alliance_id == $alliance->id) {
             $alliance->leader_id($new_leader->id);

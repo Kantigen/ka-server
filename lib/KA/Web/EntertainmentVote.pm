@@ -28,7 +28,7 @@ sub www_default {
     unless ($building_id) {
         confess [400, 'You need to pass a building id'];
     }
-    my $building = KA->db->resultset('KA::DB::Result::Building')->find($building_id);
+    my $building = KA->db->resultset('Building')->find($building_id);
     unless (defined $building) {
         confess [404, 'Could not find your entertainment district.'];
     }
@@ -53,7 +53,7 @@ sub www_default {
         $cache->set('high_vote'.$zone, $ymd, $ticket, 60*60*48);
         $cache->set('high_vote_empire'.$zone, $ymd, $empire->id, 60*60*48);
     }
-    KA->db->resultset('KA::DB::Result::Log::Lottery')->new({
+    KA->db->resultset('Log::Lottery')->new({
         empire_id   => $empire->id,
         empire_name => $empire->name,
         ip_address  => $request->address,

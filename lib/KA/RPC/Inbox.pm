@@ -263,14 +263,14 @@ sub send_message {
     my $session  = $self->get_session({session_id => $session_id });
     my $empire   = $session->current_empire;
     if ($options->{in_reply_to}) {
-        my $reply_to = KA->db->resultset('KA::DB::Result::Message')->find($options->{in_reply_to});
+        my $reply_to = KA->db->resultset('Message')->find($options->{in_reply_to});
         unless ($empire->id ~~ [$reply_to->to_id, $reply_to->from_id]) {
             confess [1010, 'You cannot reply to a message id that you cannot read.'];
         }
     }
     my $attachments = {};
     if ($options->{forward}) {
-        my $forward = KA->db->resultset('KA::DB::Result::Message')->find($options->{forward});
+        my $forward = KA->db->resultset('Message')->find($options->{forward});
         unless ($empire->id ~~ [$forward->to_id, $forward->from_id]) {
             confess [1010, 'You cannot forward a message id that you cannot read.'];
         }
@@ -298,7 +298,7 @@ sub send_message {
             }
         }
         else {
-            my $user = KA->db->resultset('KA::DB::Result::Empire')->search({name => $name})->first;
+            my $user = KA->db->resultset('Empire')->search({name => $name})->first;
             if (defined $user) {
                 push @sent, $user->name;
                 push @to, $user;

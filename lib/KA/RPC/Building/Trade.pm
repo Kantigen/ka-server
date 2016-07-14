@@ -316,7 +316,7 @@ sub create_supply_chain {
     if ($body->id == $target_id) {
         confess [1002, "You can't set up a supply chain to yourself."];
     }
-    my $target = KA->db->resultset('KA::DB::Result::Map::Body')->find($target_id);
+    my $target = KA->db->resultset('Map::Body')->find($target_id);
     unless ($target) {
         confess [1002, "Cannot find that target body."];
     }

@@ -68,7 +68,7 @@ sub create_alliance {
     if ($empire->alliance_id) {
         confess [1010, 'Cannot form a new alliance, while you belong to an existing alliance.'];
     }
-    my $alliances = KA->db->resultset('KA::DB::Result::Alliance');
+    my $alliances = KA->db->resultset('Alliance');
     KA::Verify->new(content=>\$name, throws=>[1000,'Alliance name not available.', 'name'])
         ->length_lt(31)
         ->length_gt(2)
@@ -220,7 +220,7 @@ sub get_pending_invites {
 
 sub get_my_invites {
     my $self = shift;
-    my $invites = KA->db->resultset('KA::DB::Result::AllianceInvite')->search({empire_id => $self->body->empire_id});
+    my $invites = KA->db->resultset('AllianceInvite')->search({empire_id => $self->body->empire_id});
     my @out;
     while (my $invite = $invites->next) {
         my $alliance = $invite->alliance;
@@ -314,7 +314,7 @@ before 'can_demolish' => sub {
 sub propositions {
     my ($self) = @_;
     my $alliance = $self->alliance;
-    return KA->db->resultset('KA::DB::Result::Propositions')->
+    return KA->db->resultset('Propositions')->
         search({ "station.alliance_id" => $alliance->id, }, { prefetch => ["station",'proposed_by'] });
 }
 

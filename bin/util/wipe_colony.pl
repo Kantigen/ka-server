@@ -33,7 +33,7 @@ use utf8;
 
   if (@eid) {
       for my $eid (@eid) {
-          my @bodies = map { $_->id } $db->resultset('KA::DB::Result::Map::Body')->search({
+          my @bodies = map { $_->id } $db->resultset('Map::Body')->search({
                            empire_id => $eid,
                        });
           push @bid, @bodies;
@@ -49,7 +49,7 @@ sub clean_off {
   my ($sanitize, $bids) = @_;
 
   for my $bid (@$bids) {
-      my $body = $db->resultset('KA::DB::Result::Map::Body')->find($bid);
+      my $body = $db->resultset('Map::Body')->find($bid);
       unless ($body) {
           print "Cannot find body id $bid\n";
           next;

@@ -24,9 +24,9 @@ my $start = DateTime->now;
 
 out('Loading DB');
 our $db = KA->db;
-our $viral_log = $db->resultset('KA::DB::Result::Log::Viral');
-our $economy_log = $db->resultset('KA::DB::Result::Log::Economy');
-our $essentia_log = $db->resultset('KA::DB::Result::Log::Essentia');
+our $viral_log = $db->resultset('Log::Viral');
+our $economy_log = $db->resultset('Log::Economy');
+our $essentia_log = $db->resultset('Log::Essentia');
 
 
 if ($all) {

@@ -23,9 +23,9 @@ my $start = time;
 
 out('Loading DB');
 our $db = KA->db;
-my $bodies = $db->resultset('KA::DB::Result::Map::Body');
-my $stars = $db->resultset('KA::DB::Result::Map::Star');
-my $empire = $db->resultset('KA::DB::Result::Empire');
+my $bodies = $db->resultset('Map::Body');
+my $stars = $db->resultset('Map::Star');
+my $empire = $db->resultset('Empire');
 
 out('Figuring out which stars need to be moved...');
 my @stars_to_move = $bodies->search({

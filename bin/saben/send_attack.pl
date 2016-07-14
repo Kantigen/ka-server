@@ -56,7 +56,7 @@ while (my $attacking_colony = $colonies->next) {
     $ai->destroy_world($attacking_colony);
     out('Finding target body to attack...');
 
-    my $targets = $db->resultset('KA::DB::Result::Map::Body')->search({
+    my $targets = $db->resultset('Map::Body')->search({
         empire_id                   => { '>' => 1 },
         is_isolationist             => 0,
         university_level            => { '>=' => 16 },

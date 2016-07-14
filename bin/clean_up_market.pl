@@ -22,7 +22,7 @@ out('Loading DB');
 our $db = KA->db;
 
 out('Deleting Outdated Market Items');
-my $market = $db->resultset('KA::DB::Result::Market');
+my $market = $db->resultset('Market');
 my @to_be_deleted = $market->search({ date_offered => { '<' => $date_ended }})->get_column('id')->all;
 foreach my $id (@to_be_deleted) {
     out('Withdrawing '.$id);

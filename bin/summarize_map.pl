@@ -45,7 +45,7 @@ sub summarize_map {
     $map_data{map} = {
       bounds => $star_map_size,
     };
-#    my $bodies = $db->resultset('KA::DB::Result::Map::Body');
+#    my $bodies = $db->resultset('Map::Body');
 #    out('Getting Occupied Bodies');
 #    my $occupied = $bodies->search({empire_id => { '!=' => 'Null' }});
 #    $map_data{colonies} = {};
@@ -63,7 +63,7 @@ sub summarize_map {
 #        $map_data{colonies}->{$body->id} = $bdata;
 #    }
     out('Getting Seized Stars');
-    my $stars  = $db->resultset('KA::DB::Result::Map::Star');
+    my $stars  = $db->resultset('Map::Star');
     my $seized_stars = $stars->search({station_id => { '!=' => 'Null' }});
     $map_data{seized} = {};
     while (my $star = $seized_stars->next) {

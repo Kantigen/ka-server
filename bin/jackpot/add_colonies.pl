@@ -20,9 +20,9 @@ my $start = time;
 out('Loading DB');
 our $db = KA->db;
 my $config = KA->config;
-my $empires = $db->resultset('KA::DB::Result::Empire');
+my $empires = $db->resultset('Empire');
 my $ai = KA::AI::Jackpot->new;
-my $viable_colonies = $db->resultset('KA::DB::Result::Map::Body')->search(
+my $viable_colonies = $db->resultset('Map::Body')->search(
                 { zone => '0|0', empire_id => undef, size => { between => [40,60]},
                   x => { between => [-50,50]}, y => {between => [-50,50]}},
                 { rows => 1, order_by => 'rand()' }

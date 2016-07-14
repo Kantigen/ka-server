@@ -11,7 +11,7 @@ before pass => sub {
     my ($self) = @_;
     my $resources = $self->scratch->{resources};
     my $planet_id = $self->scratch->{planet_id};
-    my $planet = KA->db->resultset('KA::DB::Result::Map::Body')->find($planet_id);
+    my $planet = KA->db->resultset('Map::Body')->find($planet_id);
     if (defined $planet) {
         if ($planet->star->station_id == $self->body_id) {
             my @types = qw( energy food ore water );

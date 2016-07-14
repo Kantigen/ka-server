@@ -276,7 +276,7 @@ sub build_fleet {
     $self->set_fleet_stealth($fleet);
     $time ||= $self->get_fleet_costs($fleet)->{seconds};
 
-    my $latest = KA->db->resultset('KA::DB::Result::Fleet')->search(
+    my $latest = KA->db->resultset('Fleet')->search(
     {
         shipyard_id => $self->id,
         task        => 'Building',

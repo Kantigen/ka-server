@@ -9,7 +9,7 @@ before pass => sub {
     my ($self) = @_;
     my $station = $self->station;
     my $name = $self->scratch->{name};
-    if (KA->db->resultset('KA::DB::Result::Map::Body')->search({name=>$name, 'id'=>{'!='=>$station->id}})->count) {
+    if (KA->db->resultset('Map::Body')->search({name=>$name, 'id'=>{'!='=>$station->id}})->count) {
         $self->pass_extra_message('Unfortunately, by the time the proposition passed, the name *'.$name.'* had already taken, effectively nullifying the vote.');
     }
     else {

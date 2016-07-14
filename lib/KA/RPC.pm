@@ -110,7 +110,7 @@ sub get_session {
                 @caller = caller(++$i);
             }
             $log->info(sprintf "ACTUAL:ipr=%s,ipe=%s,ipm=%s,ses=%s,sat:%d,rpc=%s", $ipr, $session->ip_address, $ipm, $opts->{session_id}, $session->is_sitter ? 1 : 0, $caller[3]);
-            #KA->db->resultset('KA::DB::Result::Log::RPC')->new({
+            #KA->db->resultset('Log::RPC')->new({
             #   empire_id    => $empire->id,
             #   empire_name  => $empire->name,
             #   module       => ref $self,

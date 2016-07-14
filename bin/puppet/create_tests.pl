@@ -23,7 +23,7 @@ our $db = KA->db;
 out('Creating empire...');
 for my $num (2..40) {
   my $name = sprintf("Test%02d",$num);
-  my $empire = KA->db->resultset('KA::DB::Result::Empire')->new({
+  my $empire = KA->db->resultset('Empire')->new({
     name                => $name,
     stage               => 'founded',
     date_created        => DateTime->now,
@@ -53,7 +53,7 @@ for my $num (2..40) {
   my $home = $empire->find_home_planet;
   $empire->found($home);
   out('Placing Embassy for '.$name.' on '.$home->name);
-  my $bld = KA->db->resultset('KA::DB::Result::Building')->new({
+  my $bld = KA->db->resultset('Building')->new({
       body_id  => $home->id,
       x        => 1,
       y        => 0,

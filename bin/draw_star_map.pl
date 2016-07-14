@@ -4,8 +4,8 @@ use lib '../lib';
 use KA::DB;
 use KA;
 
-my $stars = KA->db->resultset('KA::DB::Result::Map::Star');
-my $bodies = KA->db->resultset('KA::DB::Result::Map::Body');
+my $stars = KA->db->resultset('Map::Star');
+my $bodies = KA->db->resultset('Map::Body');
 for (my $y = 15; $y > -15; $y--) {
     foreach (my $x = 15; $x > -15; $x--) {
         my $star = $stars->search({x=>$x, y=>$y})->count;

@@ -8,7 +8,7 @@ extends 'KA::DB::Result::Propositions';
 before pass => sub {
     my ($self) = @_;
     my $station = $self->station;
-    my $bodies = KA->db->resultset('KA::DB::Result::Map::Body');
+    my $bodies = KA->db->resultset('Map::Body');
     my $asteroid = $bodies->find($self->scratch->{asteroid_id});
     my $name = $self->scratch->{name};
     if ($bodies->search({name=>$name, id=>{'!='=>$asteroid->id}})->count) {

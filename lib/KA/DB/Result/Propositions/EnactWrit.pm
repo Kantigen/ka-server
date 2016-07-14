@@ -7,7 +7,7 @@ extends 'KA::DB::Result::Propositions';
 
 before pass => sub {
     my ($self) = @_;
-    my $law = KA->db->resultset('KA::DB::Result::Laws')->new({
+    my $law = KA->db->resultset('Laws')->new({
         name        => $self->name,
         description => $self->description,
         type        => 'Writ',

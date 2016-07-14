@@ -35,14 +35,14 @@ my $start = time;
 die "ERROR: Must specify a filename" if not $filename;
 die "ERROR: You must specify an empire to email from" if not $empire_name;
 
-my ($from_empire) = KA->db->resultset('KA::DB::Result::Empire')->search({
+my ($from_empire) = KA->db->resultset('Empire')->search({
     name => $empire_name,
 });
 die "ERROR: Cannot find empire '$empire_name'" if not $from_empire;
 
 out('Loading DB');
 our $db = KA->db;
-my $empires = KA->db->resultset('KA::DB::Result::Empire')->search;
+my $empires = KA->db->resultset('Empire')->search;
 
 while (my $empire = $empires->next) {
     my $send_email = 0;

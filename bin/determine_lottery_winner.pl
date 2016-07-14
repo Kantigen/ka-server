@@ -20,8 +20,8 @@ out('Loading DB');
 our $db = KA->db;
 our $config = KA->config;
 our $cache = KA->cache;
-our $news = $db->resultset('KA::DB::Result::News');
-our $empires = $db->resultset('KA::DB::Result::Empire');
+our $news = $db->resultset('News');
+our $empires = $db->resultset('Empire');
 my $ymd = DateTime->now->subtract(days=>1)->ymd;
 X: foreach my $x (int($config->get('map_size/x')->[0]/250) .. int($config->get('map_size/x')->[1]/250)) {
     Y: foreach my $y (int($config->get('map_size/y')->[0]/250) .. int($config->get('map_size/y')->[1]/250)) {

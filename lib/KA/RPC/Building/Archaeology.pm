@@ -287,7 +287,7 @@ sub abandon_excavator {
     my $empire      = $session->current_empire;
     my $building    = $session->current_building;
     my $site_id     = $args->{site_id};
-    my $site        = KA->db->resultset('KA::DB::Result::Excavators')->find($site_id);
+    my $site        = KA->db->resultset('Excavators')->find($site_id);
 
     unless (defined $site) {
         confess [1002, "Excavator Site :".$site_id.": not found."];

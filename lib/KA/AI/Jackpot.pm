@@ -12,7 +12,7 @@ has viable_colonies => (
     is          => 'ro',
     lazy        => 1,
     default     => sub {
-        return KA->db->resultset('KA::DB::Result::Map::Body')->search(
+        return KA->db->resultset('Map::Body')->search(
             { empire_id => undef, zone => '0|0', orbit => { between => [1,7] }, size => { between => [30,65]}},
             );
     }

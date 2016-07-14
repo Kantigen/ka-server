@@ -45,7 +45,7 @@ use constant waste_production => 2;
 
 sub missions {
     my ($self) = @_;
-    return KA->db->resultset('KA::DB::Result::Mission')->search({
+    return KA->db->resultset('Mission')->search({
         zone                    => $self->body->zone,
     },{
         order_by   => ['max_university_level','date_posted'],

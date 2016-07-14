@@ -322,7 +322,7 @@ sub view_laws {
     my $empire   = $session->current_empire;
     my $star = KA->db->resultset('Map::Star')->find($star_id);
     if ($star and $star->station_id) {
-        my $station = KA->db->resultset('KA::DB::Result::Map::Body')
+        my $station = KA->db->resultset('Map::Body')
                 ->find($star->station->id);
         my @out;
         my $laws;

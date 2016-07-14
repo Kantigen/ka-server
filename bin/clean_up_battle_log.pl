@@ -23,7 +23,7 @@ our $db = KA->db;
 our $dtf = $db->storage->datetime_parser;
 
 out('Deleting Old Battle Logs');
-my $log = $db->resultset('KA::DB::Result::Log::Battles');
+my $log = $db->resultset('Log::Battles');
 $log->search({ date_stamp => { '<' => $dtf->format_datetime($date_ended) }})->delete_all;
 
 my $finish = time;

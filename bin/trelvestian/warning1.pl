@@ -17,7 +17,7 @@ my $start = time;
 
 out('Loading DB');
 our $db = KA->db;
-my $empires = KA->db->resultset('KA::DB::Result::Empire');
+my $empires = KA->db->resultset('Empire');
 my $config = KA->config;
 
 out('getting empires...');

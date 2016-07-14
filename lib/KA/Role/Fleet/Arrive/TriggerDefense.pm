@@ -187,7 +187,7 @@ sub report_defender_shot_down {
 sub log_attack {
     my ($attacker, $defender, $victor) = @_;
     my $body_attacked = $attacker->foreign_body;
-    my $logs = KA->db->resultset('KA::DB::Result::Log::Battles');
+    my $logs = KA->db->resultset('Log::Battles');
     $logs->new({
         date_stamp => DateTime->now,
         attacking_empire_id     => $attacker->body->empire_id,

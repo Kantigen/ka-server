@@ -21,7 +21,7 @@ use constant OVERLOAD_ALLOWED => $overload_allowed;
 
 sub _market {
     my $self = shift;
-    return KA->db->resultset('KA::DB::Result::Market');
+    return KA->db->resultset('Market');
 }
 
 sub market {
@@ -60,7 +60,7 @@ sub check_payload {
         confess $offer_nothing_exception unless ($item->{quantity} > 0);
         confess $fractional_offer_exception if ($item->{quantity} != int($item->{quantity}));
         confess [1002, 'you must specify a glyph name with a quantity.'] unless $item->{name};
-        my $glyph = KA->db->resultset('KA::DB::Result::Glyph')->search({
+        my $glyph = KA->db->resultset('Glyph')->search({
             type    => $item->{name},
             body_id => $self->body_id,
             })->first;
@@ -104,7 +104,7 @@ sub check_payload {
             }
       when ('prisoner') {
         confess [1002, 'You must specify a prisoner_id if you are pushing a prisoner.'] unless $item->{prisoner_id};
-        my $prisoner = KA->db->resultset('KA::DB::Result::Spies')->find($item->{prisoner_id});
+        my $prisoner = KA->db->resultset('Spies')->find($item->{prisoner_id});
         confess $have_exception unless (defined $prisoner && $self->body_id eq $prisoner->on_body_id && $prisoner->task eq 'Captured');
         push @expanded_items, $item;
         $space_used += 350;
@@ -205,7 +205,7 @@ sub structure_payload {
                 }
             }
             when ('prisoner') {
-                my $prisoner = KA->db->resultset('KA::DB::Result::Spies')->find($item->{prisoner_id});
+                my $prisoner = KA->db->resultset('Spies')->find($item->{prisoner_id});
                 $prisoner->task('Prisoner Transport');
                 $prisoner->update;
                 push @{$payload->{prisoners}}, $prisoner->id;

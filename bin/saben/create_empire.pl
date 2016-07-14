@@ -21,7 +21,7 @@ out('Loading DB');
 our $db = KA->db;
 
 out('Creating empire...');
-my $empire = KA->db->resultset('KA::DB::Result::Empire')->new({
+my $empire = KA->db->resultset('Empire')->new({
     id                  => -1,
     name                => 'Sābēn Demesne',
     stage               => 'founded',
@@ -47,7 +47,7 @@ my $empire = KA->db->resultset('KA::DB::Result::Empire')->new({
 });
 
 out('Find home planet...');
-my $bodies = $db->resultset('KA::DB::Result::Map::Body');
+my $bodies = $db->resultset('Map::Body');
 my $zone = $bodies->get_column('zone')->max;
 my $home = $bodies->search({size => 35, zone => $zone })->first;
 $empire->insert;

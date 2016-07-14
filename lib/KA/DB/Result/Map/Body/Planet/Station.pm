@@ -106,7 +106,7 @@ sub add_waste {
 sub in_jurisdiction {
     my ($self, $target) = @_;
     if (ref $target eq 'KA::DB::Result::Map::Star') {
-        my $star = KA->db->resultset('KA::DB::Result::Map::Star')->find($target->id);
+        my $star = KA->db->resultset('Map::Star')->find($target->id);
         unless (defined $star) {
             confess [1009, 'Invalid star'];
         }
@@ -114,7 +114,7 @@ sub in_jurisdiction {
             confess [1009, 'Target star is not in the station\'s jurisdiction.'];
         }
     } else {
-        my $body = KA->db->resultset('KA::DB::Result::Map::Body')->find($target->id);
+        my $body = KA->db->resultset('Map::Body')->find($target->id);
         unless (defined $body) {
             confess [1009, 'Invalid body'];
         }

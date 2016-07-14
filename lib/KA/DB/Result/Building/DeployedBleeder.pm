@@ -62,7 +62,7 @@ after finish_upgrade => sub {
         }
         else {
             $place = 1;
-            my $deployed = KA->db->resultset('KA::DB::Result::Building')->new({
+            my $deployed = KA->db->resultset('Building')->new({
                 class       => 'KA::DB::Result::Building::DeployedBleeder',
                 x           => $x,
                 y           => $y,

@@ -267,7 +267,7 @@ sub fissure_spawn {
         }
         out("    using free plot $x,$y");
 
-        $building = KA->db->resultset('KA::DB::Result::Building')->new({
+        $building = KA->db->resultset('Building')->new({
             x               => $x,
             y               => $y,
             class           => 'KA::DB::Result::Building::Permanent::Fissure',

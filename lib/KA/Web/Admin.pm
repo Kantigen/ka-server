@@ -16,7 +16,7 @@ use LWP::UserAgent;
 sub www_send_test_message {
     my ($self, $request, $id) = @_;
     $id ||= $request->param('empire_id');
-    my $empire = KA->db->resultset('KA::DB::Result::Empire')->find($id);
+    my $empire = KA->db->resultset('Empire')->find($id);
     unless (defined $empire) {
         confess [404, 'Empire not found.'];
     }
@@ -76,7 +76,7 @@ sub www_send_test_message {
 sub www_search_essentia_codes {
     my ($self, $request) = @_;
     my $page_number = $request->param('page_number') || 1;
-    my $codes = KA->db->resultset('KA::DB::Result::EssentiaCode')->search(undef, {order_by => { -desc => 'date_created' }, rows => 25, page => $page_number });
+    my $codes = KA->db->resultset('EssentiaCode')->search(undef, {order_by => { -desc => 'date_created' }, rows => 25, page => $page_number });
     my $code = $request->param('code') || '';
     if ($code) {
         $codes = $codes->search({code => { like => $code.'%' }});
@@ -111,7 +111,7 @@ sub www_search_essentia_codes {
 
 sub www_add_essentia_code {
     my ($self, $request) = @_;
-    my $code = KA->db->resultset('KA::DB::Result::EssentiaCode')->new({
+    my $code = KA->db->resultset('EssentiaCode')->new({
         date_created    => DateTime->now,
         amount          => $request->param('amount'),
         description     => decode_utf8($request->param('description')),
@@ -123,7 +123,7 @@ sub www_add_essentia_code {
 sub www_view_essentia_log {
     my ($self, $request) = @_;
     my $empire_id = $request->param('empire_id');
-    my $transactions = KA->db->resultset('KA::DB::Result::Log::Essentia')->search({empire_id => $empire_id}, {order_by => { -desc => 'date_stamp' }});
+    my $transactions = KA->db->resultset('Log::Essentia')->search({empire_id => $empire_id}, {order_by => { -desc => 'date_stamp' }});
     my $out = '<h1>Essentia Transaction Log</h1>';
     $out .= sprintf('<a href="/admin/view/empire?id=%s">Back To Empire</a>', $empire_id);
     $out .= '<table style="width: 100%;"><tr><th>Date</th><th>Amount</th><th>Description</th><th>From ID</th><th>From</th><th>Transaction ID</th></tr>';
@@ -151,7 +151,7 @@ sub www_view_login_log {
         }
     }
     my $page_number = $request->param('page_number') || 1;
-    my $logins = KA->db->resultset('KA::DB::Result::Log::Login')->search(
+    my $logins = KA->db->resultset('Log::Login')->search(
         { $search_field => $search_value },
         { order_by => { -desc => 'date_stamp' },
           rows     => 25,
@@ -185,7 +185,7 @@ sub www_view_login_log {
 sub www_view_empire_name_change_log {
     my ($self, $request) = @_;
     my $empire_id = $request->param('empire_id');
-    my $history = KA->db->resultset('KA::DB::Result::Log::EmpireNameChange')->search({empire_id => $empire_id},{order_by => { -desc => 'date_stamp' }});
+    my $history = KA->db->resultset('Log::EmpireNameChange')->search({empire_id => $empire_id},{order_by => { -desc => 'date_stamp' }});
     my $out = '<h1>Empire Name-Change Log</h1>';
     $out .= sprintf('<a href="/admin/view/empire?id=%s">Back To Empire</a>', $empire_id);
     $out .= '<table style="width: 100%;"><tr><th>Date</th><th>New Name</th><th>Old Name</th></tr>';
@@ -202,7 +202,7 @@ sub www_search_similar_empire {
     my $empire_id   = $request->param('empire_id');
     my $page_number = $request->param('page_number') || 1;
     my $type        = $request->param('type');
-    my $empire = KA->db->resultset('KA::DB::Result::Empire')->find($empire_id);
+    my $empire = KA->db->resultset('Empire')->find($empire_id);
     unless (defined $empire) {
         confess [404, 'Empire not found.'];
     }
@@ -244,7 +244,7 @@ sub www_search_similar_empire {
         }
         push @query, email => { 'LIKE' => "%\@$domain" };
     }
-    my $search = KA->db->resultset('KA::DB::Result::Empire')->search(
+    my $search = KA->db->resultset('Empire')->search(
         { -and => \@query },
         { order_by => { -desc => 'id' },
           rows     => 25,
@@ -267,7 +267,7 @@ sub www_search_similar_empire {
 sub www_search_empires {
     my ($self, $request) = @_;
     my $page_number = $request->param('page_number') || 1;
-    my $empires = KA->db->resultset('KA::DB::Result::Empire')->search(undef, { rows => 25, page => $page_number });
+    my $empires = KA->db->resultset('Empire')->search(undef, { rows => 25, page => $page_number });
     my $field = $request->param('field') || 'name';
     my $name  = decode_utf8($request->param('name') || '');
     if ($name) {
@@ -309,7 +309,7 @@ use Encode;
 sub www_search_bodies {
     my ($self, $request) = @_;
     my $page_number = $request->param('page_number') || 1;
-    my $bodies = KA->db->resultset('KA::DB::Result::Map::Body')->search(undef, {order_by => ['me.name'], rows => 25, page => $page_number, prefetch=>[qw/empire star/] });
+    my $bodies = KA->db->resultset('Map::Body')->search(undef, {order_by => ['me.name'], rows => 25, page => $page_number, prefetch=>[qw/empire star/] });
     my $name = decode_utf8($request->param('name') || '');
     my $pager = 'name';
 
@@ -345,7 +345,7 @@ sub www_search_bodies {
 sub www_search_stars {
     my ($self, $request) = @_;
     my $page_number = $request->param('page_number') || 1;
-    my $stars = KA->db->resultset('KA::DB::Result::Map::Star')->search(undef, {order_by => ['name'], rows => 25, page => $page_number });
+    my $stars = KA->db->resultset('Map::Star')->search(undef, {order_by => ['name'], rows => 25, page => $page_number });
     my $name = decode_utf8($request->param('name') || '');
     if ($name) {
         my $query = "$name%";
@@ -371,7 +371,7 @@ sub www_search_stars {
 sub www_complete_builds {
     my ($self, $request, $body_id) = @_;
     $body_id ||= $request->param('body_id');
-    my $body = KA->db->resultset('KA::DB::Result::Map::Body')->find($body_id);
+    my $body = KA->db->resultset('Map::Body')->find($body_id);
     foreach my $building (@{$body->building_cache}) {
         next unless ( $building->is_upgrading );
         $building->finish_upgrade;
@@ -382,7 +382,7 @@ sub www_complete_builds {
 sub www_send_stellar_flare {
     my ($self, $request, $body_id) = @_;
     $body_id ||= $request->param('body_id');
-    my $body = KA->db->resultset('KA::DB::Result::Map::Body')->find($body_id);
+    my $body = KA->db->resultset('Map::Body')->find($body_id);
     foreach my $building (@{$body->building_cache}) {
 #        next unless ('Infrastructure' ~~ [$building->build_tags]);
         next if ( $building->class eq 'KA::DB::Result::Building::PlanetaryCommand' );
@@ -404,7 +404,7 @@ sub www_send_stellar_flare {
 sub www_send_meteor_shower {
     my ($self, $request, $body_id) = @_;
     $body_id ||= $request->param('body_id');
-    my $body = KA->db->resultset('KA::DB::Result::Map::Body')->find($body_id);
+    my $body = KA->db->resultset('Map::Body')->find($body_id);
     foreach my $building (@{$body->building_cache}) {
 #        next unless ('Infrastructure' ~~ [$building->build_tags]);
         next if ( $building->class eq 'KA::DB::Result::Building::PlanetaryCommand' );
@@ -429,7 +429,7 @@ sub www_send_meteor_shower {
 sub www_send_pestilence {
     my ($self, $request, $body_id) = @_;
     $body_id ||= $request->param('body_id');
-    my $body = KA->db->resultset('KA::DB::Result::Map::Body')->find($body_id);
+    my $body = KA->db->resultset('Map::Body')->find($body_id);
     if ($body->id == $body->empire->home_planet_id) {
         confess [401, 'You cannot send pestilence to someone\'s home planet.'];
     }
@@ -448,7 +448,7 @@ sub www_send_pestilence {
 sub www_view_buildings {
     my ($self, $request, $body_id) = @_;
     $body_id ||= $request->param('body_id');
-    my $buildings = KA->db->resultset('KA::DB::Result::Building')->search({ body_id => $body_id }, {order_by => ['x','y'] });
+    my $buildings = KA->db->resultset('Building')->search({ body_id => $body_id }, {order_by => ['x','y'] });
     my $out = '<h1>View Buildings</h1>';
     $out .= sprintf('<a href="/admin/view/body?id=%s">Back To Body</a>', $body_id);
     $out .= '<table style="width: 100%;"><tr><th>Id</th><th>Name</th><th>X</th><th>Y</th><th>Level</th><th>InProgress</th><th>Efficiency</th></tr>';
@@ -515,7 +515,7 @@ sub www_add_building {
     # is the plot empty?
     $body->check_for_available_build_space( $x, $y );
 
-    my $building = KA->db->resultset('KA::DB::Result::Building')->new({
+    my $building = KA->db->resultset('Building')->new({
         x               => $x,
         y               => $y,
         level           => $level,
@@ -532,7 +532,7 @@ sub www_add_building {
 
 sub www_set_efficiency {
     my ($self, $request) = @_;
-    my $building = KA->db->resultset('KA::DB::Result::Building')->find($request->param('building_id'));
+    my $building = KA->db->resultset('Building')->find($request->param('building_id'));
     my $body = KA->db->resultset('Map::Body')->find($building->body_id);
     my $x = $request->param('x');
     my $y = $request->param('y');
@@ -561,7 +561,7 @@ sub www_set_efficiency {
 
 sub www_delete_building {
     my ($self, $request) = @_;
-    my $building = KA->db->resultset('KA::DB::Result::Building')->find($request->param('building_id'));
+    my $building = KA->db->resultset('Building')->find($request->param('building_id'));
     my $body = $building->body;
     $building->delete;
     $body->needs_recalc(1);
@@ -584,7 +584,7 @@ sub www_view_fleets {
             $out .= sprintf('<td>%s<form method="post" action="/admin/zoom/fleet"><input type="hidden" name="fleet_id" value="%s"><input type="hidden" name="body_id" value="%s"><input type="submit" value="zoom"></form></td>', $fleet->task, $fleet->id, $body_id);
         }
         elsif ($fleet->task ~~ [qw(Defend Orbiting)]) {
-            my $target = KA->db->resultset('KA::DB::Result::Map::Body')->find($fleet->foreign_body_id);
+            my $target = KA->db->resultset('Map::Body')->find($fleet->foreign_body_id);
             $out .= sprintf('<td>%s<br>%s (%d, %d)<form method="post" action="/admin/recall/fleet"><input type="hidden" name="fleet_id" value="%s"><input type="hidden" name="body_id" value="%s"><input type="submit" value="recall"></form></td>', $fleet->task, $target->name, $target->x, $target->y, $fleet->id, $body_id);
         }
         elsif ($fleet->task ne 'Docked') {
@@ -612,7 +612,7 @@ sub www_recall_fleet {
     my ($self, $request) = @_;
     my $fleet_id = $request->param('fleet_id');
     my $fleet = KA->db->resultset('Fleet')->find($fleet_id);
-    my $target = KA->db->resultset('KA::DB::Result::Map::Body')->find($fleet->foreign_body_id);
+    my $target = KA->db->resultset('Map::Body')->find($fleet->foreign_body_id);
 
     my $body = $fleet->body;
     $fleet->send(
@@ -641,7 +641,7 @@ sub www_delete_fleet {
 sub www_view_resources {
     my ($self, $request, $body_id) = @_;
     $body_id ||= $request->param('body_id');
-    my $body = KA->db->resultset('KA::DB::Result::Map::Body')->find($request->param('body_id'));
+    my $body = KA->db->resultset('Map::Body')->find($request->param('body_id'));
     my @types = (FOOD_TYPES, ORE_TYPES, qw(water energy waste));
     my $out = '<h1>View Resources</h1>';
     $out .= sprintf('<a href="/admin/view/body?id=%s">Back To Body</a>', $body_id);
@@ -655,7 +655,7 @@ sub www_view_resources {
 
 sub www_add_resources {
     my ($self, $request) = @_;
-    my $body = KA->db->resultset('KA::DB::Result::Map::Body')->find($request->param('body_id'));
+    my $body = KA->db->resultset('Map::Body')->find($request->param('body_id'));
     unless (defined $body) {
         confess [404, 'Body not found.'];
     }
@@ -667,7 +667,7 @@ sub www_add_resources {
 sub www_view_glyphs {
     my ($self, $request, $body_id) = @_;
     $body_id ||= $request->param('body_id');
-    my $glyphs = KA->db->resultset('KA::DB::Result::Glyph')->search({ body_id => $body_id }, {order_by => ['type'] });
+    my $glyphs = KA->db->resultset('Glyph')->search({ body_id => $body_id }, {order_by => ['type'] });
     my $out = '<h1>View Glyphs</h1>';
     $out .= sprintf('<a href="/admin/view/body?id=%s">Back To Body</a>', $body_id);
     $out .= '<table style="width: 100%;"><tr><th>Id</th><th>Type</th><th>Quantity</th><th>Action</th></tr>';
@@ -690,7 +690,7 @@ sub www_view_glyphs {
 
 sub www_add_glyph {
     my ($self, $request) = @_;
-    my $body = KA->db->resultset('KA::DB::Result::Map::Body')->find($request->param('body_id'));
+    my $body = KA->db->resultset('Map::Body')->find($request->param('body_id'));
     unless (defined $body) {
         confess [404, 'Body not found.'];
     }
@@ -700,7 +700,7 @@ sub www_add_glyph {
 
 sub www_delete_glyph {
     my ($self, $request) = @_;
-    my $body = KA->db->resultset('KA::DB::Result::Map::Body')->find($request->param('body_id'));
+    my $body = KA->db->resultset('Map::Body')->find($request->param('body_id'));
     unless (defined $body) {
         confess [404, 'Body not found.'];
     }
@@ -711,7 +711,7 @@ sub www_delete_glyph {
 sub www_view_plans {
     my ($self, $request, $body_id) = @_;
     $body_id ||= $request->param('body_id');
-    my $body = KA->db->resultset('KA::DB::Result::Map::Body')->find($request->param('body_id'));
+    my $body = KA->db->resultset('Map::Body')->find($request->param('body_id'));
     my $plans = $body->sorted_plans;
 
     my $out = '<h1>View Plans</h1>';
@@ -760,7 +760,7 @@ sub www_add_plan {
 
 sub www_delete_plan {
     my ($self, $request) = @_;
-    my $body = KA->db->resultset('KA::DB::Result::Map::Body')->find($request->param('body_id'));
+    my $body = KA->db->resultset('Map::Body')->find($request->param('body_id'));
     unless (defined $body) {
         confess [404, 'Body not found.'];
     }
@@ -785,7 +785,7 @@ sub www_delete_plan {
 
 sub www_recalc_body {
     my ($self, $request) = @_;
-    my $body = KA->db->resultset('KA::DB::Result::Map::Body')->find($request->param('body_id'));
+    my $body = KA->db->resultset('Map::Body')->find($request->param('body_id'));
     unless (defined $body) {
         confess [404, 'Body not found.'];
     }
@@ -821,7 +821,7 @@ MUCH later.
 sub www_delete_empire {
     my ($self, $request, $id) = @_;
     $id ||= $request->param('empire_id');
-    my $empire = KA->db->resultset('KA::DB::Result::Empire')->find($id);
+    my $empire = KA->db->resultset('Empire')->find($id);
     unless (defined $empire) {
         confess [404, 'Empire not found.'];
     }
@@ -839,7 +839,7 @@ sub www_delete_empire {
 sub www_toggle_isolationist {
     my ($self, $request, $id) = @_;
     $id ||= $request->param('id');
-    my $empire = KA->db->resultset('KA::DB::Result::Empire')->find($id);
+    my $empire = KA->db->resultset('Empire')->find($id);
     unless (defined $empire) {
         confess [404, 'Empire not found.'];
     }
@@ -859,7 +859,7 @@ Admins are added/removed so rarely, it shouldn't be done so trivially
 sub www_toggle_admin {
     my ($self, $request, $id) = @_;
     $id ||= $request->param('id');
-    my $empire = KA->db->resultset('KA::DB::Result::Empire')->find($id);
+    my $empire = KA->db->resultset('Empire')->find($id);
     unless (defined $empire) {
         confess [404, 'Empire not found.'];
     }
@@ -877,7 +877,7 @@ sub www_toggle_admin {
 sub www_toggle_mission_curator {
     my ($self, $request, $id) = @_;
     $id ||= $request->param('id');
-    my $empire = KA->db->resultset('KA::DB::Result::Empire')->find($id);
+    my $empire = KA->db->resultset('Empire')->find($id);
     unless (defined $empire) {
         confess [404, 'Empire not found.'];
     }
@@ -893,7 +893,7 @@ sub www_toggle_mission_curator {
 sub www_become_empire {
     my ($self, $request, $id) = @_;
     $id ||= $request->param('empire_id');
-    my $empire = KA->db->resultset('KA::DB::Result::Empire')->find($id);
+    my $empire = KA->db->resultset('Empire')->find($id);
     unless (defined $empire) {
         confess [404, 'Empire not found.'];
     }
@@ -906,7 +906,7 @@ sub www_become_empire {
 sub www_view_empire {
     my ($self, $request, $id) = @_;
     $id ||= $request->param('id');
-    my $empire = KA->db->resultset('KA::DB::Result::Empire')->find($id);
+    my $empire = KA->db->resultset('Empire')->find($id);
     unless (defined $empire) {
         confess [404, 'Empire not found.'];
     }
@@ -947,7 +947,7 @@ sub www_view_empire {
     }
     $out .= sprintf('</td></tr>');
     $out .= '<tr><th>Invites Sent To</th><td>';
-    my $invites_sent = KA->db->resultset('KA::DB::Result::Invite')->search({inviter_id => $empire->id});
+    my $invites_sent = KA->db->resultset('Invite')->search({inviter_id => $empire->id});
     $out .= join ' ; ',
         map {
             sprintf('<a href="/admin/view/empire?id=%d">%s</a> (%s)', $_->id, $_->name, $_->id )
@@ -957,7 +957,7 @@ sub www_view_empire {
             $invites_sent->all;
     $out .= '</td></tr>';
     $out .= '<tr><th>Invite Accepted From</th><td>';
-    my $invite_accepted = KA->db->resultset('KA::DB::Result::Invite')->search({invitee_id => $empire->id})->first;
+    my $invite_accepted = KA->db->resultset('Invite')->search({invitee_id => $empire->id})->first;
     if ( $invite_accepted && $invite_accepted->inviter_id ) {
         my $inviter = $invite_accepted->inviter;
         $out .= sprintf('<a href="/admin/view/empire?id=%d">%s</a> (%s)', $inviter->id, $inviter->name, $inviter->id);
@@ -1025,7 +1025,7 @@ sub www_view_admin_note_log {
 sub www_set_alliance_logo {
     my ($self, $request, $id) = @_;
     $id ||= $request->param('id');
-    my $alliance = KA->db->resultset('KA::DB::Result::Alliance')->find($id);
+    my $alliance = KA->db->resultset('Alliance')->find($id);
     unless (defined $alliance) {
         confess [404, 'Alliance not found.'];
     }
@@ -1060,7 +1060,7 @@ sub www_set_alliance_logo {
 sub www_view_alliance {
     my ($self, $request, $id) = @_;
     $id ||= $request->param('id');
-    my $alliance = KA->db->resultset('KA::DB::Result::Alliance')->find($id);
+    my $alliance = KA->db->resultset('Alliance')->find($id);
     unless (defined $alliance) {
         confess [404, 'Alliance not found.'];
     }
@@ -1106,7 +1106,7 @@ sub www_view_alliance {
 sub www_view_body {
     my ($self, $request, $id) = @_;
     $id ||= $request->param('id');
-    my $body = KA->db->resultset('KA::DB::Result::Map::Body')->find($id);
+    my $body = KA->db->resultset('Map::Body')->find($id);
     unless (defined $body) {
         confess [404, 'Body not found.'];
     }
@@ -1145,7 +1145,7 @@ sub www_view_body {
 sub www_view_star {
     my ($self, $request, $id) = @_;
     $id ||= $request->param('id');
-    my $star = KA->db->resultset('KA::DB::Result::Map::Star')->find($id);
+    my $star = KA->db->resultset('Map::Star')->find($id);
     unless (defined $star) {
         confess [404, 'Star not found.'];
     }
@@ -1172,7 +1172,7 @@ sub www_view_star {
 sub www_add_essentia {
     my ($self, $request) = @_;
     my $id = $request->param('id');
-    my $empire = KA->db->resultset('KA::DB::Result::Empire')->find($id);
+    my $empire = KA->db->resultset('Empire')->find($id);
     unless (defined $empire) {
         confess [404, 'Empire not found.'];
     }
@@ -1188,7 +1188,7 @@ sub www_add_essentia {
 sub www_change_university_level {
     my ($self, $request) = @_;
     my $id = $request->param('id');
-    my $empire = KA->db->resultset('KA::DB::Result::Empire')->find($id);
+    my $empire = KA->db->resultset('Empire')->find($id);
     unless (defined $empire) {
         confess [404, 'Empire not found.'];
     }
@@ -1200,7 +1200,7 @@ sub www_change_university_level {
 sub www_add_happiness {
     my ($self, $request) = @_;
     my $id = $request->param('id');
-    my $body = KA->db->resultset('KA::DB::Result::Map::Body')->find($id);
+    my $body = KA->db->resultset('Map::Body')->find($id);
     unless (defined $body) {
         confess [404, 'Body not found.'];
     }
@@ -1238,7 +1238,7 @@ sub www_view_virality {
 
     my $dt_formatter = KA->db->storage->datetime_parser;
     my (@accepts, @abandons, @creates, @invites, @dates, @deletes, @users, @stay, @vc, @gr, @cr, $previous, $max_viral, $max_change, $max_users, $max_stay);
-    my $past30 = KA->db->resultset('KA::DB::Result::Log::Viral')->search({date_stamp => { '>=' => $dt_formatter->format_datetime(DateTime->now->subtract(days => 31))}}, { order_by => 'date_stamp'});
+    my $past30 = KA->db->resultset('Log::Viral')->search({date_stamp => { '>=' => $dt_formatter->format_datetime(DateTime->now->subtract(days => 31))}}, { order_by => 'date_stamp'});
     while (my $day = $past30->next) {
         unless (defined $previous) {
             $previous = $day;
@@ -1368,7 +1368,7 @@ sub www_view_economy {
     my (@dates, $previous, @arpu, $max_purchases, @p30, @p100, @p200, @p600, @p1300, $max_revenue, @revenue, @r30, @r100, @r200, @r600, @r1300);
     my ($max_out, @out_boost, @out_mission, @out_recycle, @out_ship, @out_spy, @out_glyph, @out_party, @out_building, @out_trade, @out_delete, @out_other);        
     my ($max_in, @in_mission, @in_purchase, @in_trade, @in_redemption, @in_vein, @in_vote, @in_tutorial, @in_other);
-    my $past30 = KA->db->resultset('KA::DB::Result::Log::Economy')->search({date_stamp => { '>=' => $dt_formatter->format_datetime(DateTime->now->subtract(days => 31))}}, { order_by => 'date_stamp'});
+    my $past30 = KA->db->resultset('Log::Economy')->search({date_stamp => { '>=' => $dt_formatter->format_datetime(DateTime->now->subtract(days => 31))}}, { order_by => 'date_stamp'});
     while (my $day = $past30->next) {
         unless (defined $previous) {
             $previous = $day;
@@ -1612,14 +1612,14 @@ sub www_delete_announcement {
 
 sub www_server_wide_recalc {
     my ($self, $request) = @_;
-    KA->db->resultset('KA::DB::Result::Map::Body')->search({empire_id => {'>', 0}})->update({needs_recalc=>1});
+    KA->db->resultset('Map::Body')->search({empire_id => {'>', 0}})->update({needs_recalc=>1});
     return $self->wrap('Done!');
 }
 
 sub www_delambert {
     my ($self, $request) = @_;
 
-    my ($scratch) = KA->db->resultset('KA::DB::Result::AIScratchPad')->search({ai_empire_id => -9, body_id => 0});
+    my ($scratch) = KA->db->resultset('AIScratchPad')->search({ai_empire_id => -9, body_id => 0});
     my $scratchpad = $scratch->pad;
 
     if ($request->param('submit')) {
@@ -1643,7 +1643,7 @@ sub www_delambert {
         $scratch->update;
     }   
     my $out = ''; 
-    my $bodies = KA->db->resultset('KA::DB::Result::Map::Body')->search({
+    my $bodies = KA->db->resultset('Map::Body')->search({
             empire_id => -9,
         },
         {
@@ -1683,7 +1683,7 @@ sub www_delambert {
 sub www_delambert_war {
     my ($self, $request) = @_;
 
-    my ($scratch) = KA->db->resultset('KA::DB::Result::AIScratchPad')->search({ai_empire_id => -9, body_id => 0});
+    my ($scratch) = KA->db->resultset('AIScratchPad')->search({ai_empire_id => -9, body_id => 0});
     my $scratchpad = $scratch->pad;
 
     if ($request->param('submit')) {
@@ -1700,10 +1700,10 @@ sub www_delambert_war {
 
     my $out = '';
     $out .= "<h1>DeLamberti war status</h1>\n";
-    my @ai_defence = KA->db->resultset('KA::DB::Result::AIBattleSummary')->search({
+    my @ai_defence = KA->db->resultset('AIBattleSummary')->search({
         defending_empire_id => -9,
     });
-    my @ai_attack = KA->db->resultset('KA::DB::Result::AIBattleSummary')->search({
+    my @ai_attack = KA->db->resultset('AIBattleSummary')->search({
         attacking_empire_id => -9,
     });
     # If the AI is attacked, we don't care who won or lost, just that there was an action against the AI
@@ -1732,11 +1732,11 @@ sub www_delambert_war {
     $out .= "<table border='1'><tr><th>Attacker</th><th>A-Victories</th><th>A-Defeats</th><th>A-Spy Hours</th><th>Attack Weight</th><th>R-Victories</th><th>R-Defeats</th><th>R-Spy Hours</th><th>Retaliate Weight</th><th>Colony</th><th>Frequency</th><th>Attack Sweepers</th><th>Attack Scows</th><th>Attack Snark</th><th>Action</th></tr>\n";
 ATTACKER:
     foreach my $attacker (@worst_attackers) {
-        my $attack_empire = KA->db->resultset('KA::DB::Result::Empire')->find($attacker);
+        my $attack_empire = KA->db->resultset('Empire')->find($attacker);
         next ATTACKER unless $attack_empire;
 
         # Obtain all colonies of the attacking empire, sorted by population desc.
-        my @colonies = KA->db->resultset('KA::DB::Result::Map::Body')->search({
+        my @colonies = KA->db->resultset('Map::Body')->search({
             empire_id       => $attacker,
         });
         @colonies = sort {$b->population <=> $a->population} @colonies;

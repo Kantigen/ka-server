@@ -19,7 +19,7 @@ out('Loading DB');
 our $db = KA->db;
 
 out('Ticking parliament');
-my $propositions_rs = $db->resultset('KA::DB::Result::Propositions');
+my $propositions_rs = $db->resultset('Propositions');
 my $dtf = $db->storage->datetime_parser;
 my @propositions = $propositions_rs->search({ status => 'Pending', date_ends => { '<' => $dtf->format_datetime(DateTime->now)} })->get_column('id')->all;
 foreach my $id (@propositions) {

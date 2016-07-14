@@ -23,7 +23,7 @@ my $start = time;
 
 out('Loading DB');
 our $db = KA->db;
-my $empires = KA->db->resultset('KA::DB::Result::Empire')->search({
+my $empires = KA->db->resultset('Empire')->search({
 });
 
 out('getting empires...');

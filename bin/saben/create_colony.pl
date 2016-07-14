@@ -22,7 +22,7 @@ my $start = time;
 
 out('Loading DB');
 our $db = KA->db;
-my $empires = $db->resultset('KA::DB::Result::Empire');
+my $empires = $db->resultset('Empire');
 
 
 out('getting empires...');
@@ -33,7 +33,7 @@ die 'Could not find target player.' unless defined $target_player;
 
 
 out('Finding colony...');
-my $body = $db->resultset('KA::DB::Result::Map::Body')->search(
+my $body = $db->resultset('Map::Body')->search(
     { zone => $target_player->home_planet->zone, empire_id => undef, size => { between => [30,35]}}
     )->first;
 die 'Could not find a colony to occupy.' unless defined $body;
@@ -49,7 +49,7 @@ $body->found_colony($saben);
 
 
 out('Setting target...');
-$db->resultset('KA::DB::Result::SabenTarget')->new({
+$db->resultset('SabenTarget')->new({
     saben_colony_id     => $body->id,
     target_empire_id    => $target_player->id,
 })->insert;
@@ -92,7 +92,7 @@ my @plans = (
     ['KA::DB::Result::Building::Permanent::AlgaePond',$half_level, 1, -2],
     ['KA::DB::Result::Building::Food::Syrup',$two_thirds_level, 2, -2],
 );
-$buildings = $db->resultset('KA::DB::Result::Building');
+$buildings = $db->resultset('Building');
 foreach my $plan (@plans) {
     my $building = $buildings->new({
         class   => $plan->[0],

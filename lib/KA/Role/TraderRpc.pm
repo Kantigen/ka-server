@@ -178,7 +178,7 @@ sub get_prisoners {
     my $dt_parser = KA->db->storage->datetime_parser;
     my $now = $dt_parser->format_datetime( DateTime->now );
 
-    my $prisoners = KA->db->resultset('KA::DB::Result::Spies')->search(
+    my $prisoners = KA->db->resultset('Spies')->search(
         { on_body_id => $building->body_id, task => 'Captured', available_on => { '>' => $now } },
         {order_by => [ 'name' ]}
         );

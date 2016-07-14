@@ -370,7 +370,7 @@ sub get_last_attacked_by {
     my $self = shift;
     my $attacker_body_id = KA->cache->get('last_attacked_by',$self->id);
     return undef unless defined $attacker_body_id;
-    my $attacker_body = KA->db->resultset('KA::DB::Result::Map::Body')->find($attacker_body_id);
+    my $attacker_body = KA->db->resultset('Map::Body')->find($attacker_body_id);
     return undef unless defined $attacker_body;
     return undef unless $attacker_body->empire_id;
     return $attacker_body;

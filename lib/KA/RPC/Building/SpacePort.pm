@@ -473,7 +473,7 @@ sub fetch_spies {
     # get spies
     my @ids_fetched;
     my @ids_not_fetched;
-    my $spies = KA->db->resultset('KA::DB::Result::Spies');
+    my $spies = KA->db->resultset('Spies');
     foreach my $id (@{$args{spy_ids}}) {
         my $spy = $spies->find($id);
         if ($spy->on_body_id == $args{on_body_id}) {
@@ -595,7 +595,7 @@ sub _fleet_filter_options {
     # Pull in the list of fleet types by tag
     my %tag;
     for my $type ( SHIP_TYPES ) {
-        my $fleet = KA->db->resultset('KA::DB::Result::Fleet')->new({ type => $type });
+        my $fleet = KA->db->resultset('Fleet')->new({ type => $type });
         for my $tag ( @{$fleet->build_tags} ) {
             push @{ $tag{$tag} }, $type;
         }

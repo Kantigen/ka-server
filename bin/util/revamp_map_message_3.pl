@@ -16,7 +16,7 @@ out('Started');
 my $start = time;
 out('Loading DB');
 our $db = KA->db;
-my $empires = $db->resultset('KA::DB::Result::Empire');
+my $empires = $db->resultset('Empire');
 
 my $lec = $empires->find(1);
 

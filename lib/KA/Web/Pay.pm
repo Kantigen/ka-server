@@ -530,7 +530,7 @@ sub www_buy_currency_cc {
             unless ($empire_id) {
                 return ['Not a valid user_id.', { status => 401 }];
             }
-            my $empire = KA->db->resultset('KA::DB::Result::Empire')->find($empire_id);
+            my $empire = KA->db->resultset('Empire')->find($empire_id);
             unless (defined $empire) {
                 return ['Empire not found.', { status => 404 }];
             }
@@ -540,7 +540,7 @@ sub www_buy_currency_cc {
             unless ($transaction_id) {
                 return ['Not a valid iTransact AuthCode.', { status => 402 }];
             }
-            my $transaction = KA->db->resultset('KA::DB::Result::Log::Essentia')->search(
+            my $transaction = KA->db->resultset('Log::Essentia')->search(
                 { transaction_id => $transaction_id }
             )->first;
             if (defined $transaction) {
@@ -681,7 +681,7 @@ sub www_paypal_ec_checkout {
         return ['Not a valid user_id.', { status => 401 }];
     }
 
-    my $empire = KA->db->resultset('KA::DB::Result::Empire')->find($user_id);
+    my $empire = KA->db->resultset('Empire')->find($user_id);
     unless (defined $empire) {
         return ['Empire not found.', { status => 404 }];
     }
@@ -713,7 +713,7 @@ sub www_paypal_ec_checkout {
     unless ($transaction_id) {
         return ['Not a valid PayPal TransactionID.', { status => 402 }];
     }
-    my $transaction = KA->db->resultset('KA::DB::Result::Log::Essentia')->search(
+    my $transaction = KA->db->resultset('Log::Essentia')->search(
         { transaction_id => $transaction_id }
     )->first;
     if (defined $transaction) {

@@ -23,7 +23,7 @@ our $db = KA->db;
 
 out('Deleting AI Mail Items older than a day');
 my $date_ended = DateTime->now->subtract( days => 1 );
-my $mail = $db->resultset('KA::DB::Result::Message');
+my $mail = $db->resultset('Message');
 $mail->search({ to_id => { '<=' => 1 }, date_sent => { '<' => $date_ended }})->delete;
 
 out('Deleting Trashed Player Mail Items');

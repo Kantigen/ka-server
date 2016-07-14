@@ -21,11 +21,11 @@ my $start = DateTime->now;
 
 out('Loading DB');
 our $db = KA->db;
-my $empires = $db->resultset('KA::DB::Result::Empire');
-my $bodies  = $db->resultset('KA::DB::Result::Map::Body');
+my $empires = $db->resultset('Empire');
+my $bodies  = $db->resultset('Map::Body');
 
 out('Withdrawing all spies in merc market');
-my $merc_market = $db->resultset('KA::DB::Result::MercenaryMarket')->search;
+my $merc_market = $db->resultset('MercenaryMarket')->search;
 while (my $offer = $merc_market->next) {
     $offer->withdraw($offer->body);
 }
@@ -60,7 +60,7 @@ while (my $planet = $planets->next) {
     }
 }
 
-my $spies   = $db->resultset('KA::DB::Result::Spies');
+my $spies   = $db->resultset('Spies');
 out('Updating spy level');
 while (my $spy = $spies->next) {
   if ($spy->task eq 'Captured') {
@@ -72,7 +72,7 @@ while (my $spy = $spies->next) {
   $spy->update;
 }
 out('Culling Spies');
-$spies   = $db->resultset('KA::DB::Result::Spies');
+$spies   = $db->resultset('Spies');
 while (my $empire = $empires->next) {
     next if $empire->id < 2;
     my $emp_spies = $spies->search({empire_id=>$empire->id}, {order_by => { -desc => 'level'}});

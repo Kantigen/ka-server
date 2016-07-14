@@ -20,7 +20,7 @@ my $config = KA->config;
 my $server_url = $config->get('server_url');
 
 out('Loading Empires');
-my $empires = KA->db->resultset('KA::DB::Result::Empire');
+my $empires = KA->db->resultset('Empire');
 my $cache = KA->cache;
 my $lec = KA::DB::Result::Empire->lacuna_expanse_corp;
 
@@ -139,7 +139,7 @@ sub twenty_stars {
         out('Checking space stations.');
         my %victory_empire;
         my $victory_empire;
-        my $stations = KA->db->resultset('KA::DB::Result::Map::Body')->search($search);
+        my $stations = KA->db->resultset('Map::Body')->search($search);
         my $message = '';
         while (my $station = $stations->next) {
             my $stars = $station->influence_spent;
@@ -160,7 +160,7 @@ sub twenty_stars {
                 out('victory empire id: ' . $victory_empire);
                 my $empire = $empires->find($victory_empire);
                 out('victory empire name: ' . $empire->name);
-                my $alliance = KA->db->resultset('KA::DB::Result::Alliance')->find($empire->alliance_id);
+                my $alliance = KA->db->resultset('Alliance')->find($empire->alliance_id);
                 if (defined $alliance) {
                     out('victory alliance: ' . $alliance->name);
                     my @allies = $alliance->members->get_column('id')->all;

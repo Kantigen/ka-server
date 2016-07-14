@@ -71,7 +71,7 @@ sub add_to_market {
         transfer_type   => $self->transfer_type,
     );
     $trade{max_university} = $internal_options->{max_university} if $internal_options;
-    return KA->db->resultset('KA::DB::Result::Market')->new(\%trade)->insert;
+    return KA->db->resultset('Market')->new(\%trade)->insert;
 }
 
 sub transfer_type {
@@ -150,7 +150,7 @@ sub push_items {
 before delete => sub {
   my ($self) = @_;
     
-  my $market = KA->db->resultset('KA::DB::Result::Market');
+  my $market = KA->db->resultset('Market');
   my @to_be_deleted = $market->search( { body_id => $self->body_id,
                                          transfer_type => 'transporter'} )->get_column('id')->all;
   foreach my $id (@to_be_deleted) {

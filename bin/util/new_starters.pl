@@ -20,7 +20,7 @@ out('Loading DB');
 our $db = KA->db;
 
 out('Reviewing planets');
-my $planets_rs = $db->resultset('KA::DB::Result::Map::Body');
+my $planets_rs = $db->resultset('Map::Body');
 my @planets = $planets_rs->search( {
                                      empire_id   => undef,
                                      orbit       => {'!=' => 8},

@@ -9,7 +9,7 @@ use experimental "switch";
 
 before pass => sub {
     my ($self) = @_;
-    my $body    = KA->db->resultset('KA::DB::Result::Map::Body')->find($self->scratch->{body_id});
+    my $body    = KA->db->resultset('Map::Body')->find($self->scratch->{body_id});
     my $station = $self->station;
     my $parl    = $station->parliament;
 

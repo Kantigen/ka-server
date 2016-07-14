@@ -59,7 +59,7 @@ sub view_profile {
     unless (defined $alliance_id && length $alliance_id) {
         confess [1002, "You must specify an alliance ID."];
     }
-    my $alliance = KA->db->resultset('KA::DB::Result::Alliance')->find($alliance_id);
+    my $alliance = KA->db->resultset('Alliance')->find($alliance_id);
     my $members = $alliance->members;
     my @members_list;
     while (my $member = $members->next) {

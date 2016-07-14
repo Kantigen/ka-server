@@ -19,14 +19,14 @@ out('Loading DB');
 our $db = KA->db;
 
 out('Giving SSD');
-my $empires = $db->resultset('KA::DB::Result::Empire');
+my $empires = $db->resultset('Empire');
 while (my $empire = $empires->next) {
     next unless $empire->tutorial_stage eq 'turing';
     my $home = $empire->home_planet;
     next unless defined $home;
     say "Adding to ".$home->name;
     my ($x, $y) = $home->find_free_space;
-    my $ssd = KA->db->resultset('KA::DB::Result::Building')->new({
+    my $ssd = KA->db->resultset('Building')->new({
         body_id  => $home->id,
         x        => $x,
         y        => $y,

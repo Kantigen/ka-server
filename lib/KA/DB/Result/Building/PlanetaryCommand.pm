@@ -65,7 +65,7 @@ around produces_food_items => sub {
 sub incoming_supply_chains {
     my ($self) = @_;
 
-    return KA->db->resultset('KA::DB::Result::SupplyChain')->search({ target_id => $self->body_id });
+    return KA->db->resultset('SupplyChain')->search({ target_id => $self->body_id });
 }
 
 sub pod_delay {

@@ -10,14 +10,14 @@ before pass => sub {
     my ($self) = @_;
 
     my $station = $self->station;
-    my $invite_empire = KA->db->resultset('KA::DB::Result::Empire')->find($self->scratch->{invite_id});
+    my $invite_empire = KA->db->resultset('Empire')->find($self->scratch->{invite_id});
     if (defined $invite_empire) {
         my $alliance = $station->alliance;
         my $count = $alliance->members->count;
         $count += $alliance->invites->count;
 
-        my $empire = KA->db->resultset('KA::DB::Result::Empire')->find($self->proposed_by_id);
-        my $building = KA->db->resultset('KA::DB::Result::Building')->find($self->scratch->{building_id});
+        my $empire = KA->db->resultset('Empire')->find($self->proposed_by_id);
+        my $building = KA->db->resultset('Building')->find($self->scratch->{building_id});
 
         my $leader_emp = $building->body->empire;
         my $embassy    = $leader_emp->highest_embassy;

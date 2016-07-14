@@ -40,12 +40,12 @@ use utf8;
 
   my $missions;
   if ($zone) {
-      $missions = KA->db->resultset('KA::DB::Result::Mission')->search({
+      $missions = KA->db->resultset('Mission')->search({
           zone                    => $zone,
       });
   }
   else {
-      $missions = KA->db->resultset('KA::DB::Result::Mission');
+      $missions = KA->db->resultset('Mission');
   }
   my %mission_name;
 

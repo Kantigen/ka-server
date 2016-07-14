@@ -10,7 +10,7 @@ my $csv = Text::CSV_XS->new({binary => 1});
 $csv->combine(qw(id name x y color zone));
 $out .= $csv->string."\n";
 #say $csv->string;
-my $stars = KA->db->resultset('KA::DB::Result::Map::Star');
+my $stars = KA->db->resultset('Map::Star');
 while (my $star = $stars->next) {
     if ($csv->combine( $star->id, $star->name, $star->x, $star->y, $star->color, $star->zone )) {
         $out .= $csv->string."\n";

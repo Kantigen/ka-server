@@ -20,7 +20,7 @@ my $start = time;
 
 out('Loading DB');
 our $db = KA->db;
-my $empires = KA->db->resultset('KA::DB::Result::Empire');
+my $empires = KA->db->resultset('Empire');
 
 out('getting empires...');
 my $saben = $empires->find(-1);

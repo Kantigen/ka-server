@@ -48,7 +48,7 @@ after insert => sub {
     # only store summary information for attacking or defending AI
     return if ($self->attacking_empire_id > 1 and (not defined $self->defending_empire_id or $self->defending_empire_id > 1 ));
 
-    my $summary_rs = KA->db->resultset('KA::DB::Result::AIBattleSummary');
+    my $summary_rs = KA->db->resultset('AIBattleSummary');
     my $ai_battle_summary = $summary_rs->search({
         attacking_empire_id     => $self->attacking_empire_id,
         defending_empire_id     => $self->defending_empire_id,

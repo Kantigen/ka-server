@@ -22,7 +22,7 @@ out('Loading AI');
 my $ai = KA::AI::Trelvestian->new;
 
 out('Loading Empires');
-my $empires = KA->db->resultset('KA::DB::Result::Empire');
+my $empires = KA->db->resultset('Empire');
 my $cache = KA->cache;
 my $lec = KA::DB::Result::Empire->lacuna_expanse_corp;
 
@@ -30,7 +30,7 @@ if ($cache->get('tournament', 'FourTrel') ne 'Tournament Over') {
 	out('Checking victory planets.');
 	my %victory_points;
 	my $victory_empire;
-	my $bodies = KA->db->resultset('KA::DB::Result::Map::Body');
+	my $bodies = KA->db->resultset('Map::Body');
 	foreach my $id (@{KA->config->get('win/alliance_control')}) {
 	    my $planet = $bodies->find($id);
 	    if ($planet->empire_id eq '' || $planet->empire_id > 1) {
@@ -62,7 +62,7 @@ if ($cache->get('tournament', 'FourTrel') ne 'Tournament Over') {
             elsif ($server_url =~ /us1/) {
                 $cache->set('tournament', 'FourTrel','Tournament Over', 60 * 60 * 24 * 30);
                 out('victory empire: ' . $victory_empire->name);
-                my $alliance = KA->db->resultset('KA::DB::Result::Alliance')->find($victory_empire->alliance_id);
+                my $alliance = KA->db->resultset('Alliance')->find($victory_empire->alliance_id);
                 if (defined $alliance) {
                     out('victory alliance: ' . $alliance->name);
                     my @allies = $alliance->members->get_column('id')->all;

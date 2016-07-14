@@ -15,7 +15,7 @@ my $s3 = Net::Amazon::S3->new(
     retry                 => 1,
     );
 my $bucket = $s3->bucket($config->get('feeds/bucket'));
-my $news_domain = $db->resultset('KA::DB::Result::News');
+my $news_domain = $db->resultset('News');
 foreach my $x (int($config->get('map_size/x')->[0]/250) .. int($config->get('map_size/x')->[1]/250)) {
     foreach my $y (int($config->get('map_size/y')->[0]/250) .. int($config->get('map_size/y')->[1]/250)) {
         my $zone = $x.'|'.$y;

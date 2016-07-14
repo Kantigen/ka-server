@@ -190,7 +190,7 @@ has is_claimed => (
 sub claimed_by {
     my $self = shift;
     my $empire_id = $self->is_claimed;
-    return $empire_id ? KA->db->resultset('KA::DB::Result::Empire')->find($empire_id) : undef;    
+    return $empire_id ? KA->db->resultset('Empire')->find($empire_id) : undef;    
 }
 
 # add a glyph to this planet
@@ -199,7 +199,7 @@ sub add_glyph {
 
   $num_add = 1 unless defined($num_add);
 
-  my $glyph = KA->db->resultset('KA::DB::Result::Glyph')->search({
+  my $glyph = KA->db->resultset('Glyph')->search({
                  type    => $type,
                  body_id => $self->id,
                })->first;
@@ -221,7 +221,7 @@ sub use_glyph {
   my ($self, $type, $num_used) = @_;
 
   $num_used = 1 unless (defined($num_used));
-  my $glyph = KA->db->resultset('KA::DB::Result::Glyph')->search({
+  my $glyph = KA->db->resultset('Glyph')->search({
                  type    => $type,
                  body_id => $self->id,
                })->first;
@@ -294,22 +294,22 @@ sub sanitize {
     foreach my $chain ($self->in_supply_chains) {
         $chain->delete;
     }
-    my $incoming = KA->db->resultset('KA::DB::Result::Fleet')->search({foreign_body_id => $self->id, direction => 'out'});
+    my $incoming = KA->db->resultset('Fleet')->search({foreign_body_id => $self->id, direction => 'out'});
     while (my $fleet = $incoming->next) {
         $fleet->turn_around->update;
     }
     $self->fleets->delete_all;
-    my $enemy_spies = KA->db->resultset('KA::DB::Result::Spies')->search({on_body_id => $self->id});
+    my $enemy_spies = KA->db->resultset('Spies')->search({on_body_id => $self->id});
     while (my $spy = $enemy_spies->next) {
         $spy->on_body_id($spy->from_body_id);
         $spy->task("Idle");
         $spy->update;
     }
-    KA->db->resultset('KA::DB::Result::Spies')->search({from_body_id => $self->id})->delete_all;
-    KA->db->resultset('KA::DB::Result::Market')->search({body_id => $self->id})->delete_all;
-    KA->db->resultset('KA::DB::Result::MercenaryMarket')->search({body_id => $self->id})->delete_all;
+    KA->db->resultset('Spies')->search({from_body_id => $self->id})->delete_all;
+    KA->db->resultset('Market')->search({body_id => $self->id})->delete_all;
+    KA->db->resultset('MercenaryMarket')->search({body_id => $self->id})->delete_all;
     # We will delete all probes (observatory or oracle), note, must recreate oracle probes if the planet is recolonised
-    KA->db->resultset('KA::DB::Result::Probes')->search_any({body_id => $self->id})->delete;
+    KA->db->resultset('Probes')->search_any({body_id => $self->id})->delete;
     $self->empire_id(undef);
     if ($self->get_type eq 'habitable planet' &&
         $self->size >= 40 && $self->size <= 50 &&
@@ -444,7 +444,7 @@ around get_status => sub {
                     my $foreign_bodies;
                     # Process all fleets that have already arrived
 
-                    my $incoming_rs = KA->db->resultset('KA::DB::Result::Fleet')->search({
+                    my $incoming_rs = KA->db->resultset('Fleet')->search({
                         foreign_body_id     => $self->id,
                         direction           => 'out',
                         task                => 'Travelling',
@@ -454,7 +454,7 @@ around get_status => sub {
                         $foreign_bodies->{$fleet->body_id} = 1;
                     }
                     foreach my $body_id (keys %$foreign_bodies) {
-                        my $body = KA->db->resultset('KA::DB::Result::Map::Body')->find($body_id);
+                        my $body = KA->db->resultset('Map::Body')->find($body_id);
                         if ($body) {
                             $body->tick;
                         }
@@ -464,7 +464,7 @@ around get_status => sub {
                     my @incoming_ally;
                     # If we are in an alliance, all fleets coming from ally (which are not ourself)
                     if ($self->empire->alliance_id) {
-                        my $incoming_ally_rs = KA->db->resultset('KA::DB::Result::Fleet')->search({
+                        my $incoming_ally_rs = KA->db->resultset('Fleet')->search({
                             foreign_body_id     => $self->id,
                             direction           => 'out',
                             task                => 'Travelling',
@@ -478,7 +478,7 @@ around get_status => sub {
                         @incoming_ally = $incoming_ally_rs->search({},{rows => 10});
                     }
                     # All fleets coming from ourself
-                    my $incoming_own_rs = KA->db->resultset('KA::DB::Result::Fleet')->search({
+                    my $incoming_own_rs = KA->db->resultset('Fleet')->search({
                         foreign_body_id     => $self->id,
                         direction           => 'out',
                         task                => 'Travelling',
@@ -491,7 +491,7 @@ around get_status => sub {
                     my @incoming_own = $incoming_own_rs->search({},{rows => 10});
 
                     # All foreign incoming
-                    my $incoming_foreign_rs = KA->db->resultset('KA::DB::Result::Fleet')->search({
+                    my $incoming_foreign_rs = KA->db->resultset('Fleet')->search({
                         foreign_body_id     => $self->id,
                         direction           => 'out',
                         task                => 'Travelling',
@@ -1092,7 +1092,7 @@ sub found_colony {
     }
 
     # add command building
-    my $command = KA->db->resultset('KA::DB::Result::Building')->new({
+    my $command = KA->db->resultset('Building')->new({
         x       => 0,
         y       => 0,
         class   => 'KA::DB::Result::Building::PlanetaryCommand',
@@ -1177,7 +1177,7 @@ sub convert_to_station {
     $self->glyph->delete;
 
     # add command building
-    my $command = KA->db->resultset('KA::DB::Result::Building')->new({
+    my $command = KA->db->resultset('Building')->new({
         x       => 0,
         y       => 0,
         class   => 'KA::DB::Result::Building::Module::StationCommand',
@@ -1186,7 +1186,7 @@ sub convert_to_station {
     $command->finish_upgrade;
 
     # add parliament
-    my $parliament = KA->db->resultset('KA::DB::Result::Building')->new({
+    my $parliament = KA->db->resultset('Building')->new({
         x       => -1,
         y       => 0,
         class   => 'KA::DB::Result::Building::Module::Parliament',
@@ -1195,7 +1195,7 @@ sub convert_to_station {
     $parliament->finish_upgrade;
 
     # add warehouse
-    my $warehouse = KA->db->resultset('KA::DB::Result::Building')->new({
+    my $warehouse = KA->db->resultset('Building')->new({
         x       => 1,
         y       => 0,
         class   => 'KA::DB::Result::Building::Module::Warehouse',
@@ -1509,7 +1509,7 @@ sub add_news {
     }
     if (randint(1,100) <= $chance) {
         $headline = sprintf $headline, @_ if @_;
-        KA->db->resultset('KA::DB::Result::News')->new({
+        KA->db->resultset('News')->new({
             date_posted => DateTime->now,
             zone        => $self->zone,
             headline    => $headline,

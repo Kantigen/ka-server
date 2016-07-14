@@ -31,7 +31,7 @@ sub format_description_of_payload {
     
   my $item_arr = [];
   if (exists $payload->{mercenary}) {
-    my $spy = KA->db->resultset('KA::DB::Result::Spies')->find($payload->{mercenary});
+    my $spy = KA->db->resultset('Spies')->find($payload->{mercenary});
     if (defined $spy) {
       $item_arr = [ sprintf( "Level %d spy named %s (Mercenary Transport) Offense: %d, Defense: %d, Intel: %d, Mayhem: %d, Politics: %d, Theft: %d, Mission Count Offensive: %d Defensive: %d)",
                     $spy->level, $spy->name, $spy->offense, $spy->defense,

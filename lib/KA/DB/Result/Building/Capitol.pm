@@ -54,7 +54,7 @@ use constant happiness_production => 100;
 before can_build => sub {
     my $self = shift;
     my @ids = $self->body->empire->planets->get_column('id')->all;
-    my $count = KA->db->resultset('KA::DB::Result::Building')->search({ class => __PACKAGE__, body_id => { in => \@ids } })->count;
+    my $count = KA->db->resultset('Building')->search({ class => __PACKAGE__, body_id => { in => \@ids } })->count;
     if ($count) {
         confess [1013, 'You can only have one Capitol.'];
     }

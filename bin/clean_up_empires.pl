@@ -19,11 +19,11 @@ my $start = DateTime->now;
 out('Loading DB');
 our $db = KA->db;
 our $dtf = $db->storage->datetime_parser;
-my $empires = $db->resultset('KA::DB::Result::Empire');
+my $empires = $db->resultset('Empire');
 
 
 out('Deleting dead spies and retiring old spies.');
-my $spies = $db->resultset('KA::DB::Result::Spies');
+my $spies = $db->resultset('Spies');
 $spies->search({task=>'Killed In Action'})->delete_all;
 my $retiring_spies = $spies->search({ -or => { offense_mission_count => { '>=' => 150 }, defense_mission_count => { '>=' => 150 } }});
 while (my $spy = $retiring_spies->next) {
@@ -95,7 +95,7 @@ while (my $empire = $inactives->next) {
 }
 
 out('Updating Viral Log');
-my $viral_log = $db->resultset('KA::DB::Result::Log::Viral');
+my $viral_log = $db->resultset('Log::Viral');
 my $add_deletes = $viral_log->search({date_stamp => format_date($start,'%F')})->first;
 unless (defined $add_deletes) {
     $add_deletes = $viral_log->new({date_stamp => format_date($start,'%F')})->insert;

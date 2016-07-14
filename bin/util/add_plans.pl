@@ -44,7 +44,7 @@ my $json = JSON->new->utf8(1);
 say $json->pretty->canonical->encode($phash) if ($verbose);
 
 for my $bid (sort @body_id) {
-  my $body = $db->resultset('KA::DB::Result::Map::Body')->find($bid);
+  my $body = $db->resultset('Map::Body')->find($bid);
   unless ($body) {
       say "Cannot find body id $bid : $phash->{$bid}->{name}\n";
       next;

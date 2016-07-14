@@ -28,7 +28,7 @@ my @mission_files = get_mission_files();
 out('Loading DB...');
 our $db = KA->db;
 our $dtf = $db->storage->datetime_parser;
-our $missions = $db->resultset('KA::DB::Result::Mission');
+our $missions = $db->resultset('Mission');
 
 out('Deleting missions nobody has completed...');
 my $old = $missions->search({date_posted => { '<' => $dtf->format_datetime(DateTime->now->subtract( hours => 72 ))}});
@@ -49,13 +49,13 @@ else {
         @zones = ($zone);
     }
     else {
-        @zones = $db->resultset('KA::DB::Result::Map::Body')->search(
+        @zones = $db->resultset('Map::Body')->search(
             { empire_id => { '>' => 0 }},
             { distinct => 1 })->get_column('zone')->all;
     }
     foreach my $zone (@zones) {
         out($zone);
-        my $current_missions = $db->resultset('KA::DB::Result::Mission')->search(
+        my $current_missions = $db->resultset('Mission')->search(
             { zone => "$zone" });
         my @current;
         while (my $mission = $current_missions->next) {

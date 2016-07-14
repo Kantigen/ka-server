@@ -30,7 +30,7 @@ while (my $colony = $colonies->next) {
         $vein->reschedule_work($ends)->update;
     }
     else {
-        my $buildings = $db->resultset('KA::DB::Result::Building');
+        my $buildings = $db->resultset('Building');
         my ($x, $y) = $colony->find_free_space;
         my $building = $buildings->new({
             class   => 'KA::DB::Result::Building::Permanent::EssentiaVein',

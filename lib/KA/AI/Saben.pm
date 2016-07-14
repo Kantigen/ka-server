@@ -13,7 +13,7 @@ has viable_colonies => (
     is          => 'ro',
     lazy        => 1,
     default     => sub {
-        return KA->db->resultset('KA::DB::Result::Map::Body')->search(
+        return KA->db->resultset('Map::Body')->search(
             { empire_id => undef, orbit => 7, size => { between => [30,70]}},
             );
     }
@@ -146,7 +146,7 @@ sub destroy_world {
         say sprintf("BHG of %s is neutralized by a space station.",$colony->name);
         return;
     }
-    my $enemies = KA->db->resultset('KA::DB::Result::Spies')
+    my $enemies = KA->db->resultset('Spies')
                          ->search({on_body_id => $colony->id,
                                    task => 'Sabotage BHG',
                                    empire_id => { '!=' => $self->empire_id }})->count;

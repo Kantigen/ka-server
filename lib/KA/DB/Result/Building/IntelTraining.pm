@@ -53,7 +53,7 @@ has spies_in_training_count => (
 
 sub get_spies {
     my ($self) = @_;
-    return KA->db->resultset('KA::DB::Result::Spies')
+    return KA->db->resultset('Spies')
                  ->search({ empire_id => $self->body->empire_id,
                             on_body_id => $self->body_id,
                             intel_xp => {'<', 2600} });
@@ -61,7 +61,7 @@ sub get_spies {
 
 sub get_spy {
     my ($self, $spy_id) = @_;
-    my $spy = KA->db->resultset('KA::DB::Result::Spies')->find($spy_id);
+    my $spy = KA->db->resultset('Spies')->find($spy_id);
     unless (defined $spy) {
         confess [1002, 'No such spy.'];
     }

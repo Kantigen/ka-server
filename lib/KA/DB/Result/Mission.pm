@@ -33,7 +33,7 @@ has params => (
 
 sub log {
     my $self = shift;
-    my $logs = KA->db->resultset('KA::DB::Result::Log::Mission');
+    my $logs = KA->db->resultset('Log::Mission');
     my $log = $logs->search({filename => $self->mission_file_name})->first;
     unless (defined $log) {
         $log = $logs->new({filename => $self->mission_file_name})->insert;
@@ -58,7 +58,7 @@ sub complete {
     $self->spend_objectives($body);
     $self->add_rewards($body);
     if (randint(0,9) < 5) {
-      KA->db->resultset('KA::DB::Result::News')->new({
+      KA->db->resultset('News')->new({
           zone                => $self->zone,
           headline            => sprintf($self->params->get('network_19_completion'), $body->empire->name),
       })->insert;
@@ -285,7 +285,7 @@ sub check_objectives {
             else {
                 $ghash{$glyph->{type}} = $glyph->{quantity};
             }
-            my $glyph_on_body = KA->db->resultset('KA::DB::Result::Glyph')->search({
+            my $glyph_on_body = KA->db->resultset('Glyph')->search({
                 type    => $glyph->{type},
                 body_id => $body->id,
             })->first;
@@ -310,8 +310,8 @@ sub check_objectives {
     # fleet movement
     if (exists $objectives->{fleet_movement}) {
         my $ships = KA->db->resultset('Fleet');
-        my $bodies = KA->db->resultset("KA::DB::Result::Map::Body");
-        my $stars = KA->db->resultset("KA::DB::Result::Map::Star");
+        my $bodies = KA->db->resultset("Map::Body");
+        my $stars = KA->db->resultset("Map::Star");
         my $scratch = $self->scratch || {fleet_movement=>[]};
         foreach my $movement (@{$scratch->{fleet_movement}}) {
             unless (KA->cache->get($movement->{ship_type}.'_arrive_'.$movement->{target_body_id}.$movement->{target_star_id}, $body->empire_id)) {
@@ -502,8 +502,8 @@ sub format_items {
     # fleet movement
     if ($is_objective && exists $items->{fleet_movement}) {
         undef $item_tmp;
-        my $bodies = KA->db->resultset("KA::DB::Result::Map::Body");
-        my $stars = KA->db->resultset("KA::DB::Result::Map::Star");
+        my $bodies = KA->db->resultset("Map::Body");
+        my $stars = KA->db->resultset("Map::Star");
         my $scratch = $self->scratch || {fleet_movement=>[]};
         foreach my $movement (@{$scratch->{fleet_movement}}) {
             my $ship =  $ships->new({type=>$movement->{ship_type}});
@@ -564,7 +564,7 @@ sub feed_filename {
 sub initialize {
     my ($class, $zone, $filename) = @_;
     return undef unless (-f '/home/keno/ka-mission/missions/'.$filename);
-    my $mission = KA->db->resultset('KA::DB::Result::Mission')->new({
+    my $mission = KA->db->resultset('Mission')->new({
         zone                => $zone,
         mission_file_name   => $filename,
     });
@@ -592,7 +592,7 @@ sub initialize {
     my $log = $mission->log;
     $log->update({ offers => $log->offers + 1});
     if (randint(0,9) < 3) {
-      KA->db->resultset('KA::DB::Result::News')->new({
+      KA->db->resultset('News')->new({
           zone                => $mission->zone,
           headline            => $mission->params->get('network_19_headline'),
       })->insert;
@@ -602,7 +602,7 @@ sub initialize {
 
 sub find_body_target {
     my ($class, $movement, $zone) = @_;
-    my $body = KA->db->resultset('KA::DB::Result::Map::Body')->search({size => { between => $movement->{target}{size}}});
+    my $body = KA->db->resultset('Map::Body')->search({size => { between => $movement->{target}{size}}});
     
     # body type
     given ($movement->{target}{type}) {
@@ -640,7 +640,7 @@ sub find_body_target {
 
 sub find_star_target {
     my ($class, $movement, $zone) = @_;
-    my $star = KA->db->resultset('KA::DB::Result::Map::Star');
+    my $star = KA->db->resultset('Map::Star');
 
     # zone
     if ($movement->{target}{in_zone}) {

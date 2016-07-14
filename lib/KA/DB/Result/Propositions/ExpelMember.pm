@@ -9,7 +9,7 @@ before pass => sub {
     my ($self) = @_;
     my $station = $self->station;
     my $alliance = $station->alliance;
-    my $empire_to_remove = KA->db->resultset('KA::DB::Result::Empire')->find($self->scratch->{empire_id});
+    my $empire_to_remove = KA->db->resultset('Empire')->find($self->scratch->{empire_id});
     if (defined $empire_to_remove) {
         if ($empire_to_remove->alliance_id == $alliance->id) {
             $alliance->remove_member($empire_to_remove);

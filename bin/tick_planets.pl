@@ -21,7 +21,7 @@ out('Loading DB');
 our $db = KA->db;
 
 out('Ticking planets');
-my $planets_rs = $db->resultset('KA::DB::Result::Map::Body')->search({empire_id => {'!=' => 0}})->get_column('id');
+my $planets_rs = $db->resultset('Map::Body')->search({empire_id => {'!=' => 0}})->get_column('id');
 while (my $id = $planets_rs->next) {
     my $planet = LD->body($id);
     out('Ticking '.$planet->name.' : '.$planet->id);

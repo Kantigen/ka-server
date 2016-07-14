@@ -55,7 +55,7 @@ sub abandon {
     my $empire = $session->current_empire;
     my $body   = $session->current_body;
     if ($body->isa('KA::DB::Result::Map::Body::Planet::Station')) { 
-        my $proposition = KA->db->resultset('KA::DB::Result::Propositions')->new({
+        my $proposition = KA->db->resultset('Propositions')->new({
             type            => 'AbandonStation',
             name            => 'Abandon Station',
             description     => 'Abandon the station named {Planet '.$body->id.' '.$body->name.'}.',            
@@ -79,7 +79,7 @@ sub rename {
         ->no_restricted_chars
         ->no_profanity
         ->no_padding
-        ->not_ok(KA->db->resultset('KA::DB::Result::Map::Body')->search({name=>$name, 'id'=>{'!='=>$body_id}})->count); # name available
+        ->not_ok(KA->db->resultset('Map::Body')->search({name=>$name, 'id'=>{'!='=>$body_id}})->count); # name available
     
     my $session = $self->get_session({session_id => $session_id, body_id => $body_id});
     my $empire = $session->current_empire;
@@ -89,7 +89,7 @@ sub rename {
         unless ($body->parliament->effective_level >= 3) {
             confess [1013, 'You need to have a level 3 Parliament to rename a station.'];
         }
-        my $proposition = KA->db->resultset('KA::DB::Result::Propositions')->new({
+        my $proposition = KA->db->resultset('Propositions')->new({
             type            => 'RenameStation',
             name            => 'Rename Station',
             scratch         => { name => $name },
@@ -271,7 +271,7 @@ sub rearrange_buildings {
     my $old_spot = sprintf("%d:%d", $cur_ids{$id}->{x}, $cur_ids{$id}->{y});
     if ($new_spot ne $old_spot) {
       my $building =
-           KA->db->resultset('KA::DB::Result::Building')->
+           KA->db->resultset('Building')->
            find({body_id => $body_id, id => $id});
       $building->update({
         x => $new_ids{$id}->{x},
@@ -436,7 +436,7 @@ sub get_buildable {
     my $empire = $session->current_empire;
     my $body   = $session->current_body;
     
-    my $building_rs = KA->db->resultset('KA::DB::Result::Building');
+    my $building_rs = KA->db->resultset('Building');
 
     $body->check_for_available_build_space($x, $y);
 
@@ -542,7 +542,7 @@ sub view_laws {
     my ($self, $session_id, $body_id) = @_;
     my $session = $self->get_session({session_id => $session_id});
     my $empire = $session->current_empire;
-    my $body = KA->db->resultset('KA::DB::Result::Map::Body')
+    my $body = KA->db->resultset('Map::Body')
                 ->find($body_id);
     if ($body and $body->isa('KA::DB::Result::Map::Body::Planet::Station')) {
         my @out;

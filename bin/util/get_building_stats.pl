@@ -12,7 +12,7 @@ open my $file, '>', '/tmp/stats.csv';
 print {$file} 'Name,Energy Hour,Food Hour,Ore Hour,Water Hour,Waste Hour,Happiness Hour,Energy Cost,Food Cost,Ore Cost,Water Cost,Waste Cost,Time Cost,Energy Storage,Food Storage,Ore Storage,Water Storage,Waste Storage'."\n";
 foreach my $module (findallmod KA::DB::Result::Building) {
     my @row;
-    my $object = $db->resultset('KA::DB::Result::Building')->new({ class=>$module, body=>$empire->home_planet});
+    my $object = $db->resultset('Building')->new({ class=>$module, body=>$empire->home_planet});
     $object->level(1);
     next if $object->name eq 'Building';
     push @row, $object->name;

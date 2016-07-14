@@ -19,7 +19,7 @@ sub view_planet {
     my $session  = $self->get_session({session_id => $session_id, building_id => $building_id });
     my $empire   = $session->current_empire;
     my $building = $session->current_building;
-    my $planet = KA->db->resultset('KA::DB::Result::Map::Body')->find($planet_id);
+    my $planet = KA->db->resultset('Map::Body')->find($planet_id);
     
     unless (defined $planet) {
         confess [1002, 'Could not locate that planet.'];
@@ -56,7 +56,7 @@ sub list_planets {
     my $building = $session->current_building;
     my $star;
     if ($star_id) {
-        $star = KA->db->resultset('KA::DB::Result::Map::Star')->find($star_id);
+        $star = KA->db->resultset('Map::Star')->find($star_id);
         unless (defined $star) {
             confess [1002, 'Could not find that star.'];
         }

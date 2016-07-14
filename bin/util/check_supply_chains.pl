@@ -19,11 +19,11 @@ out('Loading DB');
 our $db = KA->db;
 
 out('Getting Supply Chains');
-my $chains = $db->resultset('KA::DB::Result::SupplyChain')->search;
+my $chains = $db->resultset('SupplyChain')->search;
 
 while ( my $chain = $chains->next) {
-    my $supply_body = $db->resultset('KA::DB::Result::Map::Body')->find($chain->planet_id);
-    my $target_body = $db->resultset('KA::DB::Result::Map::Body')->find($chain->target_id);
+    my $supply_body = $db->resultset('Map::Body')->find($chain->planet_id);
+    my $target_body = $db->resultset('Map::Body')->find($chain->target_id);
 
     if ($supply_body->empire->alliance_id != $target_body->empire->alliance_id) {
         my $saname = "";

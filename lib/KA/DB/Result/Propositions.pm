@@ -95,7 +95,7 @@ sub cast_vote {
     if ($self->votes->search({empire_id => $empire->id})->count) {
         confess [1010, 'You have already voted on this proposition.'];
     }
-    KA->db->resultset('KA::DB::Result::Votes')->new({
+    KA->db->resultset('Votes')->new({
         proposition_id  => $self->id,
         empire_id       => $empire->id,
         vote            => $vote,

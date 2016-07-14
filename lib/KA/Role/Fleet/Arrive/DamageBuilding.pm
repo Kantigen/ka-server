@@ -57,7 +57,7 @@ after handle_arrival_procedures => sub {
     }
     $body_attacked->add_news(70, sprintf('An attack fleet screamed out of the sky and damaged the %s on %s.',$building->name, $body_attacked->name));
 
-    my $logs = KA->db->resultset('KA::DB::Result::Log::Battles');
+    my $logs = KA->db->resultset('Log::Battles');
     $logs->new({
         date_stamp => DateTime->now,
         attacking_empire_id     => $self->body->empire_id,

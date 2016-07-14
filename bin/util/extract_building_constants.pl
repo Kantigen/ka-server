@@ -15,17 +15,17 @@ my $bid;
     'bid=s'   => \$bid,
   );
 
-  my $empires = $db->resultset('KA::DB::Result::Empire');
+  my $empires = $db->resultset('Empire');
   my $empire = $empires->find($empire_id);
   die "Could not find Empire!\n" unless $empire;
   print "Setting up for empire: ".$empire->name." : ".$empire_id."\n";
   my $ehash;
   my $body;
   if ($bid) {
-      $body = $db->resultset('KA::DB::Result::Map::Body')->find($bid);
+      $body = $db->resultset('Map::Body')->find($bid);
   }
   else {
-      $body = $db->resultset('KA::DB::Result::Map::Body')->find($empire->home_planet_id);
+      $body = $db->resultset('Map::Body')->find($empire->home_planet_id);
   }
 
 print "Building, lvl, food_hour, ore_hour, water_hour, energy_hour, waste_hour, happiness_hour, food_capacity, ore_capacity, water_capacity, energy_capacity, waste_capacity, food cost, ore cost, water cost, energy cost, waste cost, time cost\n";
@@ -190,7 +190,7 @@ for my $building (qw(
     )) {
     my $lvl = 1;
     for my $lvl (1..30) {
-      my $obj = KA->db->resultset('KA::DB::Result::Building')->new({
+      my $obj = KA->db->resultset('Building')->new({
           body_id  => $bid,
           class    => $building,
           level    => $lvl,

@@ -14,7 +14,7 @@ use constant waste_prod_rate => WASTE_F;
 
 sub platforms {
     my $self = shift;
-    return KA->db->resultset('KA::DB::Result::MiningPlatforms')->search({ planet_id => $self->body_id });
+    return KA->db->resultset('MiningPlatforms')->search({ planet_id => $self->body_id });
 }
 
 sub ships {
@@ -59,7 +59,7 @@ sub can_add_platform {
     }
     
     # asteroid count
-    $count = KA->db->resultset('KA::DB::Result::MiningPlatforms')->search({ asteroid_id => $asteroid->id })->count;
+    $count = KA->db->resultset('MiningPlatforms')->search({ asteroid_id => $asteroid->id })->count;
     unless ($on_arrival) {
         $count += KA->db->resultset('Fleet')->search({type=>'mining_platform_ship',foreign_body_id => $asteroid->id, task=>'Travelling',body_id=>$self->body_id})->count;
     }
@@ -71,7 +71,7 @@ sub can_add_platform {
 
 sub add_platform {
     my ($self, $asteroid) = @_;
-    KA->db->resultset('KA::DB::Result::MiningPlatforms')->new({
+    KA->db->resultset('MiningPlatforms')->new({
         planet_id   => $self->body_id,
         planet      => $self->body,
         asteroid_id => $asteroid->id,

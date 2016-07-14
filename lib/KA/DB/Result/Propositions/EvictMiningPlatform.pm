@@ -7,9 +7,9 @@ extends 'KA::DB::Result::Propositions';
 
 before pass => sub {
     my ($self) = @_;
-    my $platform = KA->db->resultset('KA::DB::Result::MiningPlatforms')->find($self->scratch->{platform_id});   
+    my $platform = KA->db->resultset('MiningPlatforms')->find($self->scratch->{platform_id});   
     my $station = $self->station;
-    my $bodies = KA->db->resultset('KA::DB::Result::Map::Body');
+    my $bodies = KA->db->resultset('Map::Body');
     my $asteroid = $bodies->find($self->scratch->{asteroid_id});
     my $name = $self->scratch->{name};
     if (! defined $platform) {

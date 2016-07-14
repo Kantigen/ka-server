@@ -92,7 +92,7 @@ sub push_items {
     unless ($target_id) {
         confess [1002, "You must specify a target body id."];
     }
-    my $target = KA->db->resultset('KA::DB::Result::Map::Body')->find($target_id);
+    my $target = KA->db->resultset('Map::Body')->find($target_id);
     unless (defined $target) {
         confess [1002, 'The target body you specified could not be found.'];
     }

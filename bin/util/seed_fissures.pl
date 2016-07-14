@@ -44,7 +44,7 @@ our $db = KA->db;
 
 my $placed = 0;
 while ($placed < $number) {
-  my $target = KA->db->resultset('KA::DB::Result::Map::Body')->search(
+  my $target = KA->db->resultset('Map::Body')->search(
                   $search,
                   { order_by => 'rand()' }
                 )->first;
@@ -62,7 +62,7 @@ while ($placed < $number) {
   elsif ($btype eq 'habitable planet') {
     my ($x, $y) = eval { $target->find_free_space};
     unless ($@) {
-        my $building = KA->db->resultset('KA::DB::Result::Building')->new({
+        my $building = KA->db->resultset('Building')->new({
             x            => $x,
             y            => $y,
             level        => randint(1, 30),

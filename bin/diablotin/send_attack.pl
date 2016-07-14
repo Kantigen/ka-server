@@ -51,7 +51,7 @@ while (my $attacking_colony = $colonies->next) {
     out('Found colony to attack from named '.$attacking_colony->name);
     my @tzones = adjacent_zones($attacking_colony->zone, \@zones);
     out(sprintf("Find body to attack from %s into %s", $attacking_colony->zone, join(",",@tzones)));
-    my $targets = $db->resultset('KA::DB::Result::Map::Body')->search({
+    my $targets = $db->resultset('Map::Body')->search({
         empire_id                   => { '>' => 1 },
         'empire.is_isolationist'    => 0,
         zone => { 'in' => \@tzones },

@@ -30,7 +30,7 @@ unless ( $status eq 'Game Over' ) {
 
 out('Loading DB');
 our $db = KA->db;
-my $empires = $db->resultset('KA::DB::Result::Empire')->search({id => { '>' => 1 } });
+my $empires = $db->resultset('Empire')->search({id => { '>' => 1 } });
 
 out('Deleting Empires');
 while (my $empire = $empires->next) {

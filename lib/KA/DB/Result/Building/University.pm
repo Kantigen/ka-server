@@ -60,7 +60,7 @@ after finish_upgrade => sub {
         $empire->university_level(++$tech_lvl);
         $empire->update;
         if ($tech_lvl > 4) {
-            my $invite = KA->db->resultset('KA::DB::Result::Invite')->search({invitee_id => $empire->id})->first;
+            my $invite = KA->db->resultset('Invite')->search({invitee_id => $empire->id})->first;
             if (defined $invite) {
                 my $inviter = $invite->inviter;
                 if (defined $inviter) {

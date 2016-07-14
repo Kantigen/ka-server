@@ -15,7 +15,7 @@ sub verify_key {
 sub spend {
     my ($self, $key, $code_string) = @_;
     confess [401, 'Invalid key.'] unless $self->verify_key($key);
-    my $code = KA->db->resultset('KA::DB::Result::EssentiaCode')->search({code => $code_string})->first;
+    my $code = KA->db->resultset('EssentiaCode')->search({code => $code_string})->first;
     confess [1002, 'The essentia code you specified is invalid.'] unless (defined $code);
     confess [1010, 'The essentia code you specified has already been redeemed.'] if ($code->used);
     $code->used(1);
@@ -29,7 +29,7 @@ sub add {
     confess [1009, 'Amount must be 0 or higher.'] unless $amount >= 0;
     confess [1009, 'You must supply a description'] unless length($description);
     my $code_string = create_uuid_as_string(UUID_V4);
-    my $code = KA->db->resultset('KA::DB::Result::EssentiaCode')->new({
+    my $code = KA->db->resultset('EssentiaCode')->new({
         code            => $code_string,
         date_created    => DateTime->now,
         description     => $description,

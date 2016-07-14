@@ -9,7 +9,7 @@ use Email::Stuff;
 
 sub www_view_stats {
     my ($self, $request) = @_;
-    my $pair = KA->db->resultset('KA::DB::Result::ApiKey')->search({ private_key => $request->param('private_key')})->first;
+    my $pair = KA->db->resultset('ApiKey')->search({ private_key => $request->param('private_key')})->first;
     unless (defined $pair) {
         confess [404, 'That private key could not be found'];
     }
@@ -21,7 +21,7 @@ sub www_view_stats {
     my $dt_parser = KA->db->storage->datetime_parser;
     my $thirty_days_ago = $dt_parser->format_datetime( DateTime->now->subtract(days=>30) );
     my $out = "<h1>Stats for $name</h1><table style=\"width: 100%;\"><tr><th>Statistic</th><th>Past 30 Days</th><th>All Time</th></tr>";
-    my $login = KA->db->resultset('KA::DB::Result::Log::Login')->search({api_key => $pair->public_key});
+    my $login = KA->db->resultset('Log::Login')->search({api_key => $pair->public_key});
     $out .= $row->('Empires Using',
         $login->search({date_stamp => { '>=' => $thirty_days_ago }},{group_by => ['empire_id']})->count,
         $login->search(undef,{group_by => ['empire_id']})->count
@@ -30,17 +30,17 @@ sub www_view_stats {
         $login->search({date_stamp => { '>=' => $thirty_days_ago }})->count,
         $login->count
     );
-    my $essentia = KA->db->resultset('KA::DB::Result::Log::Essentia')->search({api_key => $pair->public_key, amount => { '<' => 0 } });
+    my $essentia = KA->db->resultset('Log::Essentia')->search({api_key => $pair->public_key, amount => { '<' => 0 } });
     $out .= $row->('Essentia Spent',
         $essentia->search({date_stamp => { '>=' =>$thirty_days_ago }})->get_column('amount')->sum * -1,
         $essentia->get_column('amount')->sum * -1
     );
-    my $lottery = KA->db->resultset('KA::DB::Result::Log::Lottery')->search({api_key => $pair->public_key });
+    my $lottery = KA->db->resultset('Log::Lottery')->search({api_key => $pair->public_key });
     $out .= $row->('Lottery Votes',
         $lottery->search({date_stamp => { '>=' =>$thirty_days_ago }})->count,
         $lottery->count
     );
-    my $rpc = KA->db->resultset('KA::DB::Result::Log::RPC')->search({api_key => $pair->public_key });
+    my $rpc = KA->db->resultset('Log::RPC')->search({api_key => $pair->public_key });
     $out .= $row->('RPC Calls',
         $rpc->search({date_stamp => { '>=' =>$thirty_days_ago }})->count,
         $rpc->count
@@ -51,7 +51,7 @@ sub www_view_stats {
 
 sub www_generate_key {
     my ($self, $request) = @_;
-    my $pair = KA->db->resultset('KA::DB::Result::ApiKey')->new({
+    my $pair = KA->db->resultset('ApiKey')->new({
         public_key  => create_uuid_as_string(UUID_V4),
         private_key => create_uuid_as_string(UUID_V4),
         email       => $request->param('email'),

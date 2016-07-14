@@ -31,7 +31,7 @@ sub www_postback {
         return $self->format_error('Could not authenticate your Facebook account. Please close this window and try again.');   
     }
 
-    my $empire = KA->db->resultset('KA::DB::Result::Empire')->search({facebook_uid => $user->{id} })->first;
+    my $empire = KA->db->resultset('Empire')->search({facebook_uid => $user->{id} })->first;
     my $uri = KA->config->get('server_url');
     if (defined $empire && $empire->stage eq 'founded') {
         $empire->facebook_token($fb->access_token);
@@ -109,7 +109,7 @@ sub www_my_empire {
         return $self->format_error(q{The bad thing that should never happen just happened. Facebook doesn't remember who you are!});   
     }
 
-    my $empire = KA->db->resultset('KA::DB::Result::Empire')->search({facebook_uid => $user->{id} })->first;
+    my $empire = KA->db->resultset('Empire')->search({facebook_uid => $user->{id} })->first;
     my $out;
     unless (defined $empire) {
         $out = q{<p><a href="}.$config->get('server_url').q{" target="_new">Join thousands of other players online now in this strategic browser game.</a> No downloads required. Play for free.</p>

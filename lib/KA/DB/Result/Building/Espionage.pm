@@ -51,7 +51,7 @@ after finish_upgrade => sub {
         $empire->update;
     }
     my $offense = ($empire->effective_deception_affinity * 50) + ($self->effective_level * 75);
-    my $spies = KA->db->resultset('KA::DB::Result::Spies')->search({
+    my $spies = KA->db->resultset('Spies')->search({
         on_body_id      => $self->body_id,
         from_body_id    => $self->body_id,
         offense         => { '<' => $offense },

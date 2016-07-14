@@ -209,7 +209,7 @@ sub _build_font_path {
 sub construct {
     my ($self) = @_;
 
-    my $captchas = KA->db->resultset('KA::DB::Result::Captcha');
+    my $captchas = KA->db->resultset('Captcha');
 
     my $security_image;
     if ($self->develop_mode) {

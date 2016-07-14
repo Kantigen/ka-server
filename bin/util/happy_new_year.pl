@@ -18,7 +18,7 @@ my $start = time;
 
 out('Loading DB');
 our $db = KA->db;
-my $empires = $db->resultset('KA::DB::Result::Empire');
+my $empires = $db->resultset('Empire');
 my $lec = $empires->find(1);
 
 my $message = q{I hope this message finds you well in the new year. In our short time together we have learned much from each other. I have one more thing to teach you about our culture.

@@ -128,7 +128,7 @@ sub run_hourly_empire_updates {
 sub get_colony_scratchpad {
     my ($self, $colony) = @_;
 
-    my ($scratch) = KA::db->resultset('KA::DB::Result::AIScratchPad')->search({
+    my ($scratch) = KA::db->resultset('AIScratchPad')->search({
         ai_empire_id    => $self->empire_id,
         body_id         => $colony->id,
     });
@@ -144,7 +144,7 @@ sub check_enemy_spy_action {
 
     my $scratchpad = $self->scratch->pad;
 
-    my $enemy_spies = KA->db->resultset('KA::DB::Result::Spies')->search({
+    my $enemy_spies = KA->db->resultset('Spies')->search({
         task    => ['Incite Mutiny','Incite Rebellion','Appropriate Technology','Sabotage Resources','Infiltrating','Incite Insurrection','Appropriate Resources','Abduct Operatives','Gather Operative Intelligence','Sabotage Probes','Rescue Comrades','Assassinate Operatives','Debriefing','Sabotage Infrastructure',],
         on_body_id => $colony->id,
         empire_id  => {'!=' => -9},
@@ -161,12 +161,12 @@ sub check_enemy_spy_action {
     }
 
     for my $empire_id (keys %$spy_ref) {
-        my ($ai_battle_summary) = KA->db->resultset('KA::DB::Result::AIBattleSummary')->search({
+        my ($ai_battle_summary) = KA->db->resultset('AIBattleSummary')->search({
             attacking_empire_id => $empire_id,
             defending_empire_id => -9,
         });
         if (not $ai_battle_summary) {
-            $ai_battle_summary = KA->db->resultset('KA::DB::Result::AIBattleSummary')->create({
+            $ai_battle_summary = KA->db->resultset('AIBattleSummary')->create({
                 attacking_empire_id => $empire_id,
                 defending_empire_id => -9,
                 attack_victories    => 0,
@@ -253,7 +253,7 @@ sub sell_glyph_trade {
                 speed           => $ship->speed,
                 trade_range     => 600,
             );
-            KA->db->resultset('KA::DB::Result::Market')->create(\%trade);
+            KA->db->resultset('Market')->create(\%trade);
         }
     }
 }
@@ -327,7 +327,7 @@ sub sell_plan_trade {
                 speed                       => $ship->speed,
                 trade_range                 => 600,
             );
-            KA->db->resultset('KA::DB::Result::Market')->create(\%trade);
+            KA->db->resultset('Market')->create(\%trade);
         }
     }
 }
@@ -363,7 +363,7 @@ sub buy_trade {
     }
 
     # get all trades with plans by other empires in this zone
-    my $market = KA->db->resultset('KA::DB::Result::Market')->search({
+    my $market = KA->db->resultset('Market')->search({
         'body.empire_id'  => {'!=' => $self->empire_id},
         transfer_type   => $colony->zone,
         has_plan        => 1,
@@ -405,7 +405,7 @@ sub buy_trade {
 
     # purchase the best value trade
     if ($best_price_per_plan <= $scratchpad->{buy_max_price_per_plan}) {
-        my $trade = KA->db->resultset('KA::DB::Result::Market')->find($best_trade_id);
+        my $trade = KA->db->resultset('Market')->find($best_trade_id);
         return if not defined $trade;
 
         my $offer_ship = KA->db->resultset('Fleet')->find($trade->ship_id);
@@ -443,7 +443,7 @@ sub retaliate {
     my $scratch_pad = $self->scratch->pad;
     my $attack = $scratch_pad->{attack};
 
-    my @del_colonies = KA->db->resultset('KA::DB::Result::Map::Body')->search({
+    my @del_colonies = KA->db->resultset('Map::Body')->search({
         empire_id   => -9,
     });
 
@@ -452,7 +452,7 @@ sub retaliate {
 
 TARGET:
     foreach my $target_id (keys %$attack) {
-       my $target = KA->db->resultset('KA::DB::Result::Empire')->find($target_id);
+       my $target = KA->db->resultset('Empire')->find($target_id);
        if ($target) {
            my $freq = $attack->{$target_id}{frequency} || 'never';
            say "    Target empire '".$target->name."' frequency '$freq'";
@@ -461,7 +461,7 @@ TARGET:
                my $num_sweepers        = $attack->{$target_id}{sweepers};
                my $num_scows           = $attack->{$target_id}{scows};
                my $num_snarks          = $attack->{$target_id}{snarks};
-               my $target_colony       = KA->db->resultset('KA::DB::Result::Map::Body')->find($target_colony_id);
+               my $target_colony       = KA->db->resultset('Map::Body')->find($target_colony_id);
                next TARGET unless $target_colony;
                next TARGET if $target_colony->empire_id != $target_id;
                say "    Attack '".$target_colony->name."' with $num_sweepers sweepers, $num_scows scows, $num_snarks snarks";
@@ -577,7 +577,7 @@ sub process_email {
             }
             next MESSAGE;
         }
-        my $request_empire = KA::db->resultset('KA::DB::Result::Empire')->find($message->from_id);
+        my $request_empire = KA::db->resultset('Empire')->find($message->from_id);
         if (not $request_empire) {
             # empire seems to have disapeared
             $message->has_read(1);

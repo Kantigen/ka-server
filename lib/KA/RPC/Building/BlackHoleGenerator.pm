@@ -95,14 +95,14 @@ sub find_target {
     }
     if (exists $target_params->{body_id}) {
         $target_word = $target_params->{body_id};
-        $target = $db->resultset('KA::DB::Result::Map::Body')->find($target_params->{body_id});
+        $target = $db->resultset('Map::Body')->find($target_params->{body_id});
         if (defined $target) {
             $target_type = $target->get_type;
         }
     }
     elsif (exists $target_params->{body_name}) {
         $target_word = $target_params->{body_name};
-        $target = $db->resultset('KA::DB::Result::Map::Body')
+        $target = $db->resultset('Map::Body')
             ->search(
                 { name => $target_params->{body_name} }
             )->first;
@@ -112,12 +112,12 @@ sub find_target {
     }
     elsif (exists $target_params->{x}) {
         $target_word = $target_params->{x}.":".$target_params->{y};
-        $target = $db->resultset('KA::DB::Result::Map::Body')
+        $target = $db->resultset('Map::Body')
             ->search(
                 { x => $target_params->{x}, y => $target_params->{y} }
             )->first;
         unless (defined $target) {
-            $target = $db->resultset('KA::DB::Result::Map::Star')
+            $target = $db->resultset('Map::Star')
                 ->search(
                     { x => $target_params->{x}, y => $target_params->{y} }
                 )->first;
@@ -128,7 +128,7 @@ sub find_target {
         }
         #Check for empty orbits.
         unless (defined $target) {
-            my $star = $db->resultset('KA::DB::Result::Map::Star')
+            my $star = $db->resultset('Map::Star')
                 ->search(
                     {
                         x => { '>=' => ($target_params->{x} -2),
@@ -227,7 +227,7 @@ sub find_target {
         my ($type,$value) = exists $target_params->{star_id} ?
             (id => $target_params->{star_id}) : (name => $target_params->{star_name});
 
-        $target = $db->resultset('KA::DB::Result::Map::Star')->find({$type => $value});
+        $target = $db->resultset('Map::Star')->find({$type => $value});
         $target_type = "star";
         $target_word =~ s/:?orbit:?//g;
 
@@ -747,7 +747,7 @@ sub generate_singularity {
     }
     unless ($task->{occupied}) {
         if ($btype eq 'asteroid') {
-            my $platforms = KA->db->resultset('KA::DB::Result::MiningPlatforms')
+            my $platforms = KA->db->resultset('MiningPlatforms')
                 ->search({asteroid_id => $target->id });
             my $count = 0;
             while (my $platform = $platforms->next) {
@@ -1386,7 +1386,7 @@ sub bhg_swap {
             orbit   => $old_data->{orbit},
         });
         if ($new_data->{type} ne 'asteroid') {
-            my $target_waste = KA->db->resultset('KA::DB::Result::WasteChain')
+            my $target_waste = KA->db->resultset('WasteChain')
                 ->search({ planet_id => $target->id });
             if ($target_waste->count > 0) {
                 while (my $chain = $target_waste->next) {
@@ -1412,10 +1412,10 @@ sub bhg_swap {
                 $toracle->update;
             }
             my $mbody = KA->db
-                ->resultset('KA::DB::Result::Map::Body')
+                ->resultset('Map::Body')
                 ->find($target->id);
             my $fbody = KA->db
-                ->resultset('KA::DB::Result::Map::Body')
+                ->resultset('Map::Body')
                 ->find($body->id);
             my $mess = sprintf("{Starmap %s %s %s} is now at %s/%s in orbit %s around {Starmap %s %s %s}.",
                     $fbody->x, $fbody->y, $fbody->name,
@@ -1440,7 +1440,7 @@ sub bhg_swap {
         }
     }
     if ($body->get_type ne 'asteroid') {
-        my $waste_chain = KA->db->resultset('KA::DB::Result::WasteChain')
+        my $waste_chain = KA->db->resultset('WasteChain')
             ->search({ planet_id => $body->id });
         if ($waste_chain->count > 0) {
             while (my $chain = $waste_chain->next) {
@@ -1466,12 +1466,12 @@ sub bhg_swap {
     }
     if (defined($body->empire)) {
         my $mbody = KA->db
-            ->resultset('KA::DB::Result::Map::Body')
+            ->resultset('Map::Body')
             ->find($body->id);
         my $mess;
         unless ($new_data->{type} eq "empty") {
             my $fbody = KA->db
-                ->resultset('KA::DB::Result::Map::Body')
+                ->resultset('Map::Body')
                 ->find($target->id);
             $mess = sprintf("{Starmap %s %s %s} took our place at %s/%s in orbit %s around {Starmap %s %s %s}.",
                     $fbody->x, $fbody->y, $fbody->name,
@@ -1480,7 +1480,7 @@ sub bhg_swap {
         }
         else {
             my $star = KA->db->
-                       resultset('KA::DB::Result::Map::Star')->find($old_data->{star_id});
+                       resultset('Map::Star')->find($old_data->{star_id});
             $mess = sprintf("There is now an empty orbit at %s/%s in orbit %s around {Starmap %s %s %s}",
                     $old_data->{x}, $old_data->{y}, $old_data->{orbit},
                     $star->x, $star->y, $star->name);
@@ -1535,7 +1535,7 @@ sub recalc_incoming_supply {
         next if defined($bids{$bid});
         $bids{$bid} = 1;
         my $sender = KA->db
-            ->resultset('KA::DB::Result::Map::Body')
+            ->resultset('Map::Body')
             ->find($bid);
         if (defined($sender->empire)) {
             $sender->recalc_chains; # Recalc all chains
@@ -1620,7 +1620,7 @@ sub bhg_random_make {
     my ($building) = @_;
     my $body = $building->body;
     my $return;
-    my $target = KA->db->resultset('KA::DB::Result::Map::Body')
+    my $target = KA->db->resultset('Map::Body')
         ->search(
             {zone => $body->zone, empire_id => undef, },
             { order_by => 'rand()' }
@@ -1639,7 +1639,7 @@ sub bhg_random_make {
         $return = bhg_make_asteroid($building, $target);
     }
     elsif ($btype eq 'asteroid') {
-        my $platforms = KA->db->resultset('KA::DB::Result::MiningPlatforms')->
+        my $platforms = KA->db->resultset('MiningPlatforms')->
         search({asteroid_id => $target->id });
         unless ($platforms->next) {
             $body->add_news(50, 'A new planet has appeared where %s had been!', $target->name);
@@ -1660,7 +1660,7 @@ sub bhg_random_type {
     my ($building) = @_;
     my $body = $building->body;
     my $return;
-    my $target = KA->db->resultset('KA::DB::Result::Map::Body')
+    my $target = KA->db->resultset('Map::Body')
         ->search(
             {zone => $body->zone, empire_id => undef, },
             { order_by => 'rand()' }
@@ -1697,7 +1697,7 @@ sub bhg_random_type {
 sub bhg_random_size {
     my ($building) = @_;
     my $body = $building->body;
-    my $target = KA->db->resultset('KA::DB::Result::Map::Body')
+    my $target = KA->db->resultset('Map::Body')
         ->search(
             {zone => $body->zone, id => { '!=' => $body->id } },
             { order_by => 'rand()' }
@@ -1733,7 +1733,7 @@ sub bhg_random_size {
 sub bhg_random_resource {
     my ($building) = @_;
     my $body = $building->body;
-    my $target = KA->db->resultset('KA::DB::Result::Map::Body')
+    my $target = KA->db->resultset('Map::Body')
         ->search(
             {zone => $body->zone, empire_id => { '!=' => undef} },
             { order_by => 'rand()' }
@@ -1766,7 +1766,7 @@ sub bhg_random_resource {
 sub bhg_random_fissure {
     my ($building) = @_;
     my $body = $building->body;
-    my $target = KA->db->resultset('KA::DB::Result::Map::Body')
+    my $target = KA->db->resultset('Map::Body')
     ->search(
             {
                 zone      => $body->zone,
@@ -1794,7 +1794,7 @@ sub bhg_random_fissure {
         my ($x, $y) = eval { $target->find_free_space};
         unless ($@) {
             my $level = randint(1,30);
-            my $building = KA->db->resultset('KA::DB::Result::Building')->new({
+            my $building = KA->db->resultset('Building')->new({
                 x            => $x,
                 y            => $y,
                 level        => $level,
@@ -1854,7 +1854,7 @@ sub bhg_random_fissure {
 sub bhg_random_decor {
     my ($building) = @_;
     my $body = $building->body;
-    my $target = KA->db->resultset('KA::DB::Result::Map::Body')
+    my $target = KA->db->resultset('Map::Body')
         ->search(
             {zone => $body->zone },
             { order_by => 'rand()' }
@@ -1955,7 +1955,7 @@ sub bhg_decor {
     foreach my $cnt (1..$plant) {
         my ($x, $y) = eval { $body->find_free_space};
         unless ($@) {
-            my $building = KA->db->resultset('KA::DB::Result::Building')->new({
+            my $building = KA->db->resultset('Building')->new({
                 x       => $x,
                 y       => $y,
                 level   => randint(1, $max_level),
@@ -2103,7 +2103,7 @@ sub recalc_miners {
     my ($asteroid) = @_;
 
     my %mining_bodies = map { $_->planet_id => 1 }
-                        KA->db->resultset('KA::DB::Result::MiningPlatforms')->search({
+                        KA->db->resultset('MiningPlatforms')->search({
                             asteroid_id => $asteroid->id})->all;
     for my $body_id (keys %mining_bodies) {
         my $body = KA->db->resultset('Map::Body')->find($body_id);

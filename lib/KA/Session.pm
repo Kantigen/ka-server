@@ -145,7 +145,7 @@ sub extend {
 
 sub end {
     my $self = shift;
-    KA->db->resultset('KA::DB::Result::Log::Login')->search({
+    KA->db->resultset('Log::Login')->search({
         session_id      => $self->id,
         log_out_date    => undef,
     })->update({
@@ -170,7 +170,7 @@ sub start {
         $ip = real_ip_address($options->{request});
         $self->ip_address($ip);
     }
-    KA->db->resultset('KA::DB::Result::Log::Login')->new({
+    KA->db->resultset('Log::Login')->new({
         empire_id       => $empire->id,
         empire_name     => $empire->name,
         api_key         => $options->{api_key},

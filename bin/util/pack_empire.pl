@@ -35,17 +35,17 @@ $|=1;
   out('Loading DB');
   our $db = KA->db;
 
-  my $empires = $db->resultset('KA::DB::Result::Empire');
+  my $empires = $db->resultset('Empire');
   my $empire = $empires->find($empire_id);
   die "Could not find Empire!\n" unless $empire;
   print "Setting up for empire: ".$empire->name." : ".$empire_id."\n";
   my $ehash;
   my $cap;
   if ($capitol) {
-      $cap = $db->resultset('KA::DB::Result::Map::Body')->find($capitol);
+      $cap = $db->resultset('Map::Body')->find($capitol);
   }
   else {
-      $cap = $db->resultset('KA::DB::Result::Map::Body')->find($empire->home_planet_id);
+      $cap = $db->resultset('Map::Body')->find($empire->home_planet_id);
   }
   unless ($cap) {
       die "Cannot find capitol $capitol\n";
@@ -68,7 +68,7 @@ $|=1;
   my %plan_h;
   my %glyph_h;
   my $bodies = KA->db
-                     ->resultset('KA::DB::Result::Map::Body')->search({
+                     ->resultset('Map::Body')->search({
                          empire_id => $empire->id,
                      });
   my $count = 0;
@@ -90,7 +90,7 @@ $|=1;
           is_cap    => $cap->id == $body->id ? 1 : 0,
       };
       print "Building:";
-      my $buildings = KA->db->resultset('KA::DB::Result::Building')->search({body_id => $body->id});
+      my $buildings = KA->db->resultset('Building')->search({body_id => $body->id});
       my @blds;
       while (my $bld = $buildings->next) {
 #Treat Essentia_veins different? Drain and destroy?
@@ -121,7 +121,7 @@ $|=1;
           }
       }
       print "Glyphs:";
-      my $glyphs = KA->db->resultset('KA::DB::Result::Glyph')->search({body_id => $body->id});
+      my $glyphs = KA->db->resultset('Glyph')->search({body_id => $body->id});
       while (my $glyph = $glyphs->next) {
           if ($glyph_h{$glyph->type}) {
               $glyph_h{$glyph->type}->{quantity} += $glyph->quantity;

@@ -212,7 +212,7 @@ sub counter_spy {
     my $empire = $self->empire;
     my $home = $empire->home_planet;
     if ($finish) {
-        my $counter = KA->db->resultset('KA::DB::Result::Spies')->search({empire_id => $empire->id, task=>'Counter Espionage'})->count;
+        my $counter = KA->db->resultset('Spies')->search({empire_id => $empire->id, task=>'Counter Espionage'})->count;
         if ($counter >= 2) {
             $home->add_trona(700);
             $home->add_bread(700);
@@ -237,7 +237,7 @@ sub observatory {
             my $shipyard = $home->get_building_of_class('KA::DB::Result::Building::Shipyard');
             if (defined $shipyard) {
                 $shipyard->body($home);
-                my $probe = KA->db->resultset('KA::DB::Result::Fleet')->new({body=>$home, type=>'probe', quantity => 1,});
+                my $probe = KA->db->resultset('Fleet')->new({body=>$home, type=>'probe', quantity => 1,});
                 $shipyard->build_fleet($probe);
                 $probe->date_available(DateTime->now->add(seconds=>60));
                 $probe->update;
@@ -284,7 +284,7 @@ sub the_end {
         $home->add_water(2000);
         $home->update;
         my ($x, $y) = $home->find_free_space;
-        my $ssd = KA->db->resultset('KA::DB::Result::Building')->new({
+        my $ssd = KA->db->resultset('Building')->new({
            x        => $x,
            y        => $y,
            class    => 'KA::DB::Result::Building::SubspaceSupplyDepot',

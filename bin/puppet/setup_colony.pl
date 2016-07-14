@@ -30,11 +30,11 @@ our $quiet;
   out('Loading DB');
   our $db = KA->db;
 
-  my $empires = $db->resultset('KA::DB::Result::Empire');
+  my $empires = $db->resultset('Empire');
   my $empire = $empires->find($empire_id);
   print "Setting up for empire: $empire->name : $empire_id\n";
 
-  my $body = $db->resultset('KA::DB::Result::Map::Body')->find($body_id);
+  my $body = $db->resultset('Map::Body')->find($body_id);
   print "Found body!\n";
   unless ($body) {
     die "Cannot find body id $body_id\n";
@@ -64,7 +64,7 @@ our $quiet;
     next if ($build->{level} < 1 or $build->{level} > 30);
 #    my ($x, $y) = $body->find_free_space;
 #    next if $y > -1;
-    my $bld = KA->db->resultset('KA::DB::Result::Building')->new({
+    my $bld = KA->db->resultset('Building')->new({
         body_id  => $body->id,
         x        => $build->{x},
         y        => $build->{y},

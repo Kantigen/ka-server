@@ -337,7 +337,7 @@ my $app = builder {
         enable "Auth::Basic", authenticator => sub {
             my ($username, $password) = @_;
             return 0 unless $username;
-            my $empire = KA->db->resultset('KA::DB::Result::Empire')->search({name => $username, is_admin => 1})->first;
+            my $empire = KA->db->resultset('Empire')->search({name => $username, is_admin => 1})->first;
             return 0 unless defined $empire;
             return $empire->is_password_valid($password);
         };
@@ -348,7 +348,7 @@ my $app = builder {
         enable "Auth::Basic", authenticator => sub {
             my ($username, $password) = @_;
             return 0 unless $username;
-            my $empire = KA->db->resultset('KA::DB::Result::Empire')->search({name => $username, is_mission_curator => 1})->first;
+            my $empire = KA->db->resultset('Empire')->search({name => $username, is_mission_curator => 1})->first;
             return 0 unless defined $empire;
             return $empire->is_password_valid($password);
         };

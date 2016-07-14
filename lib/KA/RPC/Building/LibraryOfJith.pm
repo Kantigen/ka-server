@@ -18,7 +18,7 @@ sub research_species {
     my $session  = $self->get_session({session_id => $session_id, building_id => $building_id });
     my $empire   = $session->current_empire;
     my $building = $session->current_building;
-    my $view_empire = KA->db->resultset('KA::DB::Result::Empire')->find($view_empire_id);
+    my $view_empire = KA->db->resultset('Empire')->find($view_empire_id);
     
     unless (defined $view_empire) {
         confess [1002, 'Could not locate that empire.'];

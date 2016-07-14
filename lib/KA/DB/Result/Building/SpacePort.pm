@@ -24,7 +24,7 @@ sub ships {
 # show all ships incoming to this planet
 sub incoming_fleets {
     my ($self) = @_;
-    return KA->db->resultset('KA::DB::Result::Fleet')->search(
+    return KA->db->resultset('Fleet')->search(
         {
             foreign_body_id => $self->body_id,
             direction       => 'out',
@@ -45,7 +45,7 @@ sub orbiting_ships {
 
 sub battle_logs {
     my ($self) = @_;
-    return KA->db->resultset('KA::DB::Result::Log::Battles')->search(
+    return KA->db->resultset('Log::Battles')->search(
         {
             -or => [
                 { attacking_empire_id => $self->body->empire_id },
@@ -83,7 +83,7 @@ has max_ships => (
     lazy    => 1,
     default => sub {
         my $self = shift;
-        my $levels = KA->db->resultset('KA::DB::Result::Building')->search( { 
+        my $levels = KA->db->resultset('Building')->search( { 
             class       => $self->class, 
             body_id     => $self->body_id,
             efficiency  => 100,
@@ -117,7 +117,7 @@ sub find_ship {
 
 before delete => sub {
   my ($self) = @_;
-  unless (KA->db->resultset('KA::DB::Result::Building')
+  unless (KA->db->resultset('Building')
                 ->search( { class => $self->class,
                             body_id => $self->body_id,
                             id => {'!=', $self->id } } )->count) {

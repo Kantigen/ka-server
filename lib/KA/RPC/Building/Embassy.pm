@@ -115,7 +115,7 @@ sub accept_invite {
     unless ($invite_id) {
         confess [1002, 'You must specify an invite id.'];
     }
-    my $invite = KA->db->resultset('KA::DB::Result::AllianceInvite')->find($invite_id);
+    my $invite = KA->db->resultset('AllianceInvite')->find($invite_id);
     unless (defined $invite) {
         confess [1002, 'Invitation not found.'];
     }
@@ -136,7 +136,7 @@ sub reject_invite {
     unless ($invite_id) {
         confess [1002, 'You must specify an invite id.'];
     }
-    my $invite = KA->db->resultset('KA::DB::Result::AllianceInvite')->find($invite_id);
+    my $invite = KA->db->resultset('AllianceInvite')->find($invite_id);
     unless (defined $invite) {
         confess [1002, 'Invitation not found.'];
     }
@@ -154,7 +154,7 @@ sub withdraw_invite {
     unless ($invite_id) {
         confess [1002, 'You must specify an invite id.'];
     }
-    my $invite = KA->db->resultset('KA::DB::Result::AllianceInvite')->find($invite_id);
+    my $invite = KA->db->resultset('AllianceInvite')->find($invite_id);
     unless (defined $invite) {
         confess [1002, 'Invitation not found.'];
     }
@@ -172,7 +172,7 @@ sub send_invite {
     unless ($empire_id) {
         confess [1002, 'You must specify which empire you want to invite.'];
     }
-    my $invitee = KA->db->resultset('KA::DB::Result::Empire')->find($empire_id);
+    my $invitee = KA->db->resultset('Empire')->find($empire_id);
     unless (defined $invitee) {
         confess [1002, 'The empire you specified to invite does not exist.'];
     }
@@ -283,7 +283,7 @@ sub cast_vote {
     }
     $cache->set($lock,$proposition_id,1,5);
     my $guard = guard {$cache->delete($lock,$proposition_id);};
-    my $proposition = KA->db->resultset('KA::DB::Result::Propositions')->find($proposition_id);
+    my $proposition = KA->db->resultset('Propositions')->find($proposition_id);
     unless (defined $proposition) {
         confess [1002, 'Proposition not found.'];
     }

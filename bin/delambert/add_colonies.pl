@@ -30,13 +30,13 @@ my $start = time;
 out('Loading DB');
 our $db     = KA->db;
 my $config  = KA->config;
-my $empires = $db->resultset('KA::DB::Result::Empire');
+my $empires = $db->resultset('Empire');
 my $empire;
 
 if ($respawn) {
     # with 'respawn' we delete and re-create the whole empire
     out('Re-Spawning Empire');
-    $db->resultset('KA::DB::Result::AIScratchPad')->search->delete;
+    $db->resultset('AIScratchPad')->search->delete;
 
     $empire = $empires->find(-9);
 
@@ -69,7 +69,7 @@ if (not defined $empire) {
 # colonies to DeLambert colonies is fairly constant.
 #
 # First work out how many bodies are occupied in each zone which are *not* DeLambert
-my @zone_empire = $db->resultset('KA::DB::Result::Map::Body')->search({
+my @zone_empire = $db->resultset('Map::Body')->search({
     -and => [
         empire_id   => {'>'  => 1},             # Ignore all AI empires
         empire_id   => {'!=' => $empire->id},
@@ -96,7 +96,7 @@ for my $zone (@zone_empire) {
 out("    Total\t$empire_occupied");
 
 # Now, how many deLambert bodies are in each zone
-my @zone_delambert = $db->resultset('KA::DB::Result::Map::Body')->search({
+my @zone_delambert = $db->resultset('Map::Body')->search({
     empire_id => $empire->id,
 },{
     group_by => [qw(zone)],
@@ -165,7 +165,7 @@ for my $level(@build_levels) {
 
     # We want to find a colony in an un-occupied star system
     my $body;
-    my $stars_rs = $db->resultset('KA::DB::Result::Map::Star')->search({zone => $add_to_zone});
+    my $stars_rs = $db->resultset('Map::Star')->search({zone => $add_to_zone});
     STAR:
     while (my $star = $stars_rs->next) {
         # Ensure there are no occupied bodies in this system
@@ -208,7 +208,7 @@ sub out {
 
 sub create_empire {
     out('Creating empire...');
-    my $empire = KA->db->resultset('KA::DB::Result::Empire')->new({
+    my $empire = KA->db->resultset('Empire')->new({
         id                      => -9,
         name                    => 'DeLambert',
         stage                   => 'founded',
@@ -234,7 +234,7 @@ sub create_empire {
     });
 
     out('Find home planet...');
-    my $bodies  = $db->resultset('KA::DB::Result::Map::Body');
+    my $bodies  = $db->resultset('Map::Body');
     my $zone    = $bodies->get_column('zone')->min;
     my $home    = $bodies->search({
         size    => { '>=' => 110}, 
@@ -251,7 +251,7 @@ sub create_empire {
 
     # Create an empire wide scratchpad for the AI
     #
-    my $scratch = $db->resultset('KA::DB::Result::AIScratchPad')->create({
+    my $scratch = $db->resultset('AIScratchPad')->create({
         ai_empire_id    => -9,
         body_id         => 0,
         pad             => {status => 'peace'},
@@ -270,7 +270,7 @@ sub create_colony {
         $body->update;
     }
     # Create a scratch-pad for the colony
-    my $scratch = $db->resultset('KA::DB::Result::AIScratchPad')->create({
+    my $scratch = $db->resultset('AIScratchPad')->create({
         ai_empire_id    => -9,
         body_id         => $body->id,
         pad             => {level => $level},
@@ -495,7 +495,7 @@ sub create_colony {
     # All terrestrial planets are size 60 or below
     # All gas giants are size 70 or above
     #
-    my $buildings = $db->resultset('KA::DB::Result::Building');
+    my $buildings = $db->resultset('Building');
     my $to_build = $has_buildings->{$level};
 
     foreach my $plan (keys %$to_build) {

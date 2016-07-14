@@ -25,7 +25,7 @@ sub unload {
     my $payload = $self->payload;
     if (exists $payload->{prisoners}) {
         foreach my $id (@{$payload->{prisoners}}) {
-            my $prisoner = KA->db->resultset('KA::DB::Result::Spies')->find($id);
+            my $prisoner = KA->db->resultset('Spies')->find($id);
             next unless defined $prisoner;
             $prisoner->task('Captured');
             $prisoner->on_body_id($body->id);
@@ -35,7 +35,7 @@ sub unload {
     }
     if (exists $payload->{mercenary}) {
         my $id = $payload->{mercenary};
-        my $spy = KA->db->resultset('KA::DB::Result::Spies')->find($id);
+        my $spy = KA->db->resultset('Spies')->find($id);
         next unless defined $spy;
         $spy->task('Idle');
         $spy->available_on(DateTime->now);
@@ -157,7 +157,7 @@ sub format_description_of_payload {
     
     # spies
     undef $scratch;
-    my $spies = KA->db->resultset('KA::DB::Result::Spies');
+    my $spies = KA->db->resultset('Spies');
     if (exists $payload->{spies}) {
         foreach my $id (@{$payload->{spies}}) {
             my $spy = $spies->find($id);

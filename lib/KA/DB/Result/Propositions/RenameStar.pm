@@ -8,12 +8,12 @@ extends 'KA::DB::Result::Propositions';
 before pass => sub {
     my ($self) = @_;
     my $station = $self->station;
-    my $star = KA->db->resultset('KA::DB::Result::Map::Star')->find($self->scratch->{star_id});
+    my $star = KA->db->resultset('Map::Star')->find($self->scratch->{star_id});
     my $name = $self->scratch->{name};
     if (!defined($star) or $star->station_id != $station->id) {
         $self->pass_extra_message('Unfortunately, by the time the proposition passed, the star was no longer under the jurisdiction of this station, effectively nullifying the vote.');
     }
-    elsif (KA->db->resultset('KA::DB::Result::Map::Star')->search({name=>$name, 'id'=>{'!='=>$star->id}})->count) {
+    elsif (KA->db->resultset('Map::Star')->search({name=>$name, 'id'=>{'!='=>$star->id}})->count) {
         $self->pass_extra_message('Unfortunately, by the time the proposition passed, the name *'.$name.'* had already been taken, effectively nullifying the vote.');
     }
     else {

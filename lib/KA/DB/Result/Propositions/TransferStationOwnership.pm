@@ -8,7 +8,7 @@ extends 'KA::DB::Result::Propositions';
 before pass => sub {
     my ($self) = @_;
     my $station = $self->station;
-    my $to_empire = KA->db->resultset('KA::DB::Result::Empire')->find($self->scratch->{empire_id});
+    my $to_empire = KA->db->resultset('Empire')->find($self->scratch->{empire_id});
     if (defined $to_empire) {
         if ($to_empire->alliance_id == $station->alliance_id) {
             $station->empire_id($to_empire->id);

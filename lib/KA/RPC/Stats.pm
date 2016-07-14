@@ -30,7 +30,7 @@ sub alliance_rank {
     unless ($by ~~ [qw(influence population average_empire_size_rank offense_success_rate_rank defense_success_rate_rank dirtiest_rank)]) {
         $by = 'influence desc,population desc';
     }
-    my $ranks = KA->db->resultset('KA::DB::Result::Log::Alliance');
+    my $ranks = KA->db->resultset('Log::Alliance');
     unless ($page_number) {
         if ($empire->alliance_id) {
             my $me = $ranks->find($empire->alliance_id);
@@ -85,7 +85,7 @@ sub find_alliance_rank {
     }
     my $session  = $self->get_session({session_id => $session_id });
     my $empire   = $session->current_empire;
-    my $ranks = KA->db->resultset('KA::DB::Result::Log::Alliance')->search(undef,{order_by => $by, rows=>25});
+    my $ranks = KA->db->resultset('Log::Alliance')->search(undef,{order_by => $by, rows=>25});
     my $ranked = $ranks->search({alliance_name => { like => $alliance_name.'%'}});
     my @alliances;
     while (my $rank = $ranked->next) {
@@ -112,7 +112,7 @@ sub empire_rank {
     unless ($by ~~ [qw(empire_size_rank offense_success_rate_rank defense_success_rate_rank dirtiest_rank)]) {
         $by = 'empire_size_rank';
     }
-    my $ranks = KA->db->resultset('KA::DB::Result::Log::Empire');
+    my $ranks = KA->db->resultset('Log::Empire');
     unless ($page_number) {
         my $me = $ranks->find($empire->id);
         if (defined $me) {
@@ -161,7 +161,7 @@ sub find_empire_rank {
     }
     my $session  = $self->get_session({session_id => $session_id });
     my $empire   = $session->current_empire;
-    my $ranks = KA->db->resultset('KA::DB::Result::Log::Empire')->search(undef,{order_by => $by, rows=>25});
+    my $ranks = KA->db->resultset('Log::Empire')->search(undef,{order_by => $by, rows=>25});
     my $ranked = $ranks->search({empire_name => { like => $empire_name.'%'}});
     my @empires;
     while (my $rank = $ranked->next) {
@@ -188,7 +188,7 @@ sub colony_rank {
     unless ($by ~~ [qw(population_rank)]) {
         $by = 'population_rank';
     }
-    my $ranks = KA->db->resultset('KA::DB::Result::Log::Colony')->search(undef,{order_by =>$by, rows=>25});
+    my $ranks = KA->db->resultset('Log::Colony')->search(undef,{order_by =>$by, rows=>25});
     my @colonies;
     while (my $rank = $ranks->next) {
         push @colonies, {
@@ -215,7 +215,7 @@ sub spy_rank {
     unless ($by ~~ [qw(level_rank success_rate_rank dirtiest_rank)]) {
         $by = 'level_rank';
     }
-    my $ranks = KA->db->resultset('KA::DB::Result::Log::Spies')->search(undef,{order_by => $by, rows=>25});
+    my $ranks = KA->db->resultset('Log::Spies')->search(undef,{order_by => $by, rows=>25});
     my @spies;
     while (my $rank = $ranks->next) {
         push @spies, {
@@ -242,7 +242,7 @@ sub weekly_medal_winners {
     my ($self, $session_id) = @_;
     my $session  = $self->get_session({session_id => $session_id });
     my $empire   = $session->current_empire;
-    my $winner_rs = KA->db->resultset('KA::DB::Result::Log::WeeklyMedalWinner')->search;
+    my $winner_rs = KA->db->resultset('Log::WeeklyMedalWinner')->search;
     my @winners;
     while (my $winner = $winner_rs->next) {
         push @winners, {

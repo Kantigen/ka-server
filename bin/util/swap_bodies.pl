@@ -97,7 +97,7 @@ sub bhg_swap {
             orbit   => $old_data->{orbit},
         });
         if ($new_data->{type} ne 'asteroid') {
-            my $target_waste = KA->db->resultset('KA::DB::Result::WasteChain')
+            my $target_waste = KA->db->resultset('WasteChain')
                 ->search({ planet_id => $target->id });
             if ($target_waste->count > 0) {
                 while (my $chain = $target_waste->next) {
@@ -112,10 +112,10 @@ sub bhg_swap {
         }
         if (defined($target->empire)) {
             my $mbody = KA->db
-                ->resultset('KA::DB::Result::Map::Body')
+                ->resultset('Map::Body')
                 ->find($target->id);
             my $fbody = KA->db
-                ->resultset('KA::DB::Result::Map::Body')
+                ->resultset('Map::Body')
                 ->find($body->id);
             my $mess = sprintf("{Starmap %s %s %s} is now at %s/%s in orbit %s around {Starmap %s %s %s}.",
                     $fbody->x, $fbody->y, $fbody->name,
@@ -140,7 +140,7 @@ sub bhg_swap {
         }
     }
     if ($body->get_type ne 'asteroid') {
-        my $waste_chain = KA->db->resultset('KA::DB::Result::WasteChain')
+        my $waste_chain = KA->db->resultset('WasteChain')
             ->search({ planet_id => $body->id });
         if ($waste_chain->count > 0) {
             while (my $chain = $waste_chain->next) {
@@ -155,12 +155,12 @@ sub bhg_swap {
     }
     if (defined($body->empire)) {
         my $mbody = KA->db
-            ->resultset('KA::DB::Result::Map::Body')
+            ->resultset('Map::Body')
             ->find($body->id);
         my $mess;
         unless ($new_data->{type} eq "empty") {
             my $fbody = KA->db
-                ->resultset('KA::DB::Result::Map::Body')
+                ->resultset('Map::Body')
                 ->find($target->id);
             $mess = sprintf("{Starmap %s %s %s} took our place at %s/%s in orbit %s around {Starmap %s %s %s}.",
                     $fbody->x, $fbody->y, $fbody->name,
@@ -169,7 +169,7 @@ sub bhg_swap {
         }
         else {
             my $star = KA->db->
-                       resultset('KA::DB::Result::Map::Star')->find($old_data->{star_id});
+                       resultset('Map::Star')->find($old_data->{star_id});
             $mess = sprintf("There is now an empty orbit at %s/%s in orbit %s around {Starmap %s %s %s}",
                     $old_data->{x}, $old_data->{y}, $old_data->{orbit},
                     $star->x, $star->y, $star->name);
@@ -232,7 +232,7 @@ sub recalc_incoming_supply {
         next if defined($bids{$bid});
         $bids{$bid} = 1;
         my $sender = KA->db
-            ->resultset('KA::DB::Result::Map::Body')
+            ->resultset('Map::Body')
             ->find($bid);
         if (defined($sender->empire)) {
             $sender->recalc_chains; # Recalc all chains
