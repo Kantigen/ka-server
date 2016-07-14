@@ -79,7 +79,7 @@ sub add_to_market {
     unless ($self->effective_level > $self->my_market->count) {
         confess [1009, "This Mercenaries Guild can only support ".$self->effective_level." spies at one time."];
     }
-    my $spy = KA->db->resultset('Spies')->find($spy_id);
+    my $spy = KA->db->resultset('Spy')->find($spy_id);
     confess $have_exception unless (defined $spy && $self->body_id eq $spy->on_body_id && $spy->task ~~ ['Counter Espionage','Idle']);
     $spy->task('Mercenary Transport');
     $spy->update;

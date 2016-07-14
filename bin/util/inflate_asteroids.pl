@@ -58,7 +58,7 @@ foreach my $id (sort { 5 > rand(10) } @rocks) {
     my $size  = 30;
     my $old_class = $rock->class;
     $old_class =~ s/.*:://;
-    my $pcount = KA->db->resultset('MiningPlatforms')
+    my $pcount = KA->db->resultset('MiningPlatform')
                 ->search({asteroid_id => $id })->count;
     out( sprintf("%30s %6d %3s -> P%3s o:%s (%4d,%4d) Z:%5s %d",
                  $rock->name, $rock->id,

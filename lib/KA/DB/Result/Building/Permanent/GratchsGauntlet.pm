@@ -28,7 +28,7 @@ before 'repair' => sub {
     my $db = KA->db;
     my $now = DateTime->now;
     my $dtf = $db->storage->datetime_parser;
-    my $i_spies = $db->resultset('Spies')
+    my $i_spies = $db->resultset('Spy')
                     ->search( { on_body_id => $self->body->id,
                                 empire_id  => { '!=' => $self->body->empire_id },
                                 available_on  => { '<' => $dtf->format_datetime($now) },

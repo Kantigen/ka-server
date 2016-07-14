@@ -146,7 +146,7 @@ sub destroy_world {
         say sprintf("BHG of %s is neutralized by a space station.",$colony->name);
         return;
     }
-    my $enemies = KA->db->resultset('Spies')
+    my $enemies = KA->db->resultset('Spy')
                          ->search({on_body_id => $colony->id,
                                    task => 'Sabotage BHG',
                                    empire_id => { '!=' => $self->empire_id }})->count;

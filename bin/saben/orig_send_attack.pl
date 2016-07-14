@@ -35,7 +35,7 @@ if ($randomize) {
 out('Loading DB');
 our $db = KA->db;
 our $empires = $db->resultset('Empire');
-our $spies = $db->resultset('Spies');
+our $spies = $db->resultset('Spy');
 our $ships = $db->resultset('Fleet');
 our $targets = $db->resultset('SabenTarget');
 my $config = KA->config;
@@ -118,7 +118,7 @@ sub start_attack {
     my ($saben_colony, $target_colony) = @_;
     out('Looking for probes...');
     my $attack = AnyEvent->condvar;
-    my $count = $db->resultset('Probes')->search_any({ empire_id => -1, star_id => $target_colony->star_id })->count;
+    my $count = $db->resultset('Probe')->search_any({ empire_id => -1, star_id => $target_colony->star_id })->count;
     if ($count) {
         out('Has one at star already...');
         my $timer = AnyEvent->timer(

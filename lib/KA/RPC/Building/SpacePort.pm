@@ -260,7 +260,7 @@ sub prepare_send_spies {
         push @fleets, $fleet->get_status($to_body);
     }
     # TODO factor out the 'available spies' code
-    my $spies = KA->db->resultset('Spies')->search({
+    my $spies = KA->db->resultset('Spy')->search({
         on_body_id  => $on_body->id, 
         empire_id   => $empire->id,
     },{
@@ -337,7 +337,7 @@ sub send_spies {
     # get the spies
     my @ids_sent;
     my @ids_not_sent;
-    my $spies = KA->db->resultset('Spies');
+    my $spies = KA->db->resultset('Spy');
     my $arrives;
     
     if ($args{arrival_date}{soonest}) {
@@ -419,7 +419,7 @@ sub prepare_fetch_spies {
     }
 
     # Get all available spies (is this common enough to code in Spies?)
-    my $spies_rs = KA->db->resultset('Spies')->search({
+    my $spies_rs = KA->db->resultset('Spy')->search({
         on_body_id  => $on_body->id, 
         empire_id   => $empire->id,
         -or => [
@@ -473,7 +473,7 @@ sub fetch_spies {
     # get spies
     my @ids_fetched;
     my @ids_not_fetched;
-    my $spies = KA->db->resultset('Spies');
+    my $spies = KA->db->resultset('Spy');
     foreach my $id (@{$args{spy_ids}}) {
         my $spy = $spies->find($id);
         if ($spy->on_body_id == $args{on_body_id}) {
@@ -724,7 +724,7 @@ sub view_mining_platforms {
     my $body        = $building->body;
 
     my $target      = $self->find_target($args{target});
-    my $platform_rs = KA->db->resultset('MiningPlatforms');
+    my $platform_rs = KA->db->resultset('MiningPlatform');
     if (not $target->isa('KA::DB::Result::Map::Body::Asteroid')) {
         confess [1002, 'Target is not an Asteroid.'];
     }
@@ -756,7 +756,7 @@ sub view_excavators {
     my $body        = $building->body;
     
     my $target      = $self->find_target($args{target});
-    my $excavator_rs = KA->db->resultset('Excavators');
+    my $excavator_rs = KA->db->resultset('Excavator');
     $excavator_rs = $excavator_rs->search({
         body_id => $target->id,
     },{

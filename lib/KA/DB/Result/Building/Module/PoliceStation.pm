@@ -18,7 +18,7 @@ sub foreign_spies {
     my $self = shift;
     return KA
         ->db
-        ->resultset('Spies')
+        ->resultset('Spy')
         ->search({ level => { '<=' => int($self->effective_level * 1.25)},
                    task => { 'not in' => [ 'Captured', 'Prisoner Transport' ] },
                    on_body_id => $self->body_id, empire_id => { '!=' => $self->body->empire_id } });
@@ -32,7 +32,7 @@ sub prisoners {
 
     return  KA
         ->db
-        ->resultset('Spies')
+        ->resultset('Spy')
         ->search(
             {
                 on_body_id  => $self->body_id,
@@ -75,7 +75,7 @@ before 'repair' => sub {
     my $db = KA->db;
     my $now = DateTime->now;
     my $dtf = $db->storage->datetime_parser;
-    my $i_spies = $db->resultset('Spies')
+    my $i_spies = $db->resultset('Spy')
                     ->search( { on_body_id => $self->body->id,
                                 empire_id  => { '!=' => $self->body->empire_id },
                                 available_on  => { '<' => $dtf->format_datetime($now) },

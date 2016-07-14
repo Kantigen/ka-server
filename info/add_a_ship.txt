@@ -1,6 +1,6 @@
 create ship class
 update KA::DB::Result::Ships to add new ship type
-update KA::DB::Result::Medals
+update KA::DB::Result::Medal
 update KA::Constant SHIP_TYPES
 update var/www/public/resources.json with new ship info
 add ship to wiki

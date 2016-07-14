@@ -47,7 +47,7 @@ use constant waste_production => 20;
 
 sub get_prisoners {
     my $self = shift;
-    my $prisoners = KA->db->resultset('Spies')->search({
+    my $prisoners = KA->db->resultset('Spy')->search({
         task        => 'Captured',
         on_body_id  => $self->body_id,
     });

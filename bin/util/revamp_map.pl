@@ -128,7 +128,7 @@ while (my $body = $bodies->next) {
     }
     else {
         # are there any mining platforms on this body?
-        my $platforms = $db->resultset('MiningPlatforms')->search({
+        my $platforms = $db->resultset('MiningPlatform')->search({
             asteroid_id => $body->id,
         });
         while (my $platform = $platforms->next) {

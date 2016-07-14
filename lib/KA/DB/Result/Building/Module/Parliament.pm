@@ -20,7 +20,7 @@ before 'can_demolish' => sub {
 
 sub propositions {
     my ($self) = @_;
-    return KA->db->resultset('Propositions')->search({station_id => $self->body->id}, {prefetch => 'station'});
+    return KA->db->resultset('Proposition')->search({station_id => $self->body->id}, {prefetch => 'station'});
 }
 
 after downgrade => sub {

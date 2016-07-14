@@ -747,7 +747,7 @@ sub generate_singularity {
     }
     unless ($task->{occupied}) {
         if ($btype eq 'asteroid') {
-            my $platforms = KA->db->resultset('MiningPlatforms')
+            my $platforms = KA->db->resultset('MiningPlatform')
                 ->search({asteroid_id => $target->id });
             my $count = 0;
             while (my $platform = $platforms->next) {
@@ -880,7 +880,7 @@ sub generate_singularity {
 #Check for enemy spies.
     my $lock_down = KA
                     ->db
-                    ->resultset('Spies')
+                    ->resultset('Spy')
                     ->search(
                         { on_body_id  => $body->id,
                           empire_id => { '!=' => $body->empire_id },
@@ -1639,7 +1639,7 @@ sub bhg_random_make {
         $return = bhg_make_asteroid($building, $target);
     }
     elsif ($btype eq 'asteroid') {
-        my $platforms = KA->db->resultset('MiningPlatforms')->
+        my $platforms = KA->db->resultset('MiningPlatform')->
         search({asteroid_id => $target->id });
         unless ($platforms->next) {
             $body->add_news(50, 'A new planet has appeared where %s had been!', $target->name);
@@ -2103,7 +2103,7 @@ sub recalc_miners {
     my ($asteroid) = @_;
 
     my %mining_bodies = map { $_->planet_id => 1 }
-                        KA->db->resultset('MiningPlatforms')->search({
+                        KA->db->resultset('MiningPlatform')->search({
                             asteroid_id => $asteroid->id})->all;
     for my $body_id (keys %mining_bodies) {
         my $body = KA->db->resultset('Map::Body')->find($body_id);

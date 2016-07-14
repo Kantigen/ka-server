@@ -6,7 +6,7 @@ use Moose::Role;
 after handle_arrival_procedures => sub {
     my ($self) = @_;
     my $empire_id = $self->body->empire_id;
-    my $spies = KA->db->resultset('Spies');
+    my $spies = KA->db->resultset('Spy');
 
     # we're coming home
     return if ($self->direction eq 'in');

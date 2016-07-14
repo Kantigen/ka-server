@@ -2,7 +2,7 @@ use 5.010;
 use strict;
 use lib '/home/keno/ka-server/lib';
 use KA::DB;
-use KA::DB::Result::Spies;
+use KA::DB::Result::Spy;
 use KA;
 use KA::Util qw(randint format_date);
 use Getopt::Long;
@@ -20,9 +20,9 @@ out('Loading DB');
 our $db = KA->db;
 
 out('Ticking spies');
-KA::DB::Result::Spies->tick_all_spies($quiet ? 0 : 1);
+KA::DB::Result::Spy->tick_all_spies($quiet ? 0 : 1);
 
-#my $spies = $db->resultset('Spies')->search({
+#my $spies = $db->resultset('Spy')->search({
 #    task    => {'!=' => 'Idle'},
 #});
 #my @ids = $spies->get_column('id')->all;

@@ -95,7 +95,7 @@ sub empires {
 }
 
 sub spies {
-    my $spies = $db->resultset('Log::Spies');
+    my $spies = $db->resultset('Log::Spy');
     
     # best in the game
     my $spy = $spies->search(undef,{order_by => [{ -desc => 'success_rate'}, 'rand()']})->first;

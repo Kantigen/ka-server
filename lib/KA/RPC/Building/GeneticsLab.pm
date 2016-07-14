@@ -40,7 +40,7 @@ sub run_experiment {
     unless ($affinity) {
         confess [1002, 'You have to specify an affinity.'];
     }
-    my $spy = KA->db->resultset('Spies')->find($spy_id);
+    my $spy = KA->db->resultset('Spy')->find($spy_id);
     unless (defined $spy) {
         confess [1002, 'Could not find that spy.'];
     }

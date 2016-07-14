@@ -554,7 +554,7 @@ sub plans_of_type {
 
 sub excavators {
   my $self = shift;
-  return KA->db->resultset('Excavators')->search({ planet_id => $self->body_id });
+  return KA->db->resultset('Excavator')->search({ planet_id => $self->body_id });
 }
 
 sub can_add_excavator {
@@ -579,7 +579,7 @@ sub can_add_excavator {
   }
     
 # Allowed one per empire per body.
-  $count = KA->db->resultset('Excavators')
+  $count = KA->db->resultset('Excavator')
              ->search({ body_id => $body->id, empire_id => $self->body->empire->id })->count;
   unless ($on_arrival) {
     my $ships = KA->db->resultset('Fleet')
@@ -604,7 +604,7 @@ sub can_add_excavator {
 
 sub add_excavator {
   my ($self, $body) = @_;
-  KA->db->resultset('Excavators')->new({
+  KA->db->resultset('Excavator')->new({
     planet_id   => $self->body_id,
     body_id     => $body->id,
     empire_id   => $self->body->empire_id,

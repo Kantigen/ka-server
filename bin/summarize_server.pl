@@ -54,7 +54,7 @@ sub generate_overview {
     my $buildings   = $db->resultset('Building')->search({body_id => { 'not in' => \@off_limits}});
     my $empires     = $db->resultset('Empire')->search({id => { '>' => 1}});
     # Get all probes, either observatory or oracle
-    my $probes      = $db->resultset('Probes')->search({empire_id => { '>' => 1} });
+    my $probes      = $db->resultset('Probe')->search({empire_id => { '>' => 1} });
     my $dtformatter = $db->storage->datetime_parser;
     
     # basics
@@ -438,7 +438,7 @@ sub summarize_colonies {
     out('Summarizing Planets');
     my $logs = $db->resultset('Log::Colony');
     my $planets = $db->resultset('Map::Body')->search({ empire_id   => {'>' => 1} },{order_by => 'name'});
-    my $spy_logs = $db->resultset('Log::Spies');
+    my $spy_logs = $db->resultset('Log::Spy');
     while (my $planet = $planets->next) {
         out($planet->name);
         my $log = $logs->search({planet_id => $planet->id})->first;

@@ -13,7 +13,7 @@ GetOptions(
 
 out("Started.");
 
-my $rs = KA->db->resultset("SitterAuths");
+my $rs = KA->db->resultset("SitterAuth");
 
 my $soon = DateTime->now()->add(days => $rs->AUTH_WARNING_DAYS);
 my $dtf = KA->db->storage->datetime_parser;

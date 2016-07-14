@@ -223,7 +223,7 @@ sub add_member {
     $empire->alliance_id($self->id);
     $empire->update;
     # I has your probes!
-    KA->db->resultset('Probes')->search({empire_id => $empire->id})->update({alliance_id => $self->id});
+    KA->db->resultset('Probe')->search({empire_id => $empire->id})->update({alliance_id => $self->id});
     KA->db->resultset('AllianceInvite')->search({empire_id => $empire->id})->delete;
     return $self;
 }
@@ -270,7 +270,7 @@ sub remove_member {
 
     $empire->alliance_id(undef);
     $empire->update;
-    KA->db->resultset('Probes')->search({empire_id => $empire->id})->update({alliance_id => undef});
+    KA->db->resultset('Probe')->search({empire_id => $empire->id})->update({alliance_id => undef});
     return $self;
 }
 

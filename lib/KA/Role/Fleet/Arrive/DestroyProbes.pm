@@ -13,7 +13,7 @@ after handle_arrival_procedures => sub {
     return unless $self->foreign_star_id;
 
     # find probes to destroy
-    my $probes = KA->db->resultset('Probes')->search({star_id => $self->foreign_star_id });
+    my $probes = KA->db->resultset('Probe')->search({star_id => $self->foreign_star_id });
     my $count;
 
     my $logs = KA->db->resultset('Log::Battles');

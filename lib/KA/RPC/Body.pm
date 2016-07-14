@@ -55,7 +55,7 @@ sub abandon {
     my $empire = $session->current_empire;
     my $body   = $session->current_body;
     if ($body->isa('KA::DB::Result::Map::Body::Planet::Station')) { 
-        my $proposition = KA->db->resultset('Propositions')->new({
+        my $proposition = KA->db->resultset('Proposition')->new({
             type            => 'AbandonStation',
             name            => 'Abandon Station',
             description     => 'Abandon the station named {Planet '.$body->id.' '.$body->name.'}.',            
@@ -89,7 +89,7 @@ sub rename {
         unless ($body->parliament->effective_level >= 3) {
             confess [1013, 'You need to have a level 3 Parliament to rename a station.'];
         }
-        my $proposition = KA->db->resultset('Propositions')->new({
+        my $proposition = KA->db->resultset('Proposition')->new({
             type            => 'RenameStation',
             name            => 'Rename Station',
             scratch         => { name => $name },

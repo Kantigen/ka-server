@@ -17,7 +17,7 @@ around 'build_tags' => sub {
 
 sub probes {
     my $self = shift;
-    return KA->db->resultset('Probes')->search_observatory( {
+    return KA->db->resultset('Probe')->search_observatory( {
         body_id     => $self->body->id,
     } );
 }

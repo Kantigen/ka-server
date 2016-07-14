@@ -104,7 +104,7 @@ sub check_payload {
             }
       when ('prisoner') {
         confess [1002, 'You must specify a prisoner_id if you are pushing a prisoner.'] unless $item->{prisoner_id};
-        my $prisoner = KA->db->resultset('Spies')->find($item->{prisoner_id});
+        my $prisoner = KA->db->resultset('Spy')->find($item->{prisoner_id});
         confess $have_exception unless (defined $prisoner && $self->body_id eq $prisoner->on_body_id && $prisoner->task eq 'Captured');
         push @expanded_items, $item;
         $space_used += 350;
@@ -205,7 +205,7 @@ sub structure_payload {
                 }
             }
             when ('prisoner') {
-                my $prisoner = KA->db->resultset('Spies')->find($item->{prisoner_id});
+                my $prisoner = KA->db->resultset('Spy')->find($item->{prisoner_id});
                 $prisoner->task('Prisoner Transport');
                 $prisoner->update;
                 push @{$payload->{prisoners}}, $prisoner->id;

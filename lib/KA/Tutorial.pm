@@ -212,7 +212,7 @@ sub counter_spy {
     my $empire = $self->empire;
     my $home = $empire->home_planet;
     if ($finish) {
-        my $counter = KA->db->resultset('Spies')->search({empire_id => $empire->id, task=>'Counter Espionage'})->count;
+        my $counter = KA->db->resultset('Spy')->search({empire_id => $empire->id, task=>'Counter Espionage'})->count;
         if ($counter >= 2) {
             $home->add_trona(700);
             $home->add_bread(700);

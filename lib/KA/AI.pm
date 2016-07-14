@@ -225,7 +225,7 @@ sub run_missions {
     say 'RUN MISSIONS';
     my @missions = $self->spy_missions;
     my $mission = $missions[rand @missions];
-    my $infiltrated_spies = KA->db->resultset('Spies')->search({from_body_id => $colony->id, on_body_id => {'!=', $colony->id}});
+    my $infiltrated_spies = KA->db->resultset('Spy')->search({from_body_id => $colony->id, on_body_id => {'!=', $colony->id}});
     while (my $spy = $infiltrated_spies->next) {
         next if $spy->task eq "Sabotage BHG";
         if ($spy->is_available) {
@@ -353,7 +353,7 @@ sub train_spies {
     return unless defined $intelligence;
 
     my $costs = $intelligence->training_costs;
-    my $spies = KA->db->resultset('Spies')->search({
+    my $spies = KA->db->resultset('Spy')->search({
             from_body_id => $colony->id,
         })->count;
     my $max_spies = $intelligence->level * 3;
@@ -367,7 +367,7 @@ sub train_spies {
             $train_count++;
             next if ($chance < rand(100));
             # bypass everything and just create the spy
-            my $spy = KA->db->resultset('Spies')->new({
+            my $spy = KA->db->resultset('Spy')->new({
                 from_body_id    => $colony->id,
                 on_body_id      => $colony->id,
                 task            => 'Idle',
@@ -503,9 +503,9 @@ sub build_ships_max {
 sub set_defenders {
     my ($self, $colony) = @_;
     say 'SET DEFENDERS';
-    my $local_spies = KA->db->resultset('Spies')->search({empire_id => $colony->empire_id, on_body_id => $colony->id});
-    my $on_sweep = KA->db->resultset('Spies')->search({empire_id => $colony->empire_id, on_body_id => $colony->id, task => "Security Sweep"})->count;
-    my $enemies = KA->db->resultset('Spies')->search({on_body_id => $colony->id, task => { '!=' => 'Captured'}, empire_id => { '!=' => $self->empire_id }})->count;
+    my $local_spies = KA->db->resultset('Spy')->search({empire_id => $colony->empire_id, on_body_id => $colony->id});
+    my $on_sweep = KA->db->resultset('Spy')->search({empire_id => $colony->empire_id, on_body_id => $colony->id, task => "Security Sweep"})->count;
+    my $enemies = KA->db->resultset('Spy')->search({on_body_id => $colony->id, task => { '!=' => 'Captured'}, empire_id => { '!=' => $self->empire_id }})->count;
     $on_sweep = 10 if ($enemies == 0);
     while (my $spy = $local_spies->next) {
         if ($spy->is_available) {
@@ -546,7 +546,7 @@ sub kill_prisoners {
 #When is in hours from prisoner being released.
 
     say 'KILL PRISONERS';
-    my $prisoners = KA->db->resultset('Spies')->search({on_body_id => $colony->id, task => 'Captured', empire_id => { '!=' => $self->empire_id }});
+    my $prisoners = KA->db->resultset('Spy')->search({on_body_id => $colony->id, task => 'Captured', empire_id => { '!=' => $self->empire_id }});
     my $now = DateTime->now;
     my $prisoner_cnt = 0;
     while (my $prisoner = $prisoners->next) {
@@ -572,7 +572,7 @@ sub start_attack {
     my $attack = AnyEvent->condvar;
     my $db = KA->db;
     my $seconds = 0;
-    my $count = $db->resultset('Probes')->search({ empire_id => $self->empire_id, star_id => $target_colony->star_id })->count;
+    my $count = $db->resultset('Probe')->search({ empire_id => $self->empire_id, star_id => $target_colony->star_id })->count;
     if ($count) {
         say '    Has one at star already...';
         $seconds = 1;

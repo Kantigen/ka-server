@@ -34,7 +34,7 @@ sub get_available_spies_to_send {
     my $on_body = $self->direction eq 'in' ? $self->foreign_body : $self->body;
     my @spies;
     if ($on_body) {
-        my $spies = KA->db->resultset('Spies')->search({
+        my $spies = KA->db->resultset('Spy')->search({
             task        => { in => ['Idle','Counter Espionage'] }, 
             on_body_id  => $on_body->id, 
             empire_id   => $body->empire->id,

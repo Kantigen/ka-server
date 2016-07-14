@@ -842,7 +842,7 @@ sub get_public_profile {
         };
     }
     my @colonies;
-    my $probes = KA->db->resultset('Probes');
+    my $probes = KA->db->resultset('Probe');
 
     if ($viewer_empire->alliance_id) {
         $probes = $probes->search_any({ alliance_id => $viewer_empire->alliance_id });
@@ -1311,7 +1311,7 @@ sub authorize_sitters {
     my $baby = $session->current_empire;
     my $baby_id = $session->empire_id;
     my $rs = $baby->sitters;
-    my $auths = KA->db->resultset('SitterAuths');
+    my $auths = KA->db->resultset('SitterAuth');
 
     my @sitters;
     if ($args{allied}) {
@@ -1373,7 +1373,7 @@ sub deauthorize_sitters {
 
     my $dtf = KA->db->storage->datetime_parser;
     my $now = $dtf->format_datetime(DateTime->now);
-    my $rs = KA->db->resultset('SitterAuths');
+    my $rs = KA->db->resultset('SitterAuth');
     
     if (defined $opts->{empires}) {
         confess [1009, "The 'empires' option must be an array of empire IDs"]

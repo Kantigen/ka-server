@@ -43,7 +43,7 @@ after handle_arrival_procedures => sub {
     return unless $security_detection > $self->stealth;
     
     # ship detected, time to go kaboom
-    my $spies = KA->db->resultset('Spies');
+    my $spies = KA->db->resultset('Spy');
     foreach my $id ((@{$self->payload->{spies}}, @{$self->payload->{fetch_spies}})) {
         next unless $id;
         my $spy = $spies->find($id);

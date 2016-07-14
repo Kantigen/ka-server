@@ -23,7 +23,7 @@ after can_send_to_target => sub {
     my ($self, $target) = @_;
     my $body = $self->body;
     # Probes = Probes deployed + probes travelling
-    my $count = KA->db->resultset('Probes')->search({ body_id => $body->id })->count;
+    my $count = KA->db->resultset('Probe')->search({ body_id => $body->id })->count;
     $count += KA->db->resultset('Fleet')->search({ body_id => $body->id, type=>'probe', task=>'Travelling' })->count;
     my $max_probes = 0;
     my ($observatory) = $body->get_buildings_of_class('KA::DB::Result::Building::Observatory');

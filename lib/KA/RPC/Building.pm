@@ -71,7 +71,7 @@ sub upgrade {
     # add vote
     if ($body->isa('KA::DB::Result::Map::Body::Planet::Station')) {
         my $name = $building->name.' ('.$building->x.','.$building->y.')';
-        my $proposition = KA->db->resultset('Propositions')->new({
+        my $proposition = KA->db->resultset('Proposition')->new({
             type            => 'UpgradeModule',
             name            => 'Upgrade '.$name,
             description     => 'Upgrade '.$name.' on {Planet '.$body->id.' '.$body->name.'} from level '.$building->level.' to '.($building->level + 1).'.',
@@ -247,7 +247,7 @@ sub build {
     # add vote
     if ($body->isa('KA::DB::Result::Map::Body::Planet::Station')) {
         my $name = $building->name.' ('.$building->x.','.$building->y.')';
-        my $proposition = KA->db->resultset('Propositions')->new({
+        my $proposition = KA->db->resultset('Proposition')->new({
             type            => 'InstallModule',
             name            => 'Install '.$name,
             description     => 'Install '.$name.' on {Planet '.$body->id.' '.$body->name.'}.',
@@ -303,7 +303,7 @@ sub demolish {
         }
         if ($building->class =~ /^KA::DB::Result::Building::Module::/) {
             my $name = $building->name.' ('.$building->x.','.$building->y.')';
-            my $proposition = KA->db->resultset('Propositions')->new({
+            my $proposition = KA->db->resultset('Proposition')->new({
                 type            => 'DemolishModule',
                 name            => 'Demolish '.$name,
                 description     => 'Demolish '.$name.' on {Planet '.$body->id.' '.$body->name.'}.',
@@ -348,7 +348,7 @@ sub downgrade {
         }
         if ($building->class =~ /^KA::DB::Result::Building::Module::/) {
             my $name = $building->name.' ('.$building->x.','.$building->y.')';
-            my $proposition = KA->db->resultset('Propositions')->new({
+            my $proposition = KA->db->resultset('Proposition')->new({
                 type            => 'DowngradeModule',
                 name            => 'Downgrade '.$name,
                 description     => 'Downgrade '.$name.' on {Planet '.$body->id.' '.$body->name.'} from level '.$building->level.' to '.($building->level - 1).'.',
@@ -436,7 +436,7 @@ sub repair {
     my $body = $building->body;
     if ($body->isa('KA::DB::Result::Map::Body::Planet::Station')) {
         my $name = $building->name.' ('.$building->x.','.$building->y.')';
-        my $proposition = KA->db->resultset('Propositions')->new({
+        my $proposition = KA->db->resultset('Proposition')->new({
             type            => 'RepairModule',
             name            => 'Repair '.$name,
             description     => 'Repair '.$name.' on {Planet '.$body->id.' '.$body->name.'}.',

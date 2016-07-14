@@ -215,7 +215,7 @@ sub spy_rank {
     unless ($by ~~ [qw(level_rank success_rate_rank dirtiest_rank)]) {
         $by = 'level_rank';
     }
-    my $ranks = KA->db->resultset('Log::Spies')->search(undef,{order_by => $by, rows=>25});
+    my $ranks = KA->db->resultset('Log::Spy')->search(undef,{order_by => $by, rows=>25});
     my @spies;
     while (my $rank = $ranks->next) {
         push @spies, {

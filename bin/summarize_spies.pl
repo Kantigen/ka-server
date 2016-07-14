@@ -41,7 +41,7 @@ exit;
 
 sub generate_overview {
     out('Generating Overview');
-    my $spies       = $db->resultset('Spies')->search({empire_id => { '>' => 1}});
+    my $spies       = $db->resultset('Spy')->search({empire_id => { '>' => 1}});
     
     # basics
     out('Getting Basic Counts');
@@ -145,7 +145,7 @@ sub rank_spies {
     # @rank=0;
     # update spy_log set dirtiest_rank=(@rank:=@rank+1) order by dirtiest desc;
     #
-    my $spies = $db->resultset('Log::Spies');
+    my $spies = $db->resultset('Log::Spy');
     foreach my $field (qw(level success_rate dirtiest)) {
         my $ranked = $spies->search(undef, {order_by => {-desc => $field}});
         my $counter = 1;
@@ -162,7 +162,7 @@ sub delete_old_records {
     # 
 
     my $start = shift;
-    $db->resultset('Log::Spies')->search({date_stamp => { '<' => $start}})->delete;
+    $db->resultset('Log::Spy')->search({date_stamp => { '<' => $start}})->delete;
 }
 
 
@@ -176,8 +176,8 @@ sub summarize_spies {
     # For the set of spies where there *is* a previous spy_log
     # select id from spies,spy_log where empire_id > 1 and spy_log.spy_id = spies.id;
     # 
-    my $spies = $db->resultset('Spies')->search({ empire_id   => {'>' => 1} });
-    my $logs = $db->resultset('Log::Spies');
+    my $spies = $db->resultset('Spy')->search({ empire_id   => {'>' => 1} });
+    my $logs = $db->resultset('Log::Spy');
     while (my $spy = $spies->next) {
         out($spy->id.":".$spy->name);
         my $log = $logs->search({ spy_id => $spy->id } )->first;

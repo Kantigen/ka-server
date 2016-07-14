@@ -299,17 +299,17 @@ sub sanitize {
         $fleet->turn_around->update;
     }
     $self->fleets->delete_all;
-    my $enemy_spies = KA->db->resultset('Spies')->search({on_body_id => $self->id});
+    my $enemy_spies = KA->db->resultset('Spy')->search({on_body_id => $self->id});
     while (my $spy = $enemy_spies->next) {
         $spy->on_body_id($spy->from_body_id);
         $spy->task("Idle");
         $spy->update;
     }
-    KA->db->resultset('Spies')->search({from_body_id => $self->id})->delete_all;
+    KA->db->resultset('Spy')->search({from_body_id => $self->id})->delete_all;
     KA->db->resultset('Market')->search({body_id => $self->id})->delete_all;
     KA->db->resultset('MercenaryMarket')->search({body_id => $self->id})->delete_all;
     # We will delete all probes (observatory or oracle), note, must recreate oracle probes if the planet is recolonised
-    KA->db->resultset('Probes')->search_any({body_id => $self->id})->delete;
+    KA->db->resultset('Probe')->search_any({body_id => $self->id})->delete;
     $self->empire_id(undef);
     if ($self->get_type eq 'habitable planet' &&
         $self->size >= 40 && $self->size <= 50 &&
@@ -1288,7 +1288,7 @@ sub recalc_stats {
     }
     $stats{max_berth} = 1;
     #calculate propaganda bonus
-    my $spy_boost = KA->db->resultset('Spies')
+    my $spy_boost = KA->db->resultset('Spy')
         ->search(
                  {
                      on_body_id => $self->id,
@@ -1329,7 +1329,7 @@ sub recalc_stats {
             $stats{max_berth} = $building->effective_level if ($building->effective_level > $stats{max_berth});
         }
         if ($building->isa('KA::DB::Result::Building::Ore::Ministry')) {
-            my $platforms = KA->db->resultset('MiningPlatforms')->search({planet_id => $self->id});
+            my $platforms = KA->db->resultset('MiningPlatform')->search({planet_id => $self->id});
             while (my $platform = $platforms->next) {
                 foreach my $type (ORE_TYPES) {
                     my $method = $type.'_hour';

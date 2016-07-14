@@ -116,15 +116,15 @@ __PACKAGE__->belongs_to('alliance',         'KA::DB::Result::Alliance',     'all
 __PACKAGE__->belongs_to('home_planet',      'KA::DB::Result::Map::Body',    'home_planet_id');
 __PACKAGE__->belongs_to('latest_message',   'KA::DB::Result::Message',      'latest_message_id', { on_delete => 'set null' });
 
-__PACKAGE__->has_many('spies',              'KA::DB::Result::Spies',        'empire_id');
+__PACKAGE__->has_many('spies',              'KA::DB::Result::Spy',        'empire_id');
 __PACKAGE__->has_many('planets',            'KA::DB::Result::Map::Body',    'empire_id');
-__PACKAGE__->has_many('propositions',       'KA::DB::Result::Propositions', 'proposed_by_id');
-__PACKAGE__->has_many('votes',              'KA::DB::Result::Votes',        'empire_id');
-__PACKAGE__->has_many('taxes',              'KA::DB::Result::Taxes',        'empire_id');
+__PACKAGE__->has_many('propositions',       'KA::DB::Result::Proposition', 'proposed_by_id');
+__PACKAGE__->has_many('votes',              'KA::DB::Result::Vote',         'empire_id');
+__PACKAGE__->has_many('taxes',              'KA::DB::Result::Tax',          'empire_id');
 __PACKAGE__->has_many('sent_messages',      'KA::DB::Result::Message',      'from_id');
 __PACKAGE__->has_many('received_messages',  'KA::DB::Result::Message',      'to_id');
 __PACKAGE__->has_many('medals',             'KA::DB::Result::Medals',       'empire_id');
-__PACKAGE__->has_many('all_probes',         'KA::DB::Result::Probes',       'empire_id');
+__PACKAGE__->has_many('all_probes',         'KA::DB::Result::Probe',       'empire_id');
 __PACKAGE__->has_many('bodies',             'KA::DB::Result::Map::Body',    'empire_id');
 
 has has_new_messages => (
@@ -151,8 +151,8 @@ sub _build_db {
 
 
 # I'm the sitter for these babies.
-__PACKAGE__->has_many('allbabyauths', 'KA::DB::Result::SitterAuths', 'sitter_id');
-__PACKAGE__->has_many('babyauths',    'KA::DB::Result::SitterAuths', sub {
+__PACKAGE__->has_many('allbabyauths', 'KA::DB::Result::SitterAuth', 'sitter_id');
+__PACKAGE__->has_many('babyauths',    'KA::DB::Result::SitterAuth', sub {
                             my $args = shift;
                             return (
                                     {
@@ -167,8 +167,8 @@ __PACKAGE__->has_many('babyauths',    'KA::DB::Result::SitterAuths', sub {
                         });
 
 # I'm the baby for these sitters.
-__PACKAGE__->has_many('allsitterauths', 'KA::DB::Result::SitterAuths', 'baby_id');
-__PACKAGE__->has_many('sitterauths',    'KA::DB::Result::SitterAuths', sub {
+__PACKAGE__->has_many('allsitterauths', 'KA::DB::Result::SitterAuth', 'baby_id');
+__PACKAGE__->has_many('sitterauths',    'KA::DB::Result::SitterAuth', sub {
                             my $args = shift;
                             return (
                                     {
@@ -1110,7 +1110,7 @@ sub add_observatory_probe {
     my ($self, $star_id, $body_id) = @_;
 
     # add probe
-    $self->db->resultset('Probes')->new({
+    $self->db->resultset('Probe')->new({
         empire_id   => $self->id,
         star_id     => $star_id,
         body_id     => $body_id,
@@ -1121,7 +1121,7 @@ sub add_observatory_probe {
     # send notifications
     my $star = $self->db->resultset('Map::Star')->find($star_id);
     # Get all empires to be notified that have probes (real or virtual)
-    my %to_notify = map { $_->empire_id => 1 } $self->db->resultset('Probes')
+    my %to_notify = map { $_->empire_id => 1 } $self->db->resultset('Probe')
                                                ->search_any({
                                                    star_id => $star_id,
                                                    empire_id => {'!=', $self->id }
@@ -1209,7 +1209,7 @@ has probed_stars => (
                 alliance_id => $self->alliance_id,
             );
         }
-        my @stars = $self->db->resultset('Probes')->search_any(\%search)->get_column('star_id')->all;
+        my @stars = $self->db->resultset('Probe')->search_any(\%search)->get_column('star_id')->all;
         return \@stars;
     },
 );
@@ -1356,13 +1356,13 @@ sub redeem_essentia_code {
 
 sub pay_taxes {
     my ($self, $station_id, $amount) = @_;
-    my $taxes = $self->db->resultset('Taxes')->search({empire_id=>$self->id,station_id=>$station_id})->first;
+    my $taxes = $self->db->resultset('Tax')->search({empire_id=>$self->id,station_id=>$station_id})->first;
     if (defined $taxes) {
         $taxes->{paid_0} += $amount;
         $taxes->update;
     }
     else {
-        $self->db->resultset('Taxes')->new({
+        $self->db->resultset('Tax')->new({
             empire_id   => $self->id,
             station_id  => $station_id,
             paid_0      => $amount,

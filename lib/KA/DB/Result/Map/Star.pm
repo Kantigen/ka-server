@@ -17,10 +17,10 @@ __PACKAGE__->add_columns(
 );
 
 __PACKAGE__->has_many('bodies', 'KA::DB::Result::Map::Body', 'star_id');
-__PACKAGE__->has_many('probes', 'KA::DB::Result::Probes', 'star_id');
-__PACKAGE__->has_many('laws', 'KA::DB::Result::Laws', 'star_id');
+__PACKAGE__->has_many('probes', 'KA::DB::Result::Probe', 'star_id');
+__PACKAGE__->has_many('laws', 'KA::DB::Result::Law', 'star_id');
 __PACKAGE__->belongs_to('station', 'KA::DB::Result::Map::Body', 'station_id', { on_delete => 'set null' });
-__PACKAGE__->has_many('bhgneut_laws', 'KA::DB::Result::Laws', sub {
+__PACKAGE__->has_many('bhgneut_laws', 'KA::DB::Result::Law', sub {
     my $args = shift;
     return (
             {

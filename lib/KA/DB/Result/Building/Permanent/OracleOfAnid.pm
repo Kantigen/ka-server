@@ -22,7 +22,7 @@ sub image_level {
 
 sub probes {
     my $self = shift;
-    return KA->db->resultset('Probes')->search_oracle( {
+    return KA->db->resultset('Probe')->search_oracle( {
         body_id     => $self->body->id,
     } );
 }
@@ -103,7 +103,7 @@ sub recalc_probes {
     if ($body->empire_id) {
         my $empire = $body->empire;
         while (my $star = $stars->next) {
-            KA->db->resultset('Probes')->new({
+            KA->db->resultset('Probe')->new({
                 empire_id   => $empire->id,
                 star_id     => $star->id,
                 body_id     => $body->id,

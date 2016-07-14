@@ -91,7 +91,7 @@ sub get_mining_platforms_for_asteroid_in_jurisdiction {
     unless ($asteroid->star->station_id == $building->body_id) {
         confess [1009, 'That asteroid is not in your jurisdiction.'];
     }
-    my $platforms = KA->db->resultset('MiningPlatforms')->search({asteroid_id => $asteroid->id});
+    my $platforms = KA->db->resultset('MiningPlatform')->search({asteroid_id => $asteroid->id});
     while (my $platform = $platforms->next) {
         push @out, {
             id          => $platform->id,
@@ -167,7 +167,7 @@ sub propose_fire_bfg {
     }
     $building->body->in_jurisdiction($body);
     my $name = $body->name.' ('.$body->x.','.$body->y.')';
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'FireBfg',
         name            => 'Fire BFG at '.$body->name,
         description     => 'Fire the BFG at {Starmap '.$body->x.' '.$body->y.' '.$body->name.'} from {Planet '.$building->body->id.' '.$building->body->name.'}. Reason cited: '.$reason,
@@ -204,7 +204,7 @@ sub propose_writ {
     KA::Verify->new(content=>\$writ, throws=>[1005,'Writ cannot be empty.',$writ])->not_empty;
     KA::Verify->new(content=>\$writ, throws=>[1005,'Writ cannot contain HTML tags or entities.',$writ])->no_tags;
     KA::Verify->new(content=>\$writ, throws=>[1005,'Writ cannot contain profanity.',$writ])->no_profanity;
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'EnactWrit',
         name            => $title,
         description     => $writ,
@@ -246,7 +246,7 @@ sub propose_transfer_station_ownership {
     if ($to_empire->is_isolationist) {
         confess [1013, 'That empire is an isolationist.'];
     }
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'TransferStationOwnership',
         name            => 'Transfer Station',
         description     => 'Transfer ownership of {Planet '.$building->body->id.' '.$building->body->name.'} from {Empire '.$building->body->empire_id.' '.$building->body->empire->name.'} to {Empire '.$to_empire->id.' '.$to_empire->name.'}.',
@@ -283,7 +283,7 @@ sub propose_repeal_law {
     unless (defined $law) {
         confess [1002, 'Could not find the law.'];
     }
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'RepealLaw',
         name            => 'Repeal '.$law->name,
         description     => 'Repeal the law described as: '.$law->description,
@@ -330,7 +330,7 @@ sub propose_rename_star {
         ->no_profanity
         ->no_padding
         ->not_ok(KA->db->resultset('Map::Star')->search({name=>$star_name, 'id'=>{'!='=>$star->id}})->count); # name available
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'RenameStar',
         name            => 'Rename '.$star->name,
         description     => 'Rename {Starmap '.$star->x.' '.$star->y.' '.$star->name.'} to '.$star_name.'.',
@@ -364,7 +364,7 @@ sub propose_broadcast_on_network19 {
     KA::Verify->new(content=>\$message, throws=>[1005,'Message cannot contain any of these characters: {}<>&;@',$message])->no_restricted_chars;
     KA::Verify->new(content=>\$message, throws=>[1005,'Message must be less than 141 characters.',$message])->length_lt(141);
     KA::Verify->new(content=>\$message, throws=>[1005,'Message cannot contain profanity.',$message])->no_profanity;
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'BroadcastOnNetwork19',
         name            => 'Broadcast On Network 19',
         description     => 'Broadcast the following message on Network 19: '.$message,
@@ -412,7 +412,7 @@ sub propose_rename_asteroid {
         ->no_profanity
         ->no_padding
         ->not_ok(KA->db->resultset('Map::Body')->search({name=>$name, 'id'=>{'!='=>$asteroid->id}})->count); # name available
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'RenameAsteroid',
         name            => 'Rename '.$asteroid->name,
         description     => 'Rename {Starmap '.$asteroid->x.' '.$asteroid->y.' '.$asteroid->name.'} to '.$name.'.',
@@ -462,7 +462,7 @@ sub propose_rename_uninhabited {
         ->no_profanity
         ->no_padding
         ->not_ok(KA->db->resultset('Map::Body')->search({name=>$name, 'id'=>{'!='=>$planet->id}})->count); # name available
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'RenameUninhabited',
         name            => 'Rename '.$planet->name,
         description     => 'Rename {Starmap '.$planet->x.' '.$planet->y.' '.$planet->name.'} to '.$name.'.',
@@ -492,7 +492,7 @@ sub propose_members_only_mining_rights {
     unless ($building->effective_level > 0 and $building->effective_efficiency == 100) {
         confess [1003, "You must have a functional Parliament!"];
     }
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'MembersOnlyMiningRights',
         name            => 'Members Only Mining Rights',
         description     => 'Only members of {Alliance '.$building->body->alliance_id.' '.$building->body->alliance->name.'} should be allowed to mine asteroids in the jurisdiction of {Starmap '.$building->body->x.' '.$building->body->y.' '.$building->body->name.'}.',
@@ -521,7 +521,7 @@ sub propose_members_only_excavation {
     unless ($building->effective_level > 0 and $building->effective_efficiency == 100) {
         confess [1003, "You must have a functional Parliament!"];
     }
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'MembersOnlyExcavation',
         name            => 'Members Only Excavation',
         description     => 'Only members of {Alliance '.$building->body->alliance_id.' '.$building->body->alliance->name.'} should be allowed to excavate bodies in the jurisdiction of {Starmap '.$building->body->x.' '.$building->body->y.' '.$building->body->name.'}.',
@@ -550,7 +550,7 @@ sub propose_members_only_colonization {
     unless ($building->effective_level > 0 and $building->effective_efficiency == 100) {
         confess [1003, "You must have a functional Parliament!"];
     }
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'MembersOnlyColonization',
         name            => 'Members Only Colonization',
         description     => 'Only members of {Alliance '.$building->body->alliance_id.' '.$building->body->alliance->name.'} should be allowed to colonize planets in the jurisdiction of {Starmap '.$building->body->x.' '.$building->body->y.' '.$building->body->name.'}.',
@@ -580,7 +580,7 @@ sub propose_members_only_stations {
     unless ($building->effective_level > 0 and $building->effective_efficiency == 100) {
         confess [1003, "You must have a functional Parliament!"];
     }
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'MembersOnlyStations',
         name            => 'Members Only Stations',
         description     => 'Only members of {Alliance '.$building->body->alliance_id.' '.$building->body->alliance->name.'} should be allowed to deploy new stations in the jurisdiction of {Starmap '.$building->body->x.' '.$building->body->y.' '.$building->body->name.'}.',
@@ -609,7 +609,7 @@ sub propose_neutralize_bhg {
     unless ($building->effective_level > 0 and $building->effective_efficiency == 100) {
         confess [1003, "You must have a functional Parliament!"];
     }
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'BHGNeutralized',
         name            => 'BHG Neutralized',
         description     => 'All non-alliance Black Hole Generators will cease to operate within and on planets in the jurisdiction of {Starmap '.$building->body->x.' '.$building->body->y.' '.$building->body->name.'}.',
@@ -642,7 +642,7 @@ sub allow_bhg_by_alliance {
     unless (defined $alliance) {
         confess [1002, 'Could not find alliance.'];
     }
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'BHGPassport',
         name            => 'BHG Passport',
         scratch         => { alliance_id => $alliance_id },
@@ -675,14 +675,14 @@ sub propose_evict_mining_platform {
     unless ($platform_id) {
         confess [1002, 'You must specify a mining platform id.'];
     }
-    my $platform = KA->db->resultset('MiningPlatforms')->find($platform_id);
+    my $platform = KA->db->resultset('MiningPlatform')->find($platform_id);
     unless (defined $platform) {
         confess [1002, 'Platform not found.'];
     }
     unless ($platform->asteroid->star->station_id == $building->body_id) {
         confess [1009, 'That platform is not in your jurisdiction.'];
     }
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'EvictMiningPlatform',
         name            => 'Evict '.$platform->planet->empire->name.' Mining Platform',
         description     => 'Evict a mining platform on {Starmap '.$platform->asteroid->x.' '.$platform->asteroid->y.' '.$platform->asteroid->name.'} controlled by {Empire '.$platform->planet->empire_id.' '.$platform->planet->empire->name.'}.',
@@ -715,14 +715,14 @@ sub propose_evict_excavator {
     unless ($excav_id) {
         confess [1002, 'You must specify an excavator id.'];
     }
-    my $excav = KA->db->resultset('Excavators')->find($excav_id);
+    my $excav = KA->db->resultset('Excavator')->find($excav_id);
     unless (defined $excav) {
         confess [1002, 'Excavator not found.'];
     }
     unless ($excav->body->star->station_id == $building->body_id) {
         confess [1009, 'That excavator is not in your jurisdiction.'];
     }
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'EvictExcavator',
         name            => 'Evict '.$excav->planet->empire->name.' Excavator',
         description     => 'Evict a excavator on {Starmap '.$excav->body->x.' '.$excav->body->y.' '.$excav->body->name.'} controlled by {Empire '.$excav->planet->empire_id.' '.$excav->planet->empire->name.'}.',
@@ -762,7 +762,7 @@ sub propose_elect_new_leader {
     unless ($to_empire->alliance_id == $empire->alliance_id) {
         confess [1009, 'That empire is not a member of your alliance.'];
     }
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'ElectNewLeader',
         name            => 'Elect New Leader',
         description     => 'Elect {Empire '.$to_empire->id.' '.$to_empire->name.'} as the new leader of {Alliance '.$building->body->alliance_id.' '.$building->body->alliance->name.'}.',
@@ -809,7 +809,7 @@ sub propose_induct_member {
     KA::Verify->new(content=>\$message, throws=>[1005,'Message must not contain restricted characters or profanity.', 'message'])
         ->no_tags
         ->no_profanity;
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'InductMember',
         name            => 'Induct Member',
         description     => 'Induct {Empire '.$invite_empire->id.' '.$invite_empire->name.'} as a new member of {Alliance '.$building->body->alliance_id.' '.$building->body->alliance->name.'}.',
@@ -852,7 +852,7 @@ sub propose_expel_member {
     KA::Verify->new(content=>\$message, throws=>[1005,'Message must not contain restricted characters or profanity.', 'message'])
         ->no_tags
         ->no_profanity;
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'ExpelMember',
         name            => 'Expel Member',
         description     => 'Expel {Empire '.$empire_to_remove->id.' '.$empire_to_remove->name.'} from {Alliance '.$building->body->alliance_id.' '.$building->body->alliance->name.'}.',
@@ -886,7 +886,7 @@ sub propose_taxation {
     {
         confess [1009, 'Taxes must be an integer greater than 0.'];
     }
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'Taxation',
         name            => 'Tax of '.$taxes.' resources per day',
         description     => 'Implement a tax of '.$taxes. ' resources per day for all empires in the jurisdiction of {Starmap '.$building->body->x.' '.$building->body->y.' '.$building->body->name.'}.',
@@ -943,7 +943,7 @@ sub propose_foreign_aid {
             confess [1007, "The station does not have enough $cost stored."];
         }
     }
-    my $proposition = KA->db->resultset('Propositions')->new({
+    my $proposition = KA->db->resultset('Proposition')->new({
         type            => 'Foreign Aid',
         name            => 'Foreign Aid for '.$planet->name.'.',
         description     => 'Send a foreign aid package of '.$resources.' resources to {Starmap '.$planet->x, $planet->y, $planet->name.'} (total cost '.2*$resources.' resources).',
@@ -972,7 +972,7 @@ sub view_taxes_collected {
     my $empire   = $session->current_empire;
     my $building = $session->current_building;
     my @out;
-    my $taxes = KA->db->resultset('Taxes')->search({station_id => $building->body_id});
+    my $taxes = KA->db->resultset('Tax')->search({station_id => $building->body_id});
     while (my $tax = $taxes->next) {
         push @out, $tax->get_status();
     }

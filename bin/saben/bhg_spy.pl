@@ -71,7 +71,7 @@ for my $body_id (sort keys %has_bhg) {
         next;
     }
     my $elevel = $body->empire->university_level;
-    my $spy = $db->resultset('Spies')->new({
+    my $spy = $db->resultset('Spy')->new({
            from_body_id    => $saben->home_planet_id,
            on_body_id      => $body_id,
            task            => 'Sabotage BHG',

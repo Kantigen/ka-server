@@ -21,7 +21,7 @@ after handle_arrival_procedures => sub {
 
     # find mining platforms to destroy
     if ($is_asteroid) {
-        my $platforms = KA->db->resultset('MiningPlatforms')->search({asteroid_id => $self->foreign_body_id });
+        my $platforms = KA->db->resultset('MiningPlatform')->search({asteroid_id => $self->foreign_body_id });
         # destroy those suckers
         while (my $platform = $platforms->next) {
             my $empire = $platform->planet->empire;
@@ -59,7 +59,7 @@ after handle_arrival_procedures => sub {
         }
     }
     # Destroy Excavs
-    my $excavs = KA->db->resultset('Excavators')->search({body_id => $self->foreign_body_id });
+    my $excavs = KA->db->resultset('Excavator')->search({body_id => $self->foreign_body_id });
     while (my $excav = $excavs->next) {
         my $empire = $excav->planet->empire;
 

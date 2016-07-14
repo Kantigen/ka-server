@@ -23,7 +23,7 @@ out('Loading DB');
 our $db = KA->db;
 my $empires = $db->resultset('Empire');
 my $bodies  = $db->resultset('Map::Body');
-my $spies   = $db->resultset('Spies');
+my $spies   = $db->resultset('Spy');
 while (my $empire = $empires->next) {
     next if $empire->id < 2;
     my $emp_bodies = $bodies->search({empire_id=>$empire->id});

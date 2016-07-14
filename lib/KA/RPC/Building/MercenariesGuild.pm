@@ -113,7 +113,7 @@ sub accept_from_market {
         payload => $trade->payload,
     );
     my $id = $trade->payload->{mercenary};
-    my $spy = KA->db->resultset('Spies')->find($id);
+    my $spy = KA->db->resultset('Spy')->find($id);
     if (defined($spy)) {
         $spy->empire_id($body->empire_id);
         $spy->from_body_id($body->id);
@@ -225,7 +225,7 @@ sub get_spies {
     my $session  = $self->get_session({session_id => $session_id, building_id => $building_id });
     my $empire   = $session->current_empire;
     my $building = $session->current_building;
-    my $spies = KA->db->resultset('Spies')->search(
+    my $spies = KA->db->resultset('Spy')->search(
         { empire_id => $empire->id, on_body_id => $building->body_id, task => { in => ['Counter Espionage','Idle'] } },
         {
             # match the order_by in L::RPC::B::Intelligence::view_spies

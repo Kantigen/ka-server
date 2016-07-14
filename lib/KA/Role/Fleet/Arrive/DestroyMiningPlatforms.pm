@@ -13,7 +13,7 @@ after handle_arrival_procedures => sub {
     return unless ( $self->foreign_body_id && $self->foreign_body->isa('KA::DB::Result::Map::Body::Asteroid') );
 
     # find mining platforms to destroy
-    my $platforms = KA->db->resultset('MiningPlatforms')->search({asteroid_id => $self->foreign_body_id });
+    my $platforms = KA->db->resultset('MiningPlatform')->search({asteroid_id => $self->foreign_body_id });
     my $count;
 
     # destroy those suckers

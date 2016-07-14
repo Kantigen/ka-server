@@ -49,7 +49,7 @@ sub foreign_spies {
     my $self = shift;
     return KA
         ->db
-        ->resultset('Spies')
+        ->resultset('Spy')
         ->search({ level => { '<=' => $self->effective_level },
                    task => { 'not in' => [ 'Captured', 'Prisoner Transport'] },
                    on_body_id => $self->body_id, empire_id => { '!=' => $self->body->empire_id } });
@@ -63,7 +63,7 @@ sub prisoners {
 
     return  KA
         ->db
-        ->resultset('Spies')
+        ->resultset('Spy')
         ->search(
             {
                 on_body_id  => $self->body_id,
@@ -76,7 +76,7 @@ sub prisoners {
 after finish_upgrade => sub {
     my $self = shift;
     my $defense = ($self->body->empire->effective_deception_affinity * 50) + ($self->effective_level * 75);
-    my $spies = KA->db->resultset('Spies')->search({
+    my $spies = KA->db->resultset('Spy')->search({
         on_body_id      => $self->body_id,
         from_body_id    => $self->body_id,
         defense         => { '<' => $defense },

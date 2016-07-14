@@ -9,8 +9,8 @@ use KA::Constants qw(MINIMUM_EXERTABLE_INFLUENCE);
 use Data::Dumper;
 
 use constant image => 'station';
-__PACKAGE__->has_many('propositions','KA::DB::Result::Propositions','station_id');
-__PACKAGE__->has_many('laws','KA::DB::Result::Laws','station_id');
+__PACKAGE__->has_many('propositions','KA::DB::Result::Proposition','station_id');
+__PACKAGE__->has_many('laws','KA::DB::Result::Law','station_id');
 __PACKAGE__->has_many('stars','KA::DB::Result::Map::Star','station_id');
 
 has parliament => (

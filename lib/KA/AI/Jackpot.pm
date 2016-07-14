@@ -171,7 +171,7 @@ sub reject_badspy {
 
     print "Bouncing Spies that are too advanced\n";
     my %empires;
-    my $spies = KA->db->resultset('Spies')->search({
+    my $spies = KA->db->resultset('Spy')->search({
                     'me.on_body_id' => $colony->id,
                     'me.empire_id'  => {'!=' => $colony->empire_id },
                     'me.task'       => { 'not in' => ['Killed In Action',

@@ -87,7 +87,7 @@ sub abandon_platform {
     my $session  = $self->get_session({session_id => $session_id, building_id => $building_id });
     my $empire   = $session->current_empire;
     my $building = $session->current_building;
-    my $platform = KA->db->resultset('MiningPlatforms')->find($platform_id);
+    my $platform = KA->db->resultset('MiningPlatform')->find($platform_id);
     unless (defined $platform) {
         confess [1002, "Platform not found."];
     }

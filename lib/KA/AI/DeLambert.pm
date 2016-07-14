@@ -144,7 +144,7 @@ sub check_enemy_spy_action {
 
     my $scratchpad = $self->scratch->pad;
 
-    my $enemy_spies = KA->db->resultset('Spies')->search({
+    my $enemy_spies = KA->db->resultset('Spy')->search({
         task    => ['Incite Mutiny','Incite Rebellion','Appropriate Technology','Sabotage Resources','Infiltrating','Incite Insurrection','Appropriate Resources','Abduct Operatives','Gather Operative Intelligence','Sabotage Probes','Rescue Comrades','Assassinate Operatives','Debriefing','Sabotage Infrastructure',],
         on_body_id => $colony->id,
         empire_id  => {'!=' => -9},

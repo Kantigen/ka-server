@@ -283,7 +283,7 @@ sub cast_vote {
     }
     $cache->set($lock,$proposition_id,1,5);
     my $guard = guard {$cache->delete($lock,$proposition_id);};
-    my $proposition = KA->db->resultset('Propositions')->find($proposition_id);
+    my $proposition = KA->db->resultset('Proposition')->find($proposition_id);
     unless (defined $proposition) {
         confess [1002, 'Proposition not found.'];
     }

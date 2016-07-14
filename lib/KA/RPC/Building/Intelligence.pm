@@ -44,7 +44,7 @@ sub view_spies {
         $cost_to_subsidize++ if ($spy->task eq 'Training');
         push @spies, $spy->get_status;
     }
-    my @assignments = KA::DB::Result::Spies->assignments;
+    my @assignments = KA::DB::Result::Spy->assignments;
     return {
         status                  => $self->format_status($session, $body),
         spies                   => \@spies,
@@ -74,7 +74,7 @@ sub view_all_spies {
         $cost_to_subsidize++ if ($spy->task eq 'Training');
         push @spies, $spy->get_status;
     }
-    my @assignments = KA::DB::Result::Spies->assignments;
+    my @assignments = KA::DB::Result::Spy->assignments;
     return {
         status                  => $self->format_status($session, $body),
         spies                   => \@spies,
@@ -105,7 +105,7 @@ sub view_all_spies {
 #         $cost_to_subsidize++ if ($spy->task eq 'Training');
 #         push @spies, $spy->get_status;
 #     }
-#     my @assignments = KA::DB::Result::Spies->assignments;
+#     my @assignments = KA::DB::Result::Spy->assignments;
 #     return {
 #         status                  => $self->format_status($session, $body),
 #         spies                   => \@spies,

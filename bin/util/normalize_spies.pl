@@ -60,7 +60,7 @@ while (my $planet = $planets->next) {
     }
 }
 
-my $spies   = $db->resultset('Spies');
+my $spies   = $db->resultset('Spy');
 out('Updating spy level');
 while (my $spy = $spies->next) {
   if ($spy->task eq 'Captured') {
@@ -72,7 +72,7 @@ while (my $spy = $spies->next) {
   $spy->update;
 }
 out('Culling Spies');
-$spies   = $db->resultset('Spies');
+$spies   = $db->resultset('Spy');
 while (my $empire = $empires->next) {
     next if $empire->id < 2;
     my $emp_spies = $spies->search({empire_id=>$empire->id}, {order_by => { -desc => 'level'}});

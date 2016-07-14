@@ -23,7 +23,7 @@ my $empires = $db->resultset('Empire');
 
 
 out('Deleting dead spies and retiring old spies.');
-my $spies = $db->resultset('Spies');
+my $spies = $db->resultset('Spy');
 $spies->search({task=>'Killed In Action'})->delete_all;
 my $retiring_spies = $spies->search({ -or => { offense_mission_count => { '>=' => 150 }, defense_mission_count => { '>=' => 150 } }});
 while (my $spy = $retiring_spies->next) {

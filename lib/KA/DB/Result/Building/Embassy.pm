@@ -314,7 +314,7 @@ before 'can_demolish' => sub {
 sub propositions {
     my ($self) = @_;
     my $alliance = $self->alliance;
-    return KA->db->resultset('Propositions')->
+    return KA->db->resultset('Proposition')->
         search({ "station.alliance_id" => $alliance->id, }, { prefetch => ["station",'proposed_by'] });
 }
 
