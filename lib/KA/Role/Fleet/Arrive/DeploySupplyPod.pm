@@ -26,7 +26,8 @@ after handle_arrival_procedures => sub {
         });
         $body->build_building($deployed, 1);
         $deployed->finish_upgrade;
-        $body->recalc_stats;
+        $body->needs_recalc(1);
+        $body->tick;
         my $payload = $self->payload;
         if (exists $payload->{resources}) {
             my %resources = %{$payload->{resources}};

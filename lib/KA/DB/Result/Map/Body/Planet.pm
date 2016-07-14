@@ -1535,77 +1535,7 @@ sub tick {
     
     my $now = DateTime->now;
     my $now_epoch = $now->epoch;
-    my $dt_parser = KA->db->storage->datetime_parser;
-    my %todo;
-    my $i; # in case 2 things finish at exactly the same time
 
-    # get building tasks
-    if (not KA->config->get('beanstalk')) {
-        my @buildings = grep {
-            ($_->is_upgrading and $_->upgrade_ends->epoch <= $now_epoch) 
-         or ($_->is_working and $_->work_ends->epoch <= $now_epoch)
-        } @{$self->building_cache};
-
-        foreach my $building (@buildings) {
-            if ($building->is_upgrading && $building->upgrade_ends->epoch <= $now_epoch) {
-                $todo{format_date($building->upgrade_ends).$i} = {
-                    object  => $building,
-                    type    => 'building upgraded',
-                };
-            }
-            if ($building->is_working && $building->work_ends->epoch <= $now_epoch) {
-                $todo{format_date($building->work_ends).$i} = {
-                    object  => $building,
-                    type    => 'building work complete',
-                };
-            }
-            $i++;
-        }
-        # get fleet tasks
-        my $fleets = KA->db->resultset('Fleet')->search({
-            body_id         => $self->id,
-            date_available  => { '<=' => $dt_parser->format_datetime($now) },
-            task            => [qw(Travelling Building)],
-        });
-        while (my $fleet = $fleets->next ) {
-            if ($fleet->task eq 'Travelling') {
-                $todo{format_date($fleet->date_available).$i} = {
-                    object  => $fleet,
-                    type    => 'fleet arrives',
-                };
-            }
-            elsif ($fleet->task eq 'Building') {
-                $todo{format_date($fleet->date_available).$i} = {
-                    object  => $fleet,
-                    type    => 'fleet built',
-                };
-            }
-            $i++;
-        }
-    }
-    # synchronize completion of tasks
-    foreach my $key (sort keys %todo) {
-        my ($object, $job) = ($todo{$key}{object}, $todo{$key}{type});
-        my $beanstalk = KA->config->get('beanstalk');
-
-        if (not $beanstalk and $job eq 'fleet built') {
-            $self->tick_to($object->date_available);
-            $object->finish_construction;
-        }
-        elsif (not $beanstalk and $job eq 'fleet arrives') {
-            $self->tick_to($object->date_available);
-            $object->arrive;            
-        }
-        elsif (not $beanstalk and $job eq 'building work complete') {
-            $self->tick_to($object->work_ends);
-            $object->finish_work->update;
-        }
-        elsif (not $beanstalk and $job eq 'building upgraded') {
-            $self->tick_to($object->upgrade_ends);
-            $object->finish_upgrade;
-        }
-    }
-    
     # check / clear boosts
     if ($self->boost_enabled) {
         my $empire = $self->empire;
