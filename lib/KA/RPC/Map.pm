@@ -40,7 +40,7 @@ sub check_star_for_incoming_probe {
     my $empire   = $session->current_empire;
     my $date = 0;
     my @bodies = $empire->planets->get_column('id')->all;
-    my $incoming = KA->db->resultset('Ships')->search({
+    my $incoming = KA->db->resultset('Fleet')->search({
         foreign_star_id => $star_id, 
         task            => 'Travelling', 
         type            => 'probe', 

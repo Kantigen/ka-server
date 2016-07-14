@@ -233,7 +233,7 @@ sub view_excavators {
         distance => 0,
     };
     my $excavators = $building->excavators;
-    my $travel = KA->db->resultset('KA::DB::Result::Ships')->search({
+    my $travel = KA->db->resultset('Fleet')->search({
         type    => 'excavator', 
         task    => 'Travelling',
         body_id => $building->body_id,

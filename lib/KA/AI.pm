@@ -420,7 +420,7 @@ sub build_ships {
     }
     my @shipyards = sort {$a->work_ends cmp $b->work_ends} $colony->get_buildings_of_class('KA::DB::Result::Building::Shipyard');
     my @priorities = $self->ship_building_priorities($colony);
-    my $ships = KA->db->resultset('KA::DB::Result::Ships');
+    my $ships = KA->db->resultset('Fleet');
     foreach my $priority (@priorities) {
         say $priority->[0];
         my $count = $ships->search({body_id => $colony->id, type => $priority->[0]})->count;
@@ -456,7 +456,7 @@ sub build_ships_max {
         return;
     }
     my @ship_yards  = sort {$a->work_ends cmp $b->work_ends} $colony->get_buildings_of_class('KA::DB::Result::Building::Shipyard');
-    my $ships 	    = KA->db->resultset('KA::DB::Result::Ships');
+    my $ships 	    = KA->db->resultset('Fleet');
     my $ship_yard   = shift @ship_yards;
     my $free_docks  = $ship_yard->level - $ships->search({shipyard_id => $ship_yard->id, task => 'Building'});
     my @priorities  = $self->ship_building_priorities($colony);
@@ -577,7 +577,7 @@ sub start_attack {
         say '    Has one at star already...';
         $seconds = 1;
     }
-    my $probe = $db->resultset('KA::DB::Result::Ships')->search({body_id => $attacking_colony->id, type => 'probe', task=>'Docked'})->first;
+    my $probe = $db->resultset('Fleet')->search({body_id => $attacking_colony->id, type => 'probe', task=>'Docked'})->first;
     if (defined $probe and $seconds == 0) {
         say '    Has a probe to launch for '.$target_colony->name.'...';
         $probe->send(target => $target_colony->star);
@@ -617,7 +617,7 @@ STYPE: foreach my $type (@$ship_types) {
         unless ($max_berth) {
             $max_berth = 1;
         }
-        my $ships_rs    = KA->db->resultset('Ships')->search({
+        my $ships_rs    = KA->db->resultset('Fleet')->search({
             body_id => $attacking_body->id,
             task    => 'Docked',
             type    => $type,

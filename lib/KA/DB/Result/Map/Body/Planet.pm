@@ -832,7 +832,7 @@ sub find_free_space {
 
 sub has_outgoing_ships {
     my ($self, $min) = @_;
-    my $ships = KA->db->resultset('Ships')->search({
+    my $ships = KA->db->resultset('Fleet')->search({
             body_id         => $self->id,
             task            => 'Travelling',
     });

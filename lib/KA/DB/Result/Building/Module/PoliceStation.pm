@@ -44,14 +44,14 @@ sub prisoners {
 
 sub ships {
     my $self = shift;
-    return KA->db->resultset('KA::DB::Result::Ships')->search({
+    return KA->db->resultset('Fleet')->search({
         body_id     => $self->body_id,
     });
 }
 
 sub foreign_ships {
     my ($self) = @_;
-    return KA->db->resultset('KA::DB::Result::Ships')->search(
+    return KA->db->resultset('Fleet')->search(
         {
             foreign_body_id => $self->body_id,
             direction       => 'out',
@@ -62,7 +62,7 @@ sub foreign_ships {
 
 sub orbiting_ships {
     my ($self) = @_;
-    return KA->db->resultset('KA::DB::Result::Ships')->search(
+    return KA->db->resultset('Fleet')->search(
         {
             foreign_body_id => $self->body_id,
             task            => { in => ['Defend','Orbiting'] },

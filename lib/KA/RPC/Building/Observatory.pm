@@ -55,7 +55,7 @@ sub get_probed_stars {
     while (my $probe = $probes->next) {
         push @stars, $probe->star->get_status($empire);
     }
-    my $travelling = KA->db->resultset('KA::DB::Result::Ships')->search({ body_id => $building->body_id, type=>'probe', task=>'Travelling' })->count;
+    my $travelling = KA->db->resultset('Fleet')->search({ body_id => $building->body_id, type=>'probe', task=>'Travelling' })->count;
     return {
         stars       => \@stars,
         star_count  => $probes->pager->total_entries,

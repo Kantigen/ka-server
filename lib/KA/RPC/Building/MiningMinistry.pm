@@ -19,7 +19,7 @@ sub view_ships {
     my $session  = $self->get_session({session_id => $session_id, building_id => $building_id });
     my $empire   = $session->current_empire;
     my $building = $session->current_building;
-    my $ships = KA->db->resultset('KA::DB::Result::Ships')->search({ 
+    my $ships = KA->db->resultset('Fleet')->search({ 
         body_id => $building->body_id, 
         task    => { in => ['Mining', 'Docked']},
         type    => { in => [SHIP_TRADE_TYPES] },
@@ -116,7 +116,7 @@ sub add_cargo_ship_to_fleet {
     my $session  = $self->get_session({session_id => $session_id, building_id => $building_id });
     my $empire   = $session->current_empire;
     my $building = $session->current_building;
-    my $ship = KA->db->resultset('KA::DB::Result::Ships')->find($ship_id);
+    my $ship = KA->db->resultset('Fleet')->find($ship_id);
     unless (defined $ship) {
         confess [1002, "Ship not found."];
     }
@@ -143,7 +143,7 @@ sub remove_cargo_ship_from_fleet {
     my $session  = $self->get_session({session_id => $session_id, building_id => $building_id });
     my $empire   = $session->current_empire;
     my $building = $session->current_building;
-    my $ship = KA->db->resultset('KA::DB::Result::Ships')->find($ship_id);
+    my $ship = KA->db->resultset('Fleet')->find($ship_id);
     unless (defined $ship) {
         confess [1002, "Ship not found."];
     }

@@ -46,7 +46,7 @@ sub withdraw {
     my ($self, $body) = @_;
     $body ||= $self->body;
     $self->unload($body,'withdraw'); # set the withdraw flag because mercs get special treatment
-    my $ship = KA->db->resultset('KA::DB::Result::Ships')->find($self->ship_id);
+    my $ship = KA->db->resultset('Fleet')->find($self->ship_id);
     $ship->land->update if defined $ship;
     $body->empire->add_essentia({
         amount  => $self->cost, 

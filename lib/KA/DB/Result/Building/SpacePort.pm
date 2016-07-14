@@ -16,7 +16,7 @@ around 'build_tags' => sub {
 
 sub ships {
     my $self = shift;
-    return KA->db->resultset('KA::DB::Result::Ships')->search({
+    return KA->db->resultset('Fleet')->search({
         body_id     => $self->body_id,  
     });
 }
@@ -35,7 +35,7 @@ sub incoming_fleets {
 
 sub orbiting_ships {
     my ($self) = @_;
-    return KA->db->resultset('KA::DB::Result::Ships')->search(
+    return KA->db->resultset('Fleet')->search(
         {
             foreign_body_id => $self->body_id,
             task            => { in => ['Defend','Orbiting'] },
@@ -107,7 +107,7 @@ sub is_full {
 
 sub find_ship {
     my ($self, $type) = @_;
-    my $ship = KA->db->resultset('KA::DB::Result::Ships')->search({body_id => $self->body_id, task => 'Docked', type => $type} )->first;
+    my $ship = KA->db->resultset('Fleet')->search({body_id => $self->body_id, task => 'Docked', type => $type} )->first;
     unless (defined $ship ) {
         $type =~ s/_/ /g;
         confess [ 1002, 'You do not have enough '.$type.'s.'];

@@ -85,7 +85,7 @@ sub accept_from_market {
     unless (defined $trade) {
         confess [1002, 'Could not find that trade. Perhaps it has already been accepted.',$trade_id];
     }
-    my $offer_ship = KA->db->resultset('KA::DB::Result::Ships')->find($trade->ship_id);
+    my $offer_ship = KA->db->resultset('Fleet')->find($trade->ship_id);
     unless (defined $offer_ship) {
         $trade->withdraw;
         confess [1009, 'Trade no longer available.'];

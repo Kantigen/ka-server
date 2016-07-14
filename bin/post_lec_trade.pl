@@ -300,7 +300,7 @@ sub build_ship
     my $body = shift;
     my $type = shift;
     my %params = @_;
-    my $ship = LD->resultset('Ships')->new({type => $type, %params});
+    my $ship = LD->resultset('Fleet')->new({type => $type, %params});
     $ship->body($body);
     $ship->date_started(DateTime->now);
     $ship->date_available(DateTime->now);

@@ -111,7 +111,7 @@ sub check_payload {
       }
       when ('ship') {
         if ($item->{ship_id}) {
-          my $ship = KA->db->resultset('KA::DB::Result::Ships')->find($item->{ship_id});
+          my $ship = KA->db->resultset('Fleet')->find($item->{ship_id});
           confess $have_exception unless (defined $ship && $self->body_id eq $ship->body_id && $ship->task eq 'Docked');
           push @expanded_items, $item;
           $space_used += 50000;
@@ -123,7 +123,7 @@ sub check_payload {
           confess [1002, 'you must specify a ship_type if you specify a quantity.'] unless $item->{ship_type};
           confess [1002, 'you must specify a hold_size if you specify a quantity.'] unless defined $item->{hold_size};
           confess [1002, 'you must specify a speed if you specify a quantity.'] unless defined $item->{speed};
-          my $ships_rs = KA->db->resultset('KA::DB::Result::Ships')->search({
+          my $ships_rs = KA->db->resultset('Fleet')->search({
                            name        => $item->{name},
                            body_id     => $self->body_id,
                            type        => $item->{ship_type},
@@ -213,7 +213,7 @@ sub structure_payload {
             }
             when ('ship') {
                 if ($item->{ship_id}) {
-                    my $ship = KA->db->resultset('KA::DB::Result::Ships')->find($item->{ship_id});
+                    my $ship = KA->db->resultset('Fleet')->find($item->{ship_id});
                     $ship->task('Waiting On Trade');
                     $ship->update;
                     push @{$payload->{ships}}, $ship->id;

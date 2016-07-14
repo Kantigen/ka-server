@@ -98,7 +98,7 @@ sub add_to_market {
 
 sub trade_ships {
     my $self = shift;
-    return KA->db->resultset('KA::DB::Result::Ships')->search({
+    return KA->db->resultset('Fleet')->search({
         task    => 'Docked',
         type    => 'spy_pod',
         body_id => $self->body_id,

@@ -19,7 +19,7 @@ sub platforms {
 
 sub ships {
     my $self = shift;
-    return KA->db->resultset('KA::DB::Result::Ships')->search({ body_id => $self->body_id, task => 'Mining' });
+    return KA->db->resultset('Fleet')->search({ body_id => $self->body_id, task => 'Mining' });
 }
 
 sub max_platforms {
@@ -52,7 +52,7 @@ sub can_add_platform {
     # ministry count
     my $count = $self->platforms->count;
     unless ($on_arrival) {
-        $count += KA->db->resultset('KA::DB::Result::Ships')->search({type=>'mining_platform_ship', task=>'Travelling',body_id=>$self->body_id})->count;
+        $count += KA->db->resultset('Fleet')->search({type=>'mining_platform_ship', task=>'Travelling',body_id=>$self->body_id})->count;
     }    
     if ($count >= $self->max_platforms) {
         confess [1009, 'Already at the maximum number of platforms allowed at this Ministry level.'];
@@ -61,7 +61,7 @@ sub can_add_platform {
     # asteroid count
     $count = KA->db->resultset('KA::DB::Result::MiningPlatforms')->search({ asteroid_id => $asteroid->id })->count;
     unless ($on_arrival) {
-        $count += KA->db->resultset('KA::DB::Result::Ships')->search({type=>'mining_platform_ship',foreign_body_id => $asteroid->id, task=>'Travelling',body_id=>$self->body_id})->count;
+        $count += KA->db->resultset('Fleet')->search({type=>'mining_platform_ship',foreign_body_id => $asteroid->id, task=>'Travelling',body_id=>$self->body_id})->count;
     }
     if ($asteroid->size <= $count) {
         confess [1010, $asteroid->name.' cannot support any additional mining platforms.'];

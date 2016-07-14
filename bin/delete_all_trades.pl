@@ -23,7 +23,7 @@ my $now = DateTime->now;
 out('Complete all trades in progress, delete all others');
 
 out('Zip all ships to their destination');
-my $ships = $db->resultset('Ships')->search({
+my $ships = $db->resultset('Fleet')->search({
     task => 'Travelling'
 });
 while (my $ship = $ships->next) {

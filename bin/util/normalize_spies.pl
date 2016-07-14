@@ -30,7 +30,7 @@ while (my $offer = $merc_market->next) {
     $offer->withdraw($offer->body);
 }
 my $now = DateTime->now;
-my $spy_pods = $db->resultset('KA::DB::Result::Ships')->search({type => 'spy_pod', task => 'Travelling'});
+my $spy_pods = $db->resultset('Fleet')->search({type => 'spy_pod', task => 'Travelling'});
 my %ship_involved;
 while (my $pod = $spy_pods->next) {
     out('Zooming ship '.$pod->id);

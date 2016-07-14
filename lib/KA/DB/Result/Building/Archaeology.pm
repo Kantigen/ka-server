@@ -157,7 +157,7 @@ sub replace_excav {
         outcome => "Replace",
   };
 # Check to see if excavs available
-  my $avail = KA->db->resultset('KA::DB::Result::Ships')
+  my $avail = KA->db->resultset('Fleet')
                 ->search({type=>'excavator', task=>'Docked',body_id=>$self->body_id});
   my $count = $avail->count;
   if ($count > 0) {
@@ -568,7 +568,7 @@ sub can_add_excavator {
   my $count = $digging;
   my $travel;
   unless ($on_arrival) {
-    $travel = KA->db->resultset('KA::DB::Result::Ships')
+    $travel = KA->db->resultset('Fleet')
                 ->search({type=>'excavator', task=>'Travelling',body_id=>$self->body_id})->count;
     $count += $travel;
   }
@@ -582,7 +582,7 @@ sub can_add_excavator {
   $count = KA->db->resultset('KA::DB::Result::Excavators')
              ->search({ body_id => $body->id, empire_id => $self->body->empire->id })->count;
   unless ($on_arrival) {
-    my $ships = KA->db->resultset('KA::DB::Result::Ships')
+    my $ships = KA->db->resultset('Fleet')
                 ->search( {
                     type=>'excavator',
                     foreign_body_id => $body->id,

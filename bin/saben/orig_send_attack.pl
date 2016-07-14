@@ -36,7 +36,7 @@ out('Loading DB');
 our $db = KA->db;
 our $empires = $db->resultset('Empire');
 our $spies = $db->resultset('Spies');
-our $ships = $db->resultset('Ships');
+our $ships = $db->resultset('Fleet');
 our $targets = $db->resultset('SabenTarget');
 my $config = KA->config;
 

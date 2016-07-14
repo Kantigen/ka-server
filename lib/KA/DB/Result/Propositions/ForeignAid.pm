@@ -28,7 +28,7 @@ before pass => sub {
                 $self->station->spend_ore($self->scratch->{ore_cost});
                 $self->station->spend_water($self->scratch->{water_cost});
                 $self->station->update;
-                my $supply_pod = KA->db->resultset('KA::DB::Result::Ships')->new({
+                my $supply_pod = KA->db->resultset('Fleet')->new({
                     body_id         => $self->station_id,
                     type            => 'supply_pod',
                     hold_size       => $self->scratch->{resource},

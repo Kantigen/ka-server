@@ -82,12 +82,12 @@ sub buildings {
 
 sub ship {
     my $self = shift;
-    $self->resultset('Ships')->find(@_);
+    $self->resultset('Fleet')->find(@_);
 }
 
 sub ships {
     my $self = shift;
-    $self->resultset('Ships')->search(@_);
+    $self->resultset('Fleet')->search(@_);
 }
 
 sub X {

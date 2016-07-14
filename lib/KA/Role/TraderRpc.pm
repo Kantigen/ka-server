@@ -107,7 +107,7 @@ sub get_ships {
     my $session  = $self->get_session({session_id => $session_id, building_id => $building_id });
     my $empire   = $session->current_empire;
     my $building = $session->current_building;
-    my $ships = KA->db->resultset('KA::DB::Result::Ships')->search(
+    my $ships = KA->db->resultset('Fleet')->search(
         {body_id => $building->body_id, task => 'docked'},
         {order_by => [ 'type', 'hold_size', 'speed']}
         );
@@ -135,7 +135,7 @@ sub get_ship_summary {
     my $session  = $self->get_session({session_id => $session_id, building_id => $building_id });
     my $empire   = $session->current_empire;
     my $building = $session->current_building;
-    my $ships = KA->db->resultset('KA::DB::Result::Ships')->search(
+    my $ships = KA->db->resultset('Fleet')->search(
         {body_id => $building->body_id, task => 'docked'},
         {order_by => [ 'type', 'hold_size', 'speed']}
         );

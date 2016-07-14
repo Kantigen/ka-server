@@ -691,7 +691,7 @@ sub get_status {
             push @{$bodies{babies}{$empire->name}{planets}}, $gen_body_info->($planet);
         }
     }
-    my $travelling_ships = $self->db->resultset('Ships')->search({ 
+    my $travelling_ships = $self->db->resultset('Fleet')->search({ 
         type                => { in => [qw(colony_ship short_range_colony_ship)]}, 
         task                => 'travelling', 
         direction           => 'out', 
@@ -1153,7 +1153,7 @@ sub next_colony_cost {
 
         if (not defined $travelling_ships) {
         $count += $travelling_ships;
-            $travelling_ships = $self->db->resultset('Ships')->search(
+            $travelling_ships = $self->db->resultset('Fleet')->search(
                 { type=> { in => [qw(colony_ship short_range_colony_ship)]}, task=>'travelling', direction=>'out', 'body.empire_id' => $self->id},
                 { join => 'body' }
             )->count;
@@ -1172,7 +1172,7 @@ sub next_colony_cost {
             {
                 alliance_id => $self->alliance_id,
             })->get_column('id')->all;
-        $count += $self->db->resultset('Ships')->search(
+        $count += $self->db->resultset('Fleet')->search(
             {
                 type=> 'space_station',
                 task=>'Travelling',

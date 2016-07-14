@@ -335,7 +335,7 @@ sub sell_plan_trade {
 sub get_trade_ship {
     my ($self, $colony) = @_;
 
-    my ($ship) = KA->db->resultset('KA::DB::Result::Ships')->search({
+    my ($ship) = KA->db->resultset('Fleet')->search({
         task    => 'Docked',
         type    => 'galleon',
         body_id => $colony->id,
@@ -408,7 +408,7 @@ sub buy_trade {
         my $trade = KA->db->resultset('KA::DB::Result::Market')->find($best_trade_id);
         return if not defined $trade;
 
-        my $offer_ship = KA->db->resultset('KA::DB::Result::Ships')->find($trade->ship_id);
+        my $offer_ship = KA->db->resultset('Fleet')->find($trade->ship_id);
         return if not defined $offer_ship;
 
         $self->empire->transfer_essentia({
@@ -479,7 +479,7 @@ DEL_COLONY:
 
                    # Send damaged sweepers by preference, leaving undamaged ones to defend!
                    if (@sweepers < $num_sweepers) {
-                       my @ships = KA->db->resultset('KA::DB::Result::Ships')->search({
+                       my @ships = KA->db->resultset('Fleet')->search({
                            type     => 'sweeper',
                            task     => 'Docked',
                            body_id  => $del_colony->id,
@@ -498,7 +498,7 @@ DEL_COLONY:
                        say "    Now got ".scalar(@sweepers)." sweepers";
                    }
                    if (@scows < $num_scows) {
-                       my @ships = KA->db->resultset('KA::DB::Result::Ships')->search({
+                       my @ships = KA->db->resultset('Fleet')->search({
                            type     => 'scow',
                            task     => 'Docked',
                            body_id  => $del_colony->id,
@@ -512,7 +512,7 @@ DEL_COLONY:
                        @scows = (@scows, splice(@ships, 0, $quantity));
                    }
                    if (@snarks < $num_snarks) {
-                       my @ships = KA->db->resultset('KA::DB::Result::Ships')->search({
+                       my @ships = KA->db->resultset('Fleet')->search({
                            type     => {like => "snark%"},
                            task     => 'Docked',
                            body_id  => $del_colony->id,
@@ -645,7 +645,7 @@ sub process_email {
                 my $to_y = $request_empire->home_planet->y;
 
                 # find the closest ship that can fulfill the order
-                my ($ship) = KA::db->resultset('KA::DB::Result::Ships')->search({
+                my ($ship) = KA::db->resultset('Fleet')->search({
                     'body.empire_id'    => -9,
                     task                => 'Docked',
                     type                => 'galleon',

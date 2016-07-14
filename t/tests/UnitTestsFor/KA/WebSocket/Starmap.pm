@@ -72,7 +72,7 @@ sub test_ws_getMapChunk {
     my $job = $queue->peek_ready;
     isnt($job, undef, "Job is ready");
 
-    $queue->use('mq_starmap');
+    $queue->use('bg_starmap');
     my $got_job = $queue->peek_ready;
     isnt($got_job, undef, "Job can be taken off queue");
     my $payload = $got_job->payload;

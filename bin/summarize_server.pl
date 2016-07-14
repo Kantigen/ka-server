@@ -49,7 +49,7 @@ sub generate_overview {
     my $stars       = $db->resultset('Map::Star');
     my $bodies      = $db->resultset('Map::Body');
     my @off_limits  = $bodies->search({empire_id => {'<' => 2}})->get_column('id')->all;
-    my $ships       = $db->resultset('Ships')->search({body_id => { 'not in' => \@off_limits}});
+    my $ships       = $db->resultset('Fleet')->search({body_id => { 'not in' => \@off_limits}});
     my $glyphs      = $db->resultset('Glyph')->search({body_id => { 'not in' => \@off_limits}});
     my $buildings   = $db->resultset('Building')->search({body_id => { 'not in' => \@off_limits}});
     my $empires     = $db->resultset('Empire')->search({id => { '>' => 1}});

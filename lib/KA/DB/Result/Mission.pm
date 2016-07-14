@@ -309,7 +309,7 @@ sub check_objectives {
 
     # fleet movement
     if (exists $objectives->{fleet_movement}) {
-        my $ships = KA->db->resultset('KA::DB::Result::Ships');
+        my $ships = KA->db->resultset('Fleet');
         my $bodies = KA->db->resultset("KA::DB::Result::Map::Body");
         my $stars = KA->db->resultset("KA::DB::Result::Map::Star");
         my $scratch = $self->scratch || {fleet_movement=>[]};
@@ -360,7 +360,7 @@ sub check_objectives {
 sub get_ship_list {
     my ($body, $ship_obj_arr) = @_;
 
-    my $ships = KA->db->resultset('KA::DB::Result::Ships');
+    my $ships = KA->db->resultset('Fleet');
     my @error_msgs;
     my $pass = 1;
 
@@ -486,7 +486,7 @@ sub format_items {
     
     # ships
     undef $item_tmp;
-    my $ships = KA->db->resultset('KA::DB::Result::Ships');
+    my $ships = KA->db->resultset('Fleet');
     foreach my $stats (@{ $items->{ships}}) {
         my $ship = $ships->new({type=>$stats->{type}});
         my $pattern = $is_objective ?

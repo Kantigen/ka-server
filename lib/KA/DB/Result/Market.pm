@@ -34,7 +34,7 @@ __PACKAGE__->add_columns(
 );
 
 __PACKAGE__->belongs_to('body', 'KA::DB::Result::Map::Body', 'body_id');
-__PACKAGE__->belongs_to('ship', 'KA::DB::Result::Ships', 'ship_id'); # TODO Delete after next release
+__PACKAGE__->belongs_to('ship', 'KA::DB::Result::Fleet', 'ship_id'); # TODO Delete after next release
 __PACKAGE__->belongs_to('fleet', 'KA::DB::Result::Fleet', 'fleet_id');
 
 sub sqlt_deploy_hook {

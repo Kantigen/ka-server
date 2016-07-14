@@ -1130,7 +1130,7 @@ sub bugout {
                             $self->from_body->name],
            );
     }
-    my $spy_pod = KA->db->resultset('Ships')->new({
+    my $spy_pod = KA->db->resultset('Fleet')->new({
                     body_id         => $self->from_body_id,
                     type            => 'spy_pod',
                     name            => "Bugout",
@@ -2066,7 +2066,7 @@ sub steal_planet {
                        });
     }
 
-    my $ships = KA->db->resultset('Ships')
+    my $ships = KA->db->resultset('Fleet')
                       ->search({body_id => $self->on_body_id,
                                 task => { '!=' => 'Docked' } });
     while (my $ship = $ships->next) {
@@ -2413,7 +2413,7 @@ sub capture_kidnapper {
 sub abduct_operative {
     my ($self, $defender) = @_;
     my @types;
-    my $ships = KA->db->resultset('Ships');
+    my $ships = KA->db->resultset('Fleet');
     my $ship;
     $ship = $ships->search( { body_id => $self->from_body->id,
                               foreign_body_id => $self->on_body->id,
@@ -2705,7 +2705,7 @@ sub destroy_resources {
 
 sub destroy_out_chain_ship {
     my ($self, $defender) = @_;
-    my $ship = KA->db->resultset('Ships')->search(
+    my $ship = KA->db->resultset('Fleet')->search(
         {body_id => $self->on_body->id,
          task => {'in' => ['Supply Chain', 'Waste Chain'] }},
         { order_by => 'rand()' }
@@ -2745,7 +2745,7 @@ sub destroy_mining_ship {
     my ($self, $defender) = @_;
     my $ministry = $self->on_body->mining_ministry;
     return $self->building_not_found->id unless defined $ministry;
-    my $ship = KA->db->resultset('Ships')->search(
+    my $ship = KA->db->resultset('Fleet')->search(
         {body_id => $self->on_body->id, task => 'Mining'},
         { order_by => 'rand()' }
         )->first;
@@ -2948,7 +2948,7 @@ sub steal_glyph {
 sub steal_ships {
     my ($self, $defender) = @_;
     my @types;
-    my $ships = KA->db->resultset('Ships');
+    my $ships = KA->db->resultset('Fleet');
     foreach my $type (SHIP_TYPES) {
         my $ship = $ships->new({type => $type});
         if ($ship->pilotable) {
@@ -3604,7 +3604,7 @@ sub travel_report {
             $ship->date_available_formatted,
         ];
     }
-    $ships = KA->db->resultset('Ships')->search(
+    $ships = KA->db->resultset('Fleet')->search(
         {body_id => $self->on_body->id,
          task => {'in' => ['Supply Chain', 'Waste Chain'] }},
         );
@@ -3633,7 +3633,7 @@ sub travel_report {
 sub ship_report {
     my ($self, $defender) = @_;
     my $ships = KA->db
-                  ->resultset('Ships')
+                  ->resultset('Fleet')
                   ->search( {body_id => $self->on_body->id,
                              task => 'Docked'});
     my @ships = (['Name', 'Type', 'Speed', 'Hold Size']);
