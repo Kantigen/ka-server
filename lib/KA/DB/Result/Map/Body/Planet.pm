@@ -22,6 +22,7 @@ __PACKAGE__->has_many('glyph','KA::DB::Result::Glyph','body_id');
 __PACKAGE__->has_many('waste_chains', 'KA::DB::Result::WasteChain','planet_id');
 __PACKAGE__->has_many('out_supply_chains', 'KA::DB::Result::SupplyChain','planet_id');
 __PACKAGE__->has_many('in_supply_chains', 'KA::DB::Result::SupplyChain','target_id');
+__PACKAGE__->has_many('body_resources','KA::DB::Result::Resource','body_id');
 
 has plan_cache => (
     is      => 'rw',
@@ -317,23 +318,8 @@ sub sanitize {
         $self->zone ~~ ['1|1','1|-1','-1|1','-1|-1','0|0','0|1','1|0','-1|0','0|-1']) {
         $self->usable_as_starter_enabled(1);
     }
-    my @attributes = qw( happiness_hour happiness waste_hour waste_stored waste_capacity
-        energy_hour energy_stored energy_capacity water_hour water_stored water_capacity ore_capacity
-        rutile_stored chromite_stored chalcopyrite_stored galena_stored gold_stored uraninite_stored bauxite_stored
-        goethite_stored halite_stored gypsum_stored trona_stored kerogen_stored methane_stored anthracite_stored
-        sulfur_stored zircon_stored monazite_stored fluorite_stored beryl_stored magnetite_stored 
-        food_capacity food_consumption_hour lapis_production_hour potato_production_hour apple_production_hour
-        root_production_hour corn_production_hour cider_production_hour wheat_production_hour bread_production_hour
-        soup_production_hour chip_production_hour pie_production_hour pancake_production_hour milk_production_hour
-        meal_production_hour algae_production_hour syrup_production_hour fungus_production_hour burger_production_hour
-        shake_production_hour beetle_production_hour lapis_stored potato_stored apple_stored root_stored corn_stored
-        cider_stored wheat_stored bread_stored soup_stored chip_stored pie_stored pancake_stored milk_stored meal_stored
-        algae_stored syrup_stored fungus_stored burger_stored shake_stored beetle_stored bean_production_hour bean_stored
-        restrict_coverage cheese_production_hour cheese_stored
-    );
-    foreach my $attribute (@attributes) {
-        $self->$attribute(0);
-    }
+    $self->resources->delete;
+    $self->restrict_coverage(0); 
     $self->update;
     return $self;
 }
@@ -350,12 +336,18 @@ before abandon => sub {
 sub get_ore_status {
     my ($self) = @_;
 
+    my $resource_rs = $self->resources;
+    my @types = (ORE_TYPES);
+
     my $out;
-    foreach my $type (ORE_TYPES) {
-        my $arg = "${type}_hour";
-        $out->{$arg} = $self->$arg;
-        $arg = "${type}_stored";
-        $out->{$arg} = $self->$arg;
+    while (my $resource = $resource_rs->next) {
+        my $type = $resource->type;
+        if ($type ~~ \@types) {
+            $out->{"${type}_hour"}          = $resource->production;    # DEPRECATED only for backwards compatibility
+            $out->{"${type}_production"}    = $resource->production;
+            $out->{"${type}_stored"}        = $resource->stored;
+            $out->{"${type}_consumed"}      = $resource->consumed;
+        }
     }
     return $out;
 }
@@ -363,14 +355,19 @@ sub get_ore_status {
 sub get_food_status {
     my ($self) = @_;
 
+    my $resource_rs = $self->resources;
+    my @types = (FOOD_TYPES);
+
     my $out;
-    foreach my $type (FOOD_TYPES) {
-        my $arg = "${type}_production_hour";
-        $out->{"${type}_hour"} = $self->$arg;
-        $arg = "${type}_stored";
-        $out->{$arg} = $self->$arg;
+    while (my $resource = $resource_rs->next) {
+        my $type = $resource->type;
+        if ($type ~~ \@types) {
+            $out->{"${type}_hour"}          = $resource->production;    # DEPRECATED only for backwards compatibility
+            $out->{"${type}_production"}    = $resource->production;
+            $out->{"${type}_stored"}        = $resource->stored;
+            $out->{"${type}_consumed"}      = $resource->consumed;
+        }
     }
-    return $out;
 }
 
 around get_status_lite => sub {

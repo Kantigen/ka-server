@@ -20,9 +20,6 @@ __PACKAGE__->add_columns(
     usable_as_starter_enabled       => { data_type => 'tinyint', default_value => 0 },
     empire_id                       => { data_type => 'int', is_nullable => 1 },
     last_tick                       => { data_type => 'datetime', is_nullable => 0, set_on_create => 1 },
-    happiness_hour                  => { data_type => 'bigint', default_value => 0 },
-    happiness                       => { data_type => 'bigint', default_value => 0 },
-    
     boost_enabled                   => { data_type => 'tinyint', default_value => 0 },
     needs_recalc                    => { data_type => 'tinyint', default_value => 0 },
     needs_surface_refresh           => { data_type => 'tinyint', default_value => 0 },
@@ -133,7 +130,6 @@ __PACKAGE__->belongs_to('alliance', 'KA::DB::Result::Alliance', 'alliance_id', {
 __PACKAGE__->belongs_to('empire', 'KA::DB::Result::Empire', 'empire_id', {join_type => 'left'});
 __PACKAGE__->has_many('_buildings','KA::DB::Result::Building','body_id');
 __PACKAGE__->has_many('foreign_fleets','KA::DB::Result::Fleet','foreign_body_id');
-__PACKAGE__->has_many('fleets','KA::DB::Result::Fleet','body_id');
 
 has building_cache => (
     is      => 'rw',
