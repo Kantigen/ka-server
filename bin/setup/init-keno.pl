@@ -28,6 +28,10 @@ use GD::Image;
 my $config  = KA->config;
 my $db      = KA->db;
 
+KA::SDB->initialize({
+    db  => $db,
+});
+
 # Connect to the Redis Docker image
 #
 my $redis = Redis->new(server => "ka-redis:6379");
@@ -124,7 +128,7 @@ sub setup {
 
     say "Creating database version";
     $db->resultset('DBVersion')->create({
-        major_version   => 2,
+        major_version   => 3,
         minor_version   => 0,
         description     => "Initial version",
     });

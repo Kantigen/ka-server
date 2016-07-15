@@ -116,15 +116,15 @@ __PACKAGE__->belongs_to('alliance',         'KA::DB::Result::Alliance',     'all
 __PACKAGE__->belongs_to('home_planet',      'KA::DB::Result::Map::Body',    'home_planet_id');
 __PACKAGE__->belongs_to('latest_message',   'KA::DB::Result::Message',      'latest_message_id', { on_delete => 'set null' });
 
-__PACKAGE__->has_many('spies',              'KA::DB::Result::Spy',        'empire_id');
+__PACKAGE__->has_many('spies',              'KA::DB::Result::Spy',          'empire_id');
 __PACKAGE__->has_many('planets',            'KA::DB::Result::Map::Body',    'empire_id');
-__PACKAGE__->has_many('propositions',       'KA::DB::Result::Proposition', 'proposed_by_id');
+__PACKAGE__->has_many('propositions',       'KA::DB::Result::Proposition',  'proposed_by_id');
 __PACKAGE__->has_many('votes',              'KA::DB::Result::Vote',         'empire_id');
 __PACKAGE__->has_many('taxes',              'KA::DB::Result::Tax',          'empire_id');
 __PACKAGE__->has_many('sent_messages',      'KA::DB::Result::Message',      'from_id');
 __PACKAGE__->has_many('received_messages',  'KA::DB::Result::Message',      'to_id');
-__PACKAGE__->has_many('medals',             'KA::DB::Result::Medals',       'empire_id');
-__PACKAGE__->has_many('all_probes',         'KA::DB::Result::Probe',       'empire_id');
+__PACKAGE__->has_many('medals',             'KA::DB::Result::Medal',        'empire_id');
+__PACKAGE__->has_many('all_probes',         'KA::DB::Result::Probe',        'empire_id');
 __PACKAGE__->has_many('bodies',             'KA::DB::Result::Map::Body',    'empire_id');
 
 has has_new_messages => (
@@ -393,7 +393,7 @@ sub get_species_stats {
 
 sub has_medal {
     my ($self, $type) = @_;
-    return $self->db->resultset('Medals')->search({empire_id => $self->id, type => $type})->first;
+    return $self->db->resultset('Medal')->search({empire_id => $self->id, type => $type})->first;
 }
 
 sub add_medal {
@@ -404,7 +404,7 @@ sub add_medal {
         $medal->update;
     }
     else {
-        $medal = $self->db->resultset('Medals')->new({
+        $medal = $self->db->resultset('Medal')->new({
             datestamp   => DateTime->now,
             public      => 1,
             empire_id   => $self->id,

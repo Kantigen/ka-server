@@ -64,7 +64,7 @@ sub subsidize_build_queue {
     };
 }
 
-sub subsidize_one_building {
+sub subsidize_one_build {
 
     my ($self, $args) = @_;
 
