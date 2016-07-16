@@ -11,6 +11,8 @@ use POSIX qw(ceil);
 
 use feature "switch";
 
+use experimental 'smartmatch';
+
 with 'KA::Role::Navigation';
 
 sub app_url {
@@ -83,7 +85,7 @@ sub _view_available_fleets {
             };
         }
     }
-        
+
     my %out = (
         status      => $self->format_status($empire),
         $option     => $option eq 'available' ? \@available : \@unavailable,
@@ -102,7 +104,7 @@ sub send_fleet {
     my $body        = $building->body;
 
     $args{arrival_date} = {soonest => 1} if not defined $args{arrival_date};
-    
+
     my $target  = $self->find_target($args{target});
     my $qty     = $args{quantity};
     my $fleet   = KA->db->resultset('Fleet')->find({id => $args{fleet_id}},{prefetch => 'body'});
@@ -125,7 +127,7 @@ sub send_fleet {
     if ($fleet->hostile_action) {
         $empire->current_session->check_captcha;
     }
-    my $new_fleet = $fleet->split($qty); 
+    my $new_fleet = $fleet->split($qty);
 
     if ($args{arrival_date}{soonest}) {
         $new_fleet->send(target => $target);
@@ -240,7 +242,7 @@ sub prepare_send_spies {
     unless ($on_body->empire_id == $to_body->empire_id) {
         $empire->current_session->check_captcha;
     }
-    
+
     my $max_berth = $on_body->max_berth;
     unless ($max_berth) {
         $max_berth = 1;
@@ -248,11 +250,11 @@ sub prepare_send_spies {
 
     my $fleets_rs = KA->db->resultset('Fleet')->search({
         type        => { in => [qw(spy_pod cargo_ship smuggler_ship dory spy_shuttle barge)]},
-        task        => 'Docked', 
+        task        => 'Docked',
         body_id     => $on_body->id,
         berth_level => {'<=' => $max_berth },
     },{
-        order_by    => 'name', 
+        order_by    => 'name',
         rows        => 100,
     });
     my @fleets;
@@ -261,10 +263,10 @@ sub prepare_send_spies {
     }
     # TODO factor out the 'available spies' code
     my $spies = KA->db->resultset('Spy')->search({
-        on_body_id  => $on_body->id, 
+        on_body_id  => $on_body->id,
         empire_id   => $empire->id,
     },{
-        order_by    => 'name', 
+        order_by    => 'name',
         rows        => 100,
     });
     my @spies;
@@ -291,7 +293,7 @@ sub send_spies {
     my $empire      = $session->current_empire;
 
     $args{arrival_date} = {soonest => 1} if not defined $args{arrival_date};
- 
+
     if ($args{to_body_id}) {
         $args{to_body} = { body_id => $args{to_body_id}};
     }
@@ -333,13 +335,13 @@ sub send_spies {
     if ($spies_to_send < 1) {
         confess [1013, "You can't send a fleet with no spies."];
     }
-   
+
     # get the spies
     my @ids_sent;
     my @ids_not_sent;
     my $spies = KA->db->resultset('Spy');
     my $arrives;
-    
+
     if ($args{arrival_date}{soonest}) {
         $arrives = DateTime->now->add(seconds => $fleet->calculate_travel_time($to_body));
     }
@@ -406,11 +408,11 @@ sub prepare_fetch_spies {
 
     my $fleets_rs = KA->db->resultset('Fleet')->search({
         type        => { in => [qw(spy_pod cargo_ship smuggler_ship dory spy_shuttle barge)]},
-        task        => 'Docked', 
+        task        => 'Docked',
         body_id     => $to_body->id,
         berth_level => {'<=' => $max_berth },
     },{
-        order_by    => 'name', 
+        order_by    => 'name',
         rows        => 100,
     });
     my @fleets;
@@ -420,17 +422,17 @@ sub prepare_fetch_spies {
 
     # Get all available spies (is this common enough to code in Spies?)
     my $spies_rs = KA->db->resultset('Spy')->search({
-        on_body_id  => $on_body->id, 
+        on_body_id  => $on_body->id,
         empire_id   => $empire->id,
         -or => [
             task        => { in => [ 'Idle', 'Counter Espionage' ], },
             -and        => [
                 task            => { in => [ 'Unconscious', 'Debriefing' ], },
-                available_on    => { '<' => '\NOW()' }, 
+                available_on    => { '<' => '\NOW()' },
             ],
         ],
         },{
-            order_by    => 'name', 
+            order_by    => 'name',
             rows        => 100,
         }
     );
@@ -443,7 +445,7 @@ sub prepare_fetch_spies {
         }
         last if (scalar @spies >= 100);
     }
-    
+
     return {
         status  => $self->format_status($empire),
         fleets  => \@fleets,
@@ -504,13 +506,13 @@ sub fetch_spies {
     if (not scalar(@{$args{spy_ids}})) {
         confess [1013, "You can't send a fleet to collect no spies."];
     }
-    
+
     # check size
     my $no_of_ships = ceil(scalar(@{$args{spy_ids}}) / $fleet->max_occupants);
     if ($fleet->quantity < $no_of_ships) {
         confess [1013, "The fleet cannot hold the spies selected."];
     }
-    
+
     # send it
     $fleet = $fleet->split($no_of_ships);
     $fleet->send(
@@ -653,7 +655,7 @@ sub _fleet_sort_options {
 }
 
 # View all of your fleets whatever they are doing
-# 
+#
 sub view_all_fleets {
     my ($self, %args) = @_;
 
@@ -754,7 +756,7 @@ sub view_excavators {
     my $empire      = $session->current_empire;
     my $building    = $session->current_building;
     my $body        = $building->body;
-    
+
     my $target      = $self->find_target($args{target});
     my $excavator_rs = KA->db->resultset('Excavator');
     $excavator_rs = $excavator_rs->search({
@@ -784,7 +786,7 @@ sub _view_fleets {
     # see all incoming ships from own empire, or from any alliance member
     # if the target is an allied colony, see all incoming ships dependent upon the highest
     # level of space-port on the target
-    
+
     my $target = $self->find_target($args->{target});
     my $fleet_rs = KA->db->resultset('Fleet');
     my @ally_ids = map {$_->id} $empire->allies;
@@ -1031,4 +1033,3 @@ __PACKAGE__->register_rpc_method_names(qw(
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
-

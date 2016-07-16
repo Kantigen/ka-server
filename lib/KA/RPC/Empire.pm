@@ -20,6 +20,8 @@ use Data::Dumper;
 # logging features are new in this level.
 use JSON::RPC::Dispatcher 0.0508;
 
+use experimental 'smartmatch';
+
 # Add status to the return value
 # (currently it always returns status, we can change this to optionally send this
 # back or not later)
@@ -44,7 +46,7 @@ sub is_name_available {
 
     $self->is_name_valid($args{name});
     $self->is_name_unique($args{name});
-    return { is_name_available => 1 }; 
+    return { is_name_available => 1 };
 }
 
 # Find empires based on their name
@@ -106,7 +108,7 @@ sub logout {
     my ($self, %args) = @_;
 
     my $session_id = $args{session_id};
-    
+
     $self->get_session($session_id)->end;
     return { logout => 1 };
 }
@@ -178,8 +180,8 @@ sub login {
     }
     my $firebase_config = $config->get('firebase');
     if ($firebase_config) {
-        my $auth_code = Firebase::Auth->new( 
-            secret  => $firebase_config->{auth}{secret}, 
+        my $auth_code = Firebase::Auth->new(
+            secret  => $firebase_config->{auth}{secret},
             data    => {
                 uid         => $empire->id,
                 isModerator => $empire->chat_admin  ? \1 : \0,
@@ -219,7 +221,7 @@ sub benchmark {
         confess [1010, "You can't log in to an empire that has not been founded."];
     }
     unless ($empire->is_password_valid($password)) {
-        confess [1004, 'Password incorrect.', $password];            
+        confess [1004, 'Password incorrect.', $password];
     }
     $out{validation} = Time::HiRes::tv_interval($t);
 
@@ -230,7 +232,7 @@ sub benchmark {
     $t = [Time::HiRes::gettimeofday];
     my $home = $empire->home_planet;
     $out{home} = Time::HiRes::tv_interval($t);
-    
+
     $t = [Time::HiRes::gettimeofday];
     $home->tick;
     $out{tick} = Time::HiRes::tv_interval($t);
@@ -238,11 +240,11 @@ sub benchmark {
     $t = [Time::HiRes::gettimeofday];
     $home->command;
     $out{pcc} = Time::HiRes::tv_interval($t);
- 
+
     $t = [Time::HiRes::gettimeofday];
     $self->format_status($session, $home);
     $out{status} = Time::HiRes::tv_interval($t);
- 
+
     return \%out;
 }
 
@@ -302,7 +304,7 @@ sub change_password {
     if ($empire->has_current_session && $empire->current_session->is_sitter) {
         confess [1015, 'Sitters cannot modify the main args password.'];
     }
-    
+
     $empire->password($empire->encrypt_password($password1));
     $empire->update;
 
@@ -333,7 +335,7 @@ sub send_password_reset_message {
     }
     $empire->password_recovery_key(create_uuid_as_string(UUID_V4));
     $empire->update;
-    
+
     my $message = "Use the key or the link below to reset the password for %s.\n\nKey: %s\n\n%s#reset_password=%s";
     $empire->send_email(
         'Reset Your Password',
@@ -365,12 +367,12 @@ sub reset_password {
     KA::Verify->new(content=>\$password1, throws=>[1001,'Invalid password.', $password1])
         ->length_gt(5)
         ->eq($password2);
-    
+
     # reset
     $empire->password($empire->encrypt_password($password1));
     $empire->password_recovery_key('');
     $empire->update;
-    
+
     # authenticate
     my $session = $empire->start_session({ api_key => $api_key, request => $plack_request });
 
@@ -386,7 +388,7 @@ sub create {
         sitter_password     => random_string('CC.c!ccn'),
     );
 
-    # check facebook    
+    # check facebook
     my $has_facebook = (exists $args{facebook_uid} && $args{facebook_uid} =~ m/^\d+$/ && exists $args{facebook_token} && length($args{facebook_token}) > 60);
     if ($has_facebook) {
         $params{facebook_uid}   = $args{facebook_uid};
@@ -405,7 +407,7 @@ sub create {
             ->eq($args{password1});
         $params{password} = KA::DB::Result::Empire->encrypt_password($args{password});
     }
-    
+
     # verify username
     eval { $self->is_name_unique($args{name}) };
     if ($@) { # maybe they're trying to finish an incomplete empire
@@ -426,7 +428,7 @@ sub create {
         else {
             confess [1002, 'Empire has gone away.'];
         }
-    }    
+    }
     $self->is_name_valid($args{name});
     $params{name} = $args{name};
 
@@ -446,7 +448,7 @@ sub create {
 
     # handle invitation
     $empire->attach_invite_code($args{invite_code});
-    
+
     return { empire_id => $empire->id };
 }
 
@@ -522,7 +524,7 @@ sub get_own_profile {
     my $session  = $self->get_session({session_id => $session_id});
     my $empire   = $session->current_empire;
     if ($empire->has_current_session && $empire->current_session->is_sitter) {
-  
+
         confess [1015, 'Sitters cannot modify preferences.'];
     }
     my $medals = $empire->medals;
@@ -579,7 +581,7 @@ sub edit_profile {
 
     my $session  = $self->get_session({session_id => $session_id});
     my $empire   = $session->current_empire;
-    
+
     # preferences
     if ($empire->has_current_session && $empire->current_session->is_sitter) {
         confess [1015, 'Sitters cannot modify preferences.'];
@@ -588,7 +590,7 @@ sub edit_profile {
         KA::Verify->new(content=>\$args->{description}, throws=>[1005,'Description must be less than 1024 characters and cannot contain special characters or profanity.', 'description'])
             ->length_lt(1025)
             ->no_restricted_chars
-            ->no_profanity;  
+            ->no_profanity;
         $empire->description($args->{description});
         if ($empire->tutorial_stage ne 'turing') {
             KA::Tutorial->new(empire=>$empire)->finish;
@@ -598,7 +600,7 @@ sub edit_profile {
         KA::Verify->new(content=>\$args->{notes}, throws=>[1005,'Notes must be less than 1024 characters and cannot contain special characters or profanity.', 'notes'])
             ->length_lt(1025)
             ->no_restricted_chars
-            ->no_profanity;  
+            ->no_profanity;
         $empire->notes($args->{notes});
     }
     if (exists $args->{status_message}) {
@@ -755,13 +757,13 @@ sub edit_profile {
         }
         $empire->email($args->{email});
     }
-    $empire->update;    
+    $empire->update;
 
     # medals
     if (exists $args->{public_medals}) {
         unless (ref $args->{public_medals} eq  'ARRAY') {
             confess [1009, 'Medals list needs to be an array reference.', 'public_medals'];
-        }    
+        }
         my $medals = $empire->medals;
         while (my $medal = $medals->next) {
             if ($medal->id ~~ $args->{public_medals}) {
@@ -774,7 +776,7 @@ sub edit_profile {
             }
         }
     }
-    
+
     return $self->get_profile($empire);
 }
 
@@ -1003,7 +1005,7 @@ sub invite_friend {
     else {
         confess [1009, 'Could not read the address(es) entered. Perhaps you formatted something incorrectly?', $addresses];
     }
-    my $out = { 
+    my $out = {
         sent        => \@sent,
         not_sent    => \@not_sent,
     };
@@ -1021,12 +1023,12 @@ sub vet_species {
         ->no_restricted_chars
         ->no_profanity;
 
-    # and the description        
+    # and the description
     KA::Verify->new(content=>\$args->{description}, throws=>[1005,'Description invalid.', 'description'])
         ->length_lt(1025)
         ->no_restricted_chars
-        ->no_profanity;  
-    
+        ->no_profanity;
+
     # how about orbits
     unless ($args->{min_orbit} >= 1 && $args->{min_orbit} <= 7 && $args->{min_orbit} <= $args->{max_orbit}) {
         confess [1009, 'Minimum orbit must be between 1 and 7 and less than or equal to maximum orbit.','min_orbit'];
@@ -1034,7 +1036,7 @@ sub vet_species {
     unless ($args->{max_orbit} >= 1 && $args->{max_orbit} <= 7 && $args->{max_orbit} >= $args->{min_orbit}) {
         confess [1009, 'Maximum orbit must be between 1 and 7 and greater than or equal to minimum orbit.','min_orbit'];
     }
- 
+
     # deal with point allocation
     my $points = $args->{max_orbit} - $args->{min_orbit} + 1;
     foreach my $attr (qw(manufacturing_affinity deception_affinity research_affinity management_affinity farming_affinity mining_affinity science_affinity environmental_affinity political_affinity trade_affinity growth_affinity)) {
@@ -1057,7 +1059,7 @@ sub vet_species {
 
 sub get_redefine_species_limits {
     my ($self, %args) = @_;
-    
+
     my $session_id = $args{session_id};
 
     my $session = $self->get_session({session_id => $session_id});
@@ -1091,15 +1093,15 @@ sub redefine_species {
     if ($args{growth_affinity} < $limits->{min_growth}) {
         confess [1009, 'Your minimum growth affinity is '.$limits->{min_growth}.'.'];
     }
-    
+
     $empire->spend_essentia({
-        amount  => 100, 
+        amount  => 100,
         reason  => 'redefine species',
     });
     $empire->update_species(%args);
     $empire->update;
     $empire->planets->update({needs_recalc=>1});
-    
+
     my $out = { redefine_species => 1 };
     return $self->append_status($session, $out, \%args);
 }
@@ -1142,7 +1144,7 @@ sub get_species_stats {
     my $session_id = $args{session_id};
     my $session  = $self->get_session({session_id => $session_id});
     my $empire   = $session->current_empire;
-    
+
     my $out = { species => $empire->get_species_stats };
     return $self->append_status($session, $out, \%args);
 }
@@ -1374,7 +1376,7 @@ sub deauthorize_sitters {
     my $dtf = KA->db->storage->datetime_parser;
     my $now = $dtf->format_datetime(DateTime->now);
     my $rs = KA->db->resultset('SitterAuth');
-    
+
     if (defined $opts->{empires}) {
         confess [1009, "The 'empires' option must be an array of empire IDs"]
             unless ref $opts->{empires} eq 'ARRAY'
@@ -1456,7 +1458,7 @@ __PACKAGE__->register_rpc_method_names(
     is_name_available
     logout
     get_full_status get_status
-    boost get_boosts    
+    boost get_boosts
     get_authorized_sitters authorize_sitters deauthorize_sitters
     ),
 );
@@ -1464,4 +1466,3 @@ __PACKAGE__->register_rpc_method_names(
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
-

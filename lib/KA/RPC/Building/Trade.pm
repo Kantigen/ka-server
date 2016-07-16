@@ -9,6 +9,8 @@ use Guard;
 use List::Util qw(first);
 use KA::Constants qw(FOOD_TYPES ORE_TYPES SHIP_WASTE_TYPES SHIP_TRADE_TYPES);
 
+use experimental 'switch';
+
 with 'KA::Role::TraderRpc','KA::Role::Fleet::Trade','KA::Role::Navigation';
 
 sub app_url {
@@ -120,12 +122,12 @@ sub accept_from_market {
 
     $empire->spend_essentia($trade->ask, 'Trade Price', 0, $trade->body->empire->id, $trade->body->empire->name )->update;
     $trade->body->empire->add_essentia($trade->ask, 'Trade Income', 0, $empire->id, $empire->name)->update;
-    
+
     $offer_fleet->send(
         target  => $body,
         payload => $trade->payload,
     );
-    
+
     $trade->body->empire->send_predefined_message(
         tags        => ['Trade','Alert'],
         filename    => 'trade_accepted.txt',
@@ -183,7 +185,7 @@ sub add_fleet_to_supply_duty {
         confess [1009, "You don't have a high enough berth for this fleet."];
     }
     $fleet = $fleet->split($quantity);
-    
+
     $building->add_fleet_to_supply_duty($fleet);
     return {
         status  =>$self->format_status($session, $building->body),
@@ -837,34 +839,33 @@ sub withdraw_from_market {
 }
 
 __PACKAGE__->register_rpc_method_names(qw(
-    get_supply_fleetss 
-    view_supply_chains 
-    add_supply_fleet 
-    remove_supply_fleet 
-    create_supply_chain 
-    delete_supply_chain 
-    update_supply_chain 
-    get_waste_fleets 
-    view_waste_chains 
-    add_waste_fleet 
-    remove_waste_fleet 
-    update_waste_chain 
-    report_abuse 
-    view_my_market 
-    view_market 
-    accept_from_market 
-    withdraw_from_market 
-    add_to_market 
-    push_items 
-    get_trade_fleets 
-    get_stored_resources 
-    get_fleets 
+    get_supply_fleetss
+    view_supply_chains
+    add_supply_fleet
+    remove_supply_fleet
+    create_supply_chain
+    delete_supply_chain
+    update_supply_chain
+    get_waste_fleets
+    view_waste_chains
+    add_waste_fleet
+    remove_waste_fleet
+    update_waste_chain
+    report_abuse
+    view_my_market
+    view_market
+    accept_from_market
+    withdraw_from_market
+    add_to_market
+    push_items
+    get_trade_fleets
+    get_stored_resources
+    get_fleets
     get_fleet_summary
-    get_prisoners 
-    get_plan_summary 
+    get_prisoners
+    get_plan_summary
     get_glyph_summary
 ));
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
-

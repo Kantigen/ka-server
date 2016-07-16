@@ -11,6 +11,8 @@ use List::Util qw(none);
 use PerlX::Maybe qw(provided);
 use Time::HiRes qw(usleep);
 
+use experimental 'smartmatch';
+
 # This function basically handles all the "or baby" logic for
 # messages.  Can be further refined by the caller with extra ->search
 # calls, but this should keep any caller from accidentally reaching
@@ -466,4 +468,3 @@ __PACKAGE__->register_rpc_method_names(qw(view_inbox view_archived view_trashed 
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
-

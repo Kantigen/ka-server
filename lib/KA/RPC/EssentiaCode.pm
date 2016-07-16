@@ -7,6 +7,8 @@ extends 'KA::RPC';
 use DateTime;
 use UUID::Tiny ':std';
 
+use experimental 'smartmatch';
+
 sub verify_key {
     my ($self, $key) = @_;
     return $key ~~ KA->config->get('server_keys') ? 1 : 0;
@@ -45,4 +47,3 @@ __PACKAGE__->register_rpc_method_names(
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
-

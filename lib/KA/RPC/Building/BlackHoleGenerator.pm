@@ -7,6 +7,8 @@ use List::Util qw(shuffle);
 use KA::Util qw(randint random_element commify);
 use KA::Constants qw(FOOD_TYPES ORE_TYPES);
 
+use experimental 'smartmatch';
+
 sub app_url {
     return '/blackholegenerator';
 }
@@ -22,7 +24,7 @@ around 'view' => sub {
     my $building = $session->current_building;
     my $out = $orig->($self, $session, $building);
     my $body = $building->body;
-    
+
     my $throw = 0; my $reason = '';
     ($throw, $reason) = check_bhg_neutralized($body, $empire);
     if ($throw > 0) {
@@ -52,12 +54,12 @@ around 'view' => sub {
         my @tasks = bhg_tasks($building);
         $out->{tasks} = \@tasks;
     }
-    
+
     my @zones = KA->db->resultset('Map::Star')->search(
         undef,
         { distinct => 1 }
     )->get_column('zone')->all;
-    
+
     $out->{task_options} = {
         asteroid_types => [ 1 .. KA::DB::Result::Map::Body->asteroid_types ],
         planet_types   => [ 1 .. KA::DB::Result::Map::Body->planet_types ],
@@ -133,7 +135,7 @@ sub find_target {
                     {
                         x => { '>=' => ($target_params->{x} -2),
                                '<=' => ($target_params->{x} +2)
-                              }, 
+                              },
                         y => { '>=' => ($target_params->{y} -2),
                                '<=' => ($target_params->{y} +2)
                               }
@@ -172,7 +174,7 @@ sub find_target {
         my @stations;
         my @stars;
         if ($empire->alliance_id) {
-            @stations = $db->resultset('Map::Body')->search( 
+            @stations = $db->resultset('Map::Body')->search(
                 {
                     'me.alliance_id' => $empire->alliance_id,
                 },
@@ -299,7 +301,7 @@ sub get_actions_for {
 
 sub task_chance {
     my ($building, $target, $target_type, $task) = @_;
-    
+
     my $dist; my $target_id;
     my $range = $task->{range};
     my $body = $building->body;
@@ -376,7 +378,7 @@ sub task_chance {
     }
     $return->{success} = (100 - $task->{base_fail}) - int( ($dist/$range) * (99-$task->{base_fail})+0.5);
     $return->{success} = 0 if $return->{success} < 1;
-    
+
     my $bhg_param = KA->config->get('bhg_param');
     if ($bhg_param) {
         $return->{waste_cost}  = $bhg_param->{waste_cost}  if ($bhg_param->{waste_cost});
@@ -393,9 +395,9 @@ sub task_chance {
         $return->{success} = 0;
         return $return;
     }
-    
+
     $return->{essentia_cost} = $return->{success} ? int($task->{subsidy_mult} * 2000 / $return->{success})/10 : 0;
-    
+
     return $return;
 }
 
@@ -669,7 +671,7 @@ sub check_starter_zone {
 sub generate_singularity {
     my $self  = shift;
     my $args  = shift;
-    
+
     if (ref($args) ne "HASH") {
         $args = {
             session_id    => $args,
@@ -684,11 +686,11 @@ sub generate_singularity {
     my $building = $session->current_building;
     my $task_name = $args->{task_name};
     my $subsidize = $args->{subsidize};
-    
+
     my $body                   = $building->body;
     my ($target, $target_type) = $self->find_target($empire, $args->{target});
     my $effect                 = {};
-    
+
     my $return_stats = {};
     if ($building->is_working) {
         confess [1010, 'The Black Hole Generator is cooling down from the last use.'];
@@ -870,7 +872,7 @@ sub generate_singularity {
             confess [1009, sprintf("%s can not be moved without tearing apart from the fissure on it.", $body->name) ];
         }
     }
-    
+
     $body->spend_waste($task->{waste_cost})->update;
     my $work_ends = DateTime->now;
     $work_ends->add(seconds => $task->{recovery});
@@ -1200,7 +1202,7 @@ sub generate_singularity {
         });
         $empire->update;
     }
-    
+
     return {
         status => $self->format_status($session, $body),
         effect => $effect,
@@ -1214,9 +1216,9 @@ sub qualify_moving_sys {
     my $current_empire = $current_body->empire;
     my $ceid = $current_empire->id;
     my $caid = $current_empire->alliance_id;
-    
+
     my $bodies = KA->db->resultset('Map::Body')->search({star_id => [ $current_star->id, $target_star->id]});
-    
+
     while (my $body = $bodies->next) {
         if (defined($body->empire)) {
             my $body_empire = $body->empire;
@@ -1241,10 +1243,10 @@ sub bhg_move_system {
     my ($building, $target_star) = @_;
     my $current_body = $building->body;
     my $current_star = $current_body->star;
-    
+
     my $current_bodies = make_orbit_array($current_star);
     my $target_bodies  = make_orbit_array($target_star);
-    
+
     my $return_stats = {};
     my @orbiting;
     my @recalcs;
@@ -1294,7 +1296,7 @@ sub bhg_move_system {
 
 sub target_orbit {
     my ($star, $orbit) = @_;
-    
+
     my $x = $star->x;
     my $y = $star->y;
     my $offset = [
@@ -1375,7 +1377,7 @@ sub bhg_swap {
         star_id => $new_data->{star_id},
         orbit   => $new_data->{orbit},
     });
-    
+
     unless ($new_data->{type} eq "empty") {
         $target->update({
             needs_recalc => 1,
@@ -1512,7 +1514,7 @@ sub bhg_swap {
         recalc_incoming_supply($body);
         $body->update({needs_recalc => 1});
     }
-    
+
     return {
         id       => $body->id,
         message  => "Swapped Places",
@@ -1566,7 +1568,7 @@ sub bhg_make_planet {
         $class = 'KA::DB::Result::Map::Body::Planet::P'.randint(1,KA::DB::Result::Map::Body->planet_types);
         $size  = 30;
     }
-    
+
     $body->update({
         class                     => $class,
         size                      => $size,
@@ -1901,10 +1903,10 @@ sub bhg_self_destruct {
         name      => $body->name,
     };
     $body->waste_stored(0);
-    
+
     # yes, ->level, not ->effective_level
     for (1..$building->level) {
-        my ($placement) = 
+        my ($placement) =
             sort {
                 $b->efficiency <=> $a->efficiency ||
                 rand() <=> rand()
@@ -1913,7 +1915,7 @@ sub bhg_self_destruct {
                 ($_->class ne 'KA::DB::Result::Building::Permanent::Crater') and
                 ($_->class ne 'KA::DB::Result::Building::DeployedBleeder')
             } @{$body->building_cache};
-        
+
         last unless defined($placement);
         my $amount = randint(10, 100);
         $placement->spend_efficiency($amount)->update;
@@ -2002,7 +2004,7 @@ sub bhg_resource {
     # If -1 deduct resources, if 0 randomize, if 1 add
     my @food = map { $_.'_stored' } FOOD_TYPES;
     my @ore  = map { $_.'_stored' } ORE_TYPES;
-    
+
     my $return = {
         variance  => $variance,
         id        => $body->id,
@@ -2091,7 +2093,7 @@ sub bhg_resource {
 
 sub rand_perc {
     my ($num) = @_;
-    
+
     my @arr;
     for (1..100) {
         $arr[randint(0,$num)]++;
@@ -2374,14 +2376,14 @@ sub subsidize_cooldown {
     unless ($building->is_working) {
         confess [1010, "BHG is not in cooldown mode."];
     }
-    
+
     unless ($empire->essentia >= 2) {
         confess [1011, "Not enough essentia."];
     }
-    
+
     $building->finish_work->update;
     $empire->spend_essentia({
-        amount  => 2, 
+        amount  => 2,
         reason  => 'BHG cooldown subsidy after the fact',
     });
     $empire->update;
@@ -2393,4 +2395,3 @@ __PACKAGE__->register_rpc_method_names(qw(generate_singularity get_actions_for s
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
-

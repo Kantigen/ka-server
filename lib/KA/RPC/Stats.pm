@@ -6,6 +6,8 @@ no warnings qw(uninitialized);
 extends 'KA::RPC';
 use KA::Constants qw(SHIP_TYPES);
 
+use experimental 'smartmatch';
+
 sub credits {
     return [
             { 'Game Design'         => ['JT Smith','Jamie Vrbsky']},
@@ -237,7 +239,7 @@ sub spy_rank {
         spies       => \@spies,
     };
 }
-    
+
 sub weekly_medal_winners {
     my ($self, $session_id) = @_;
     my $session  = $self->get_session({session_id => $session_id });
@@ -258,10 +260,9 @@ sub weekly_medal_winners {
         winners       => \@winners,
     };
 }
-    
+
 
 __PACKAGE__->register_rpc_method_names(qw(weekly_medal_winners spy_rank colony_rank find_empire_rank empire_rank credits alliance_rank find_alliance_rank));
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
-

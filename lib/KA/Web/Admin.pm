@@ -13,6 +13,8 @@ use List::Util qw(sum);
 use Data::Dumper;
 use LWP::UserAgent;
 
+use experimental 'switch';
+
 sub www_send_test_message {
     my ($self, $request, $id) = @_;
     $id ||= $request->param('empire_id');
@@ -464,7 +466,7 @@ sub www_view_buildings {
         $out .= sprintf('<form method="post" action="/admin/delete/building">');
         $out .= sprintf('<input type="hidden" name="building_id" value="%s"/>', $building->id);
         $out .= sprintf('<td><input type="submit" value="delete"/></td></form></tr>');
-    }   
+    }
     $out .= '</table>';
     $out .= '<h2>Add Building</h2>';
     $out .= '<p>This costs no resources or plans, and bypasses normal restrictions ';
@@ -536,7 +538,7 @@ sub www_set_efficiency {
     my $body = KA->db->resultset('Map::Body')->find($building->body_id);
     my $x = $request->param('x');
     my $y = $request->param('y');
-    
+
     # is the building being moved?
     if ( $x != $building->x || $y != $building->y ) {
         # check the plot lock
@@ -549,7 +551,7 @@ sub www_set_efficiency {
         # is the plot empty?
         $body->check_for_available_build_space( $x, $y );
     }
-    
+
     $building->update({
         efficiency      => $request->param('efficiency'),
         x               => $x,
@@ -588,10 +590,10 @@ sub www_view_fleets {
             $out .= sprintf('<td>%s<br>%s (%d, %d)<form method="post" action="/admin/recall/fleet"><input type="hidden" name="fleet_id" value="%s"><input type="hidden" name="body_id" value="%s"><input type="submit" value="recall"></form></td>', $fleet->task, $target->name, $target->x, $target->y, $fleet->id, $body_id);
         }
         elsif ($fleet->task ne 'Docked') {
-            $out .= sprintf('<td>%s<form method="post" action="/admin/dock/fleet"><input type="hidden" name="fleet_id" value="%s"><input type="hidden" name="body_id" value="%s"><input type="submit" value="dock" onclick="return confirm(\'Doing this without knowing the implications can cause unintended side effects. Are you sure?\');"></form></td>', $fleet->task, $fleet->id, $body_id);            
+            $out .= sprintf('<td>%s<form method="post" action="/admin/dock/fleet"><input type="hidden" name="fleet_id" value="%s"><input type="hidden" name="body_id" value="%s"><input type="submit" value="dock" onclick="return confirm(\'Doing this without knowing the implications can cause unintended side effects. Are you sure?\');"></form></td>', $fleet->task, $fleet->id, $body_id);
         }
         else {
-            $out .= sprintf('<td>%s</td>', $fleet->task);            
+            $out .= sprintf('<td>%s</td>', $fleet->task);
         }
         $out .= sprintf('<form method="post" action="/admin/delete/fleet"><td><input type="hidden" name="fleet_id" value="%s"><input type="hidden" name="body_id" value="%s"><input type="submit" value="delete"></td></form></tr>', $fleet->id, $body_id);
     }
@@ -770,7 +772,7 @@ sub www_delete_plan {
         and $_->class               eq $request->param('class')
         and $_->extra_build_level   == $request->param('extra')
     } @{$body->plan_cache};
-    
+
     if (not defined $plan) {
         confess [404, 'Plan not found.'];
     }
@@ -795,7 +797,7 @@ sub www_recalc_body {
 
 sub format_paginator {
     my ($self, $method, $key, $value, $page_number) = @_;
-    
+
     return $self->format_complex_paginator( $method, { $key => $value }, $page_number );
 }
 
@@ -953,7 +955,7 @@ sub www_view_empire {
             sprintf('<a href="/admin/view/empire?id=%d">%s</a> (%s)', $_->id, $_->name, $_->id )
         }
         map  { $_->invitee }
-        grep { $_->invitee_id } 
+        grep { $_->invitee_id }
             $invites_sent->all;
     $out .= '</td></tr>';
     $out .= '<tr><th>Invite Accepted From</th><td>';
@@ -1177,7 +1179,7 @@ sub www_add_essentia {
         confess [404, 'Empire not found.'];
     }
     $empire->add_essentia({
-        amount  => $request->param('amount'), 
+        amount  => $request->param('amount'),
         reason  => $request->param('description'),
         type    => 'free',
     });
@@ -1245,15 +1247,15 @@ sub www_view_virality {
             next;
         }
         push @dates, $day->date_stamp->month.'/'.$day->date_stamp->day;
-        
+
         # users chart
         push @users, $day->total_users;
         $max_users = $users[-1] if ($max_users < $users[-1]);
-        
+
         # stay chart
         push @stay, $day->active_duration / (60 * 60 * 24);
         $max_stay = $stay[-1] if ($max_stay < $stay[-1]);
-        
+
         # viral chart
         push @vc, sprintf('%.0f', ($day->accepts / $previous->total_users) * 100);
         $max_viral = $vc[-1] if ($max_viral < $vc[-1]);
@@ -1261,7 +1263,7 @@ sub www_view_virality {
         $max_viral = $gr[-1] if ($max_viral < $gr[-1]);
         push @cr, sprintf('%.0f', ($day->deletes / $previous->total_users) * 100);
         $max_viral = $cr[-1] if ($max_viral < $cr[-1]);
-        
+
         # change chart
         push @accepts, $day->accepts;
         $max_change = $accepts[-1] if ($max_change < $accepts[-1]);
@@ -1273,10 +1275,10 @@ sub www_view_virality {
         $max_change = $creates[-1] if ($max_change < $creates[-1]);
         push @abandons, $day->abandons;
         $max_change = $abandons[-1] if ($max_change < $abandons[-1]);
-        
+
         $previous = $day;
     }
-    
+
     my $users_chart = 'http://chart.apis.google.com/chart?chxr=1,0,'.$max_users
         .'&chxt=x,y&chds=0,'.$max_users
         .'&chdl=Users&chf=bg,s,014986&chxs=0,ffffff|1,ffffff&chls=3&chxtc=1,-900&chs=900x300&cht=ls&chco=ffffff&chd=t:'
@@ -1317,7 +1319,7 @@ sub www_view_virality {
         )
         .'&chxl='
         .join('|', '0:', @dates);
-    
+
     my $avg_vc = sprintf('%.2f', sum(@vc) / 100 / scalar(@vc));
     my $avg_gr = sprintf('%.2f', sum(@gr) / 100 / scalar(@gr));
     my $avg_cr = sprintf('%.2f', sum(@cr) / 100 / scalar(@cr));
@@ -1328,7 +1330,7 @@ sub www_view_virality {
             <span style="font-size: 12px;">Viral Coefficient</span><br>
             <span style="font-size: 100px;">'.$avg_vc.'</span>
         </div>
-        
+
         <div style="margin: 10px; text-align: center; float: left; border: 3px solid #ffb400;">
             <span style="font-size: 12px;">Growth Rate</span><br>
             <span style="font-size: 100px;">'.$avg_gr.'</span>
@@ -1340,22 +1342,22 @@ sub www_view_virality {
         </div>
         <div style="clear: both"></div>
         <img src="'.$viral_chart.'" alt="viral chart">
-        
+
         <br>
         <h2>Change</h2>
         <img src="'.$change_chart.'" alt="change chart">
-        
+
         <br>
         <h2>Total Users</h2>
         <img src="'.$users_chart.'" alt="users chart">
-        
+
         <br>
         <h2>Stay</h2>
         <img src="'.$stay_chart.'" alt="users chart">
-        
+
         </div>
     ';
-    
+
     return $self->wrap($out);
 }
 
@@ -1366,7 +1368,7 @@ sub www_view_economy {
 
     my $dt_formatter = KA->db->storage->datetime_parser;
     my (@dates, $previous, @arpu, $max_purchases, @p30, @p100, @p200, @p600, @p1300, $max_revenue, @revenue, @r30, @r100, @r200, @r600, @r1300);
-    my ($max_out, @out_boost, @out_mission, @out_recycle, @out_ship, @out_spy, @out_glyph, @out_party, @out_building, @out_trade, @out_delete, @out_other);        
+    my ($max_out, @out_boost, @out_mission, @out_recycle, @out_ship, @out_spy, @out_glyph, @out_party, @out_building, @out_trade, @out_delete, @out_other);
     my ($max_in, @in_mission, @in_purchase, @in_trade, @in_redemption, @in_vein, @in_vote, @in_tutorial, @in_other);
     my $past30 = KA->db->resultset('Log::Economy')->search({date_stamp => { '>=' => $dt_formatter->format_datetime(DateTime->now->subtract(days => 31))}}, { order_by => 'date_stamp'});
     while (my $day = $past30->next) {
@@ -1457,12 +1459,12 @@ sub www_view_economy {
         $sum_out += $out_delete[-1];
         push @out_mission, $day->out_mission;
         $sum_out += $out_mission[-1];
-        push @out_other, $day->out_other;        
+        push @out_other, $day->out_other;
         $sum_out += $out_other[-1];
         $max_out = $sum_out if ($max_out < $sum_out);
 
     }
-    
+
     my $in_chart = 'http://chart.apis.google.com/chart?chxr=1,0,'.$max_in
         .'&chxt=x,y&chds=0,'.$max_in.',0,'.$max_in.',0,'.$max_in.',0,'.$max_in.',0,'.$max_in.',0,'.$max_in.',0,'.$max_in.',0,'.$max_in
         .'&chdl=Purchased|Trade|Redemption|Vein|Vote|Tutorial|Mission|Other&chf=bg,s,014986&chxs=0,ffffff|1,ffffff&chls=3|3|3|3|3|3|3|3&chxtc=1,-900&chs=900x300'
@@ -1540,26 +1542,26 @@ sub www_view_economy {
         <h2>Revenue</h2>
         <img src="'.$revenue_chart.'" alt="revenue chart">
         <br>
-        
+
         <h2>User Purchases</h2>
         <img src="'.$purchases_chart.'" alt="purchases chart">
         <br>
-        
+
         <h2>Average Revenue Per User</h2>
         <img src="'.$arpu_chart.'" alt="arpu chart">
         <br>
-        
+
         <h2>Essentia Spent</h2>
         <img src="'.$out_chart.'" alt="out chart">
         <br>
-        
+
         <h2>Essentia Earned</h2>
         <img src="'.$in_chart.'" alt="in chart">
         <br>
-        
+
         </div>
     ';
-    
+
     return $self->wrap($out);
 }
 
@@ -1575,7 +1577,7 @@ sub www_default {
         <li><a href="/api/">API</a></li>
         <li><a href="http://www.lacunaexpanse.com/">KA Web Site</a></li>
         </ul>
-        
+
         <fieldset><legend>Announcement</legend>
         <form method="post" action="/admin/change/announcement">
         <textarea name="message" rows="10" cols="80">'.$announcement.'</textarea><br>
@@ -1641,8 +1643,8 @@ sub www_delambert {
         $scratchpad->{sell_max_plan_trades_in_zone}   = $request->param('sell_max_plan_trades_in_zone');
         $scratch->pad($scratchpad);
         $scratch->update;
-    }   
-    my $out = ''; 
+    }
+    my $out = '';
     my $bodies = KA->db->resultset('Map::Body')->search({
             empire_id => -9,
         },
@@ -1717,7 +1719,7 @@ sub www_delambert_war {
     } @ai_defence;
 
     # If the AI attacks, we just care about when the AI wins the attack
-    my %attack  = map { 
+    my %attack  = map {
         $_->defending_empire_id => {
             attack_victories    => $_->attack_victories,
             defense_victories   => $_->defense_victories,
@@ -1829,4 +1831,3 @@ sub wrap {
 
 no Moose;
 __PACKAGE__->meta->make_immutable(inline_constructor => 0);
-

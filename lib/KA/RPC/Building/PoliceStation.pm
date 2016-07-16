@@ -3,6 +3,8 @@ package KA::RPC::Building::PoliceStation;
 use Moose;
 use utf8;
 no warnings qw(uninitialized);
+use experimental 'smartmatch';
+
 extends 'KA::RPC::Building';
 
 sub app_url {
@@ -250,4 +252,3 @@ __PACKAGE__->register_rpc_method_names(qw(view_prisoners view_foreign_spies exec
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
-

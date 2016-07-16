@@ -14,6 +14,7 @@ use Carp;
 use Data::Dumper;
 
 use feature 'switch';
+use experimental 'switch';
 
 extends 'KA::RPC';
 
@@ -54,11 +55,11 @@ sub abandon {
     my $session = $self->get_session({session_id => $session_id, body_id => $body_id});
     my $empire = $session->current_empire;
     my $body   = $session->current_body;
-    if ($body->isa('KA::DB::Result::Map::Body::Planet::Station')) { 
+    if ($body->isa('KA::DB::Result::Map::Body::Planet::Station')) {
         my $proposition = KA->db->resultset('Proposition')->new({
             type            => 'AbandonStation',
             name            => 'Abandon Station',
-            description     => 'Abandon the station named {Planet '.$body->id.' '.$body->name.'}.',            
+            description     => 'Abandon the station named {Planet '.$body->id.' '.$body->name.'}.',
             proposed_by_id  => $empire->id,
         });
         $proposition->station($body);
@@ -80,7 +81,7 @@ sub rename {
         ->no_profanity
         ->no_padding
         ->not_ok(KA->db->resultset('Map::Body')->search({name=>$name, 'id'=>{'!='=>$body_id}})->count); # name available
-    
+
     my $session = $self->get_session({session_id => $session_id, body_id => $body_id});
     my $empire = $session->current_empire;
     my $body   = $session->current_body;
@@ -93,7 +94,7 @@ sub rename {
             type            => 'RenameStation',
             name            => 'Rename Station',
             scratch         => { name => $name },
-            description     => 'Rename the station from {Planet '.$body->id.' '.$body->name.'} to "'.$name.'".',            
+            description     => 'Rename the station from {Planet '.$body->id.' '.$body->name.'} to "'.$name.'".',
             proposed_by_id  => $empire->id,
         });
         $proposition->station($body);
@@ -144,7 +145,7 @@ sub repair_list {
     if (scalar @$building_ids > 121) {
         confess [1002, 'Invalid number of buildings in argument.'];
     }
-    
+
     if ($body->needs_surface_refresh) {
         $body->needs_surface_refresh(0);
         $body->update;
@@ -435,7 +436,7 @@ sub get_buildable {
     my $session = $self->get_session({session_id => $session_id, body_id => $body_id});
     my $empire = $session->current_empire;
     my $body   = $session->current_body;
-    
+
     my $building_rs = KA->db->resultset('Building');
 
     $body->check_for_available_build_space($x, $y);
@@ -453,13 +454,13 @@ sub get_buildable {
 
     my %out;
     my @buildable = BUILDABLE_CLASSES;
-    
+
     # build queue
     my $dev = $body->development;
     my $max_items_in_build_queue = $body->build_queue_size;
     my $items_in_build_queue = $body->build_queue_length;
-    
-    if ($body->isa('KA::DB::Result::Map::Body::Planet::Station')) { 
+
+    if ($body->isa('KA::DB::Result::Map::Body::Planet::Station')) {
         @buildable = ();
         $max_items_in_build_queue = 99;
     }
@@ -616,4 +617,3 @@ __PACKAGE__->register_rpc_method_names(qw(
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
-

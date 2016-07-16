@@ -5,6 +5,8 @@ use feature "switch";
 use KA::Constants qw(ORE_TYPES FOOD_TYPES);
 use KA::Util qw(randint);
 
+use experimental 'smartmatch';
+
 sub view_my_market {
     my $self = shift;
     my $args = shift;
@@ -56,9 +58,9 @@ sub view_market {
     $args->{page_number} ||=1;
     my $all_trades = $building->available_market->search(
         undef,{
-            rows        => 25, 
-            page        => $args->{page_number}, 
-            join        => 'body', 
+            rows        => 25,
+            page        => $args->{page_number},
+            join        => 'body',
             order_by    => 'ask',
         }
     );
@@ -321,5 +323,3 @@ sub report_abuse {
 
 
 1;
-
-

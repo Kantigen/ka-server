@@ -8,6 +8,8 @@ extends 'KA::RPC::Building';
 use KA::Constants qw(SHIP_TYPES);
 use Data::Dumper;
 
+use experimental 'smartmatch';
+
 sub app_url {
     return '/shipyard';
 }
@@ -97,9 +99,9 @@ sub subsidize_build_queue {
     }
 
     $empire->spend_essentia({
-        amount      => $cost, 
+        amount      => $cost,
         reason      => 'ship build subsidy after the fact',
-    });    
+    });
     $empire->update;
 
     $fleets->reset;
@@ -107,10 +109,10 @@ sub subsidize_build_queue {
         $fleet->finish_construction;
     }
     $building->finish_work->update;
- 
+
     return $self->view_build_queue(
-        session_id  => $empire, 
-        building_id => $building, 
+        session_id  => $empire,
+        building_id => $building,
         no_status   => $args{no_status},
     );
 }
@@ -234,7 +236,7 @@ sub build_fleet {
 
     my @buildings;
     push @buildings, map { $self->get_building($session, $_) } @$building_ids;
-    
+
     # All buildings must be on the same body and functional
     foreach my $building (@buildings) {
         unless ($building->effective_level > 0 and $building->efficiency == 100) {
@@ -280,7 +282,7 @@ sub build_fleet {
     my $building = $buildings[0];
 
     my $fleet = KA->db->resultset('Fleet')->new({
-        type        => $type, 
+        type        => $type,
         quantity    => $quantity,
     });
     my $costs = $building->get_fleet_costs($fleet);
@@ -290,9 +292,9 @@ sub build_fleet {
     $fleet->body_id($body->id);
     $fleet->insert;
 
-    return $self->view_build_queue( 
-        no_status   => $args{no_status}, 
-        session_id  => $empire, 
+    return $self->view_build_queue(
+        no_status   => $args{no_status},
+        session_id  => $empire,
         building_id => $building,
     );
 }
@@ -372,7 +374,7 @@ sub get_repairable {
     }
     my $max_ships = $building->max_ships;
     my $total_ships_building = KA->db->resultset('Fleet')->search({
-        body_id => $building->body_id, 
+        body_id => $building->body_id,
         task    => ['Building','Repairing'],
     })->count;
 
@@ -430,7 +432,7 @@ sub get_buildable {
     }
     my $max_ships = $building->max_ships;
     my $total_ships_building = KA->db->resultset('Fleet')->search({
-        body_id => $building->body_id, 
+        body_id => $building->body_id,
         task    => ['Building','Repairing'],
     })->count;
 
@@ -445,15 +447,14 @@ sub get_buildable {
 
 
 __PACKAGE__->register_rpc_method_names(qw(
-    get_buildable 
+    get_buildable
     get_repairable
-    build_fleet 
+    build_fleet
     repair_fleet
-    view_build_queue 
+    view_build_queue
     subsidize_build_queue
     subsidize_fleet
 ));
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
-
