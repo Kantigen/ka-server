@@ -4,4 +4,4 @@ Server for the up-and-coming community edition of The Lacuna Expanse, known as "
 
 # License
 
-See the [LICENSE](infor/LICENSE) file.
+See the [LICENSE](info/LICENSE) file.
