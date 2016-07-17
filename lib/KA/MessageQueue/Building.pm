@@ -19,7 +19,7 @@ sub log {
 sub db {
     my ($self) = @_;
 
-    return KA::SDB->instance;
+    return KA::SDB->instance->db;
 }
 
 #--- Building finishes Upgrade

@@ -10,9 +10,5 @@ has db => (
            #handles     => [qw(resultset)],
 );
 
-sub resultset {
-    __PACKAGE__->instance->db->resultset(@_);
-}
-
 __PACKAGE__->meta->make_immutable;
 
