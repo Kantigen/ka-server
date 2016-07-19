@@ -24,11 +24,23 @@ __PACKAGE__->has_many('out_supply_chains', 'KA::DB::Result::SupplyChain','planet
 __PACKAGE__->has_many('in_supply_chains', 'KA::DB::Result::SupplyChain','target_id');
 __PACKAGE__->has_many('body_resources','KA::DB::Result::Resource','body_id');
 
+has log => (
+    is      => 'rw',
+    lazy    => 1,
+);
+
 has plan_cache => (
     is      => 'rw',
     lazy    => 1,
     builder => '_build_plan_cache',
     clearer => 'clear_plan_cache',
+);
+
+has resource_cache => (
+    is      => 'rw',
+    lazy    => 1,
+    builder => '_build_resource_cache',
+    clearer => 'clear_resource_cache',
 );
 
 sub fleets_travelling {
@@ -51,6 +63,121 @@ sub _build_plan_cache {
     }
     return $plans;
 }
+
+# the 'resource_cache' is a replacement for the old $body->algae_stored etc.
+#
+sub _build_resource_cache {
+    my ($self) = @_;
+
+    my $resources = {};
+    my $resource_rs = $self->body_resources->search({});
+    while (my $resource = $resource_rs->next) {
+        $resources->{$resource->type} = $resource;
+    }
+    return $resources;
+}
+
+# Get methods for stored, production (per hour), consumption (per hour) and capacity
+#
+sub get_resource {
+    my ($self, $type) = @_;
+
+    my $resource = $self->resource_cache->{$type};
+    if (defined $resource) {
+        return $resource;
+    }
+    $resource = KA->db->resultset('Resource')->new({
+        body_id         => $self->id,
+        type            => $type,
+        production      => 0,
+        consumption     => 0,
+        stored          => 0,
+        capacity        => 0,
+    });
+    $self->resource_cache->{$type} = $resource;
+}
+
+
+sub get_stored {
+    my ($self, $type) = @_;
+
+    return $self->get_resource($type)->stored;
+}
+
+sub get_production {
+    my ($self, $type) = @_;
+
+    return $self->get_resource($type)->production;
+}
+
+sub get_consumption {
+    my ($self, $type) = @_;
+    return $self->get_resource($type)->consumption;
+}
+
+sub get_capacity {
+    my ($self, $type) = @_;
+    return $self->get_resource($type)->capacity;
+}
+
+
+# Set methods for stored, production (per hour), consumption (per hour) and capacity
+#
+sub set_stored {
+    my ($self, $type, $qty) = @_;
+    $self->get_resource($type)->stored($qty);
+}
+
+sub set_production {
+    my ($self, $type, $qty) = @_;
+    $self->get_resource($type)->production($qty);
+}
+
+sub set_consumption {
+    my ($self, $type, $qty) = @_;
+    $self->get_resource($type)->consumption($qty);
+}
+
+sub set_capacity {
+    my ($self, $type, $qty) = @_;
+    $self->get_resource($type)->capacity($qty);
+}
+
+# Methods to add or spend stored resources
+#
+sub add_stored {
+    my ($self, $type, $qty) = @_;
+    my $resource = $self->get_resource($type);
+    my $new_qty = $resource->stored + $qty;
+    $resource->stored($new_qty);
+}
+
+sub spend_stored {
+    my ($self, $type, $qty) = @_;
+    my $resource = $self->get_resource($type);
+    my $new_qty = $resource->stored - $qty;
+    $new_qty = 0 if $new_qty < 0;
+    $resource->stored($new_qty);
+}
+
+# On destruction, make sure all cached resources are saved
+#
+sub DEMOLISH {
+    my ($self, $global_destruction) = @_;
+
+    foreach $key (keys %{$self->resource_cache}) {
+        my $resource = $self->resource_cache->{$key};
+        if ($resource->id) {
+            $resource->update;
+        }
+        else {
+            $resource->insert;
+        }
+    }
+}
+
+
+
 
 # Sort plans by name (asc), by level (asc), by extra_build_level (desc)
 sub sorted_plans {
