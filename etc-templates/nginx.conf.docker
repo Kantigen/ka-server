@@ -8,7 +8,7 @@ events {
 
 
 http {
-    include       mime.types;
+    include	  mime.types;
     default_type  application/octet-stream;
 
     log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
@@ -30,7 +30,7 @@ http {
         location = / {
             add_header Cache-Control must-revalidate;
             add_header Cache-Control public;
-            root   /data/KA-Server-Open/var/www/public;
+            root   /home/keno/ka-server/var/www/public;
             add_header Access-Control-Allow-Origin *;
             index  index.html;
         }
@@ -38,29 +38,29 @@ http {
         location ~ \.(html|xml|txt|json) {
             add_header Cache-Control must-revalidate;
             add_header Cache-Control public;
-            root   /data/KA-Server-Open/var/www/public;
+            root   /home/keno/ka-server/var/www/public;
             add_header Access-Control-Allow-Origin *;
         }
         location ^~ /api/ {
-            root   /data/KA-Server-Open/var/www/public;
+            root   /home/keno/ka-server/var/www/public;
             index  Intro.html;
         }
         location ^~ /assets/ {
-            root   /data/KA-Assets;
+            root   /home/keno/ka-server/var/www/public;
             index  README.txt;
         }
         location ^~ /starmap/ {
-            root   /data/KA-Server-Open/var/www/public;
+            root   /home/keno/ka-server/var/www/public;
             index  index.html;
         }
 
         location ^~ /captcha/ {
-            root   /data/captcha;
+            root   /home/keno/ka-server/captcha;
             rewrite ^/captcha/(.*)$ /$1 break;
         }
 
         location ~ /.* {
-            proxy_pass http://tle-server:5000;
+            proxy_pass http://ka-server:5000;
             proxy_set_header X-Real-IP $remote_addr;
             add_header Access-Control-Allow-Origin *;
         }
