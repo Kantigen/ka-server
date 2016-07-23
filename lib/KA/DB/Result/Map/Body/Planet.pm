@@ -11,6 +11,7 @@ use KA::Util qw(randint format_date random_element);
 use DateTime;
 use Data::Dumper;
 use Scalar::Util qw(weaken);
+use Log::Any;
 
 no warnings 'uninitialized';
 
@@ -55,7 +56,7 @@ sub fleets_travelling {
 
 sub _build_log {
     my ($self) = @_;
-    return Log::Log4perl->get_logger(__PACKAGE__);
+    return Log::Any->get_logger;
 }
 
 
@@ -102,6 +103,7 @@ sub get_resource {
         capacity        => 0,
     });
     $self->resource_cache->{$type} = $resource;
+    return $resource;
 }
 
 
@@ -171,13 +173,17 @@ sub add_capacity {
     my $resource = $self->get_resource($type);
     my $new_qty = $resource->capacity + $qty;
     $resource->capacity($new_qty);
+    $self->log->debug("ADD_CAPACITY $resource - $new_qty");
 }
 
 sub add_stored {
     my ($self, $type, $qty) = @_;
+
+    $self->log->debug("ADD_STORED: $type $qty");
     my $resource = $self->get_resource($type);
     my $new_qty = $resource->stored + $qty;
     $resource->stored($new_qty);
+    $self->log->debug("ADDED: $new_qty");
 }
 
 # Note, stored can be negative (e.g. happiness) this must be
@@ -197,9 +203,11 @@ sub update_resources {
     foreach my $key (keys %{$self->resource_cache}) {
         my $resource = $self->resource_cache->{$key};
         if ($resource->id) {
+            $self->log->debug("UPDATE $resource");
             $resource->update;
         }
         else {
+            $self->log->debug("INSERT $resource");
             $resource->insert;
         }
     }
@@ -1412,6 +1420,7 @@ sub recalc_chains {
 sub recalc_stats {
     my ($self) = @_;
 
+    $self->log->debug("RECALC_STATS");
 #    $self->clear_building_cache;
 
     my %stats = ( needs_recalc => 0 );
@@ -1712,6 +1721,7 @@ sub tick {
 sub tick_to {
     my ($self, $now) = @_;
 
+    $self->log->debug("TICK_TO $now");
     my $seconds  = $now->epoch - $self->last_tick->epoch;
     my $tick_rate = $seconds / 3600;
     $self->last_tick($now);
@@ -1789,8 +1799,7 @@ sub tick_to {
     my %ore;
     my $ore_produced   = 0;
     foreach my $type (ORE_TYPES) {
-        my $method = $type.'_hour';
-        $ore{$type} = sprintf('%.0f', $self->$method() * $tick_rate);
+        $ore{$type} = sprintf('%.0f', $self->get_production($type) * $tick_rate);
         if ($ore{$type} > 0) {
             $ore_produced += $ore{$type};
         }
@@ -1844,8 +1853,7 @@ sub tick_to {
     my %food;
     my $food_produced   = 0;
     foreach my $type (FOOD_TYPES) {
-        my $production_hour_method = $type.'_production_hour';
-        $food{$type} = sprintf('%.0f', $self->$production_hour_method() * $tick_rate);
+        $food{$type} = sprintf('%.0f', $self->get_production($type) * $tick_rate);
         if ($food{$type} > 0) {
             $food_produced += $food{$type};
         }
@@ -1931,6 +1939,7 @@ sub tick_to {
         }
     }
     $self->update;
+    $self->update_resources;
 }
 
 # Change the state of a supply chain (stalled/not-stalled)
@@ -1999,10 +2008,10 @@ sub can_add_type {
     if ($type ~~ [FOOD_TYPES]) {
         $type = 'food';
     }
-    my $capacity = $type.'_capacity';
-    my $stored = $type.'_stored';
-    my $available_storage = $self->$capacity - $self->$stored;
-    if ($available_storage < $value) {
+    my $capacity = $self->get_capacity($type);
+    my $stored   = $self->get_stored($type);
+    my $available = $capacity - $stored;
+    if ($available < $value) {
         confess [1009, "You don't have enough available storage."];
     }
     return 1;
@@ -2048,8 +2057,7 @@ sub add_ore {
     my ($self, $value) = @_;
     foreach my $type (shuffle ORE_TYPES) {
         next if $self->$type < 100; 
-        my $add_method = 'add_'.$type;
-        $self->$add_method($value);
+        $self->add_stored($type);
         last;
     }
     return $self;
@@ -2243,7 +2251,7 @@ sub add_energy {
     my ($self, $value) = @_;
 
     my $store = $self->get_stored('energy') + $value;
-    my $storage = $self->energy_capacity;
+    my $storage = $self->get_capacity('energy');
     $self->set_stored('energy', ($store < $storage) ? $store : $storage );
     return $self;
 }
