@@ -275,7 +275,7 @@ sub _on_message {
         return;
     }
 
-    $self->route_call('fg_', $json_msg, $connection);
+    $self->route_call('ws_', $json_msg, $connection);
 }
 
 # Remove all data held for the client
