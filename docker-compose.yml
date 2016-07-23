@@ -1,0 +1,158 @@
+version: '2'
+
+services:
+
+  ########################
+  ## BEANSTALKD CONSOLE ##
+  ########################
+
+  ka-beanstalkd-console:
+    container_name: 'ka-beanstalkd-console'
+    depends_on:
+      - 'ka-beanstalkd'
+    image: 'schickling/beanstalkd-console'
+    ports:
+      - '2080:2080'
+
+  ################
+  ## BEANSTALKD ##
+  ################
+
+  ka-beanstalkd:
+    container_name: 'ka-beanstalkd'
+    image: 'schickling/beanstalkd'
+    ports:
+      - '11300:11300'
+
+  ##################
+  ## CAPTCHA DATA ##
+  ##################
+
+  ka-captcha-data:
+    build:
+      context: .
+      dockerfile: ./docker/build-captcha-data/Dockerfile
+    container_name: 'ka-captcha-data'
+    image: 'kenoantigen/ka-captcha-data'
+    volumes:
+      - '/home/keno/captcha'
+
+  ###############
+  ## MEMCACHED ##
+  ###############
+
+  ka-memcached:
+    container_name: 'ka-memcached'
+    image: 'memcached'
+
+  ################
+  ## MYSQL DATA ##
+  ################
+
+  ka-mysql-data:
+    command: '/usr/bin/bash'
+    container_name: 'ka-mysql-data'
+    image: 'arungupta/mysql-data-container'
+
+  ##################
+  ## MYSQL SERVER ##
+  ##################
+
+  ka-mysql-server:
+    container_name: 'ka-mysql-server'
+    depends_on:
+      - 'ka-mysql-data'
+    environment:
+      - 'MYSQL_ROOT_PASSWORD=keno'
+    image: 'mysql:5.5'
+    volumes_from:
+      - 'ka-mysql-data'
+
+  ###########
+  ## NGINX ##
+  ###########
+
+  ka-nginx:
+    container_name: 'ka-nginx'
+    build:
+      context: .
+      dockerfile: ./docker/build-nginx/Dockerfile
+    image: 'kenoantigen/ka-ngnix'
+    ports:
+      - '8000:80'
+    volumes:
+      - ./etc:/etc/nginx
+      - ./etc:/home/keno/ka-server/etc
+      - ./var:/home/keno/ka-server/var
+      - ./captcha:/home/keno/ka-server/captcha
+      - ./../ka-assets:/home/keno/ka-server/var/www/public/assets
+      - ./var/www/public/api/api.css:/home/keno/ka-server/var/www/public/api/api.css
+    volumes_from:
+      - 'ka-captcha-data'
+
+  ###########
+  ## REDIS ##
+  ###########
+
+  ka-redis:
+    container_name: 'ka-redis'
+    image: redis
+    ports:
+      - '6379:6379'
+
+  ############
+  ## SERVER ##
+  ############
+
+  ka-server:
+    build:
+      context: .
+      dockerfile: ./docker/build-server/Dockerfile
+    command: '/usr/bin/bash startdev.sh'
+    container_name: 'ka-server'
+    depends_on:
+      - 'ka-captcha-data'
+      - 'ka-mysql-data'
+      - 'ka-redis'
+      - 'ka-memcached'
+      - 'ka-beanstalkd'
+      - 'ka-nginx'
+    environment:
+      - 'KA_NO_MIDDLEWARE=1'
+    image: 'kenoantigen/ka-server'
+    ports:
+      - '5000:5000'
+    volumes:
+      - ./bin:/home/keno/ka-server/bin
+      - ./docs:/home/keno/ka-server/docs
+      - ./etc:/home/keno/ka-server/etc
+      - ./lib:/home/keno/ka-server/lib
+      - ./t:/home/keno/ka-server/t
+      - ./var:/home/keno/ka-server/var
+      - ./var/www/public/api/api.css:/home/keno/ka-server/var/www/public/api/api.css
+    volumes_from:
+      - 'ka-captcha-data'
+
+  ################
+  ## WEB SOCKET ##
+  ################
+
+  ka-websocket:
+    command: 'perl ws.pl'
+    container_name: 'ka-websocket'
+    depends_on:
+      - 'ka-server'
+    environment:
+      - 'KA_NO_MIDDLEWARE=1'
+    image: 'kenoantigen/ka-server'
+    ports:
+      - '8090:80'
+    volumes:
+        - ./bin:/home/keno/ka-server/bin
+        - ./docs:/home/keno/ka-server/docs
+        - ./etc:/home/keno/ka-server/etc
+        - ./lib:/home/keno/ka-server/lib
+        - ./t:/home/keno/ka-server/t
+        - ./var:/home/keno/ka-server/var
+    volumes_from:
+      - 'ka-captcha-data'

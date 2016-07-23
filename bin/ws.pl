@@ -38,7 +38,7 @@ KA::Config->initialize;
 #
 #KA::Queue->initialize({
 #    server      => "ka-beanstalkd:11300",
-#    
+#
 #});
 
 # Connect to the mysql Docker image
@@ -73,7 +73,9 @@ tcp_server 0, 80, sub {
 };
 
 #--- beanstalk handler
-my $timer = AE::timer 0, 1, sub { print STDERR "In Timer!\n" };
+my $timer = AE::timer 0, 1, sub {
+  # print STDERR "In Timer!\n"
+};
 my $queue = KA::Queue->instance;
 
 while (1) {
@@ -91,4 +93,3 @@ while (1) {
 
 $condvar->recv;
 print STDERR "WE SHOULD NEVER GET HERE\n";
-
