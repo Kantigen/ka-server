@@ -544,7 +544,7 @@ sub happiness_production_bonus {
     my $boost = (time < $empire->happiness_boost->epoch) ? 25 : 0;
     my $sboost = $self->body->propaganda_boost;
     my $max_b = $boost ? 75 : 50;
-    if ($self->body->happiness > 0 and $sboost > $max_b) {
+    if ($self->body->get_stored('happiness') > 0 and $sboost > $max_b) {
         $sboost = $max_b;
     }
     $boost += $sboost;

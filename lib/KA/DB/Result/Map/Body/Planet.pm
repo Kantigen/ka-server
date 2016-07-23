@@ -18,7 +18,7 @@ use experimental "switch";
 
 __PACKAGE__->has_many('fleets','KA::DB::Result::Fleet','body_id');
 __PACKAGE__->has_many('_plans','KA::DB::Result::Plan','body_id');
-__PACKAGE__->has_many('glyph','KA::DB::Result::Glyph','body_id');
+__PACKAGE__->has_many('glyphs','KA::DB::Result::Glyph','body_id');
 __PACKAGE__->has_many('waste_chains', 'KA::DB::Result::WasteChain','planet_id');
 __PACKAGE__->has_many('out_supply_chains', 'KA::DB::Result::SupplyChain','planet_id');
 __PACKAGE__->has_many('in_supply_chains', 'KA::DB::Result::SupplyChain','target_id');
@@ -27,6 +27,7 @@ __PACKAGE__->has_many('body_resources','KA::DB::Result::Resource','body_id');
 has log => (
     is      => 'rw',
     lazy    => 1,
+    builder => '_build_log',
 );
 
 has plan_cache => (
@@ -51,6 +52,12 @@ sub fleets_travelling {
     });
     return $fleets_rs;
 }
+
+sub _build_log {
+    my ($self) = @_;
+    return Log::Log4perl->get_logger(__PACKAGE__);
+}
+
 
 sub _build_plan_cache {
     my ($self) = @_;
@@ -145,6 +152,27 @@ sub set_capacity {
 
 # Methods to add or spend stored resources
 #
+sub add_production {
+    my ($self, $type, $qty) = @_;
+    my $resource = $self->get_resource($type);
+    my $new_qty = $resource->production + $qty;
+    $resource->production($new_qty);
+}
+
+sub add_consumption {
+    my ($self, $type, $qty) = @_;
+    my $resource = $self->get_resource($type);
+    my $new_qty = $resource->consumption + $qty;
+    $resource->consumption($new_qty);
+}
+
+sub add_capacity {
+    my ($self, $type, $qty) = @_;
+    my $resource = $self->get_resource($type);
+    my $new_qty = $resource->capacity + $qty;
+    $resource->capacity($new_qty);
+}
+
 sub add_stored {
     my ($self, $type, $qty) = @_;
     my $resource = $self->get_resource($type);
@@ -152,20 +180,21 @@ sub add_stored {
     $resource->stored($new_qty);
 }
 
-sub spend_stored {
+# Note, stored can be negative (e.g. happiness) this must be
+# dealt with externally
+#
+sub use_stored {
     my ($self, $type, $qty) = @_;
     my $resource = $self->get_resource($type);
     my $new_qty = $resource->stored - $qty;
-    $new_qty = 0 if $new_qty < 0;
     $resource->stored($new_qty);
 }
 
-# On destruction, make sure all cached resources are saved
-#
-sub DEMOLISH {
-    my ($self, $global_destruction) = @_;
+sub update_resources {
+    my ($self) = @_;
 
-    foreach $key (keys %{$self->resource_cache}) {
+    $self->log->debug("UPDATE_RESOURCES");
+    foreach my $key (keys %{$self->resource_cache}) {
         my $resource = $self->resource_cache->{$key};
         if ($resource->id) {
             $resource->update;
@@ -175,9 +204,6 @@ sub DEMOLISH {
         }
     }
 }
-
-
-
 
 # Sort plans by name (asc), by level (asc), by extra_build_level (desc)
 sub sorted_plans {
@@ -205,7 +231,6 @@ sub _delete_building {
         }
         $i++;
     }
-    $self->update;
 }
 sub _delete_plan {
     my ($self, $plan) = @_;
@@ -221,7 +246,6 @@ sub _delete_plan {
         }
         $i++;
     }
-    $self->update;
 }
 
 # delete buildings passed in as an array reference
@@ -323,47 +347,47 @@ sub claimed_by {
 
 # add a glyph to this planet
 sub add_glyph {
-  my ($self, $type, $num_add) = @_;
+    my ($self, $type, $num_add) = @_;
 
-  $num_add = 1 unless defined($num_add);
+    $num_add = 1 unless defined($num_add);
 
-  my $glyph = KA->db->resultset('Glyph')->search({
-                 type    => $type,
-                 body_id => $self->id,
-               })->first;
-  if (defined($glyph)) {
-    my $sum = $num_add + $glyph->quantity;
-    $glyph->quantity($sum);
-    $glyph->update;
-  }
-  else {
-    $self->glyph->new({
-      type     => $type,
-      body_id  => $self->id,
-      quantity => $num_add,
-    })->insert;
-  }
+    my $glyph = KA->db->resultset('Glyph')->search({
+        type    => $type,
+        body_id => $self->id,
+    })->first;
+    if (defined($glyph)) {
+        my $sum = $num_add + $glyph->quantity;
+        $glyph->quantity($sum);
+        $glyph->update;
+    }
+    else {
+        $self->glyphs->new({
+            type     => $type,
+            body_id  => $self->id,
+            quantity => $num_add,
+        })->insert;
+    }
 }
 
 sub use_glyph {
-  my ($self, $type, $num_used) = @_;
+    my ($self, $type, $num_used) = @_;
 
-  $num_used = 1 unless (defined($num_used));
-  my $glyph = KA->db->resultset('Glyph')->search({
-                 type    => $type,
-                 body_id => $self->id,
-               })->first;
-  return 0 unless defined($glyph);
-  if ($glyph->quantity > $num_used) {
-    my $sum = $glyph->quantity - $num_used;
-    $glyph->quantity($sum);
-    $glyph->update;
-  }
-  else {
-    $num_used = $glyph->quantity;
-    $glyph->delete;
-  }
-  return $num_used;
+    $num_used = 1 unless (defined($num_used));
+    my $glyph = KA->db->resultset('Glyph')->search({
+        type    => $type,
+        body_id => $self->id,
+    })->first;
+    return 0 unless defined($glyph);
+    if ($glyph->quantity > $num_used) {
+        my $sum = $glyph->quantity - $num_used;
+        $glyph->quantity($sum);
+        $glyph->update;
+    }
+    else {
+        $num_used = $glyph->quantity;
+        $glyph->delete;
+    }
+    return $num_used;
 }
 
 # get a plan with the highest extra build level
@@ -413,7 +437,7 @@ sub sanitize {
     }
     $self->alliance_id(undef);
     $self->_plans->delete;
-    $self->glyph->delete;
+    $self->glyphs->delete;
     $self->waste_chains->delete;
     # do individual deletes so the remote ends can be tidied up too
     foreach my $chain ($self->out_supply_chains) {
@@ -445,7 +469,8 @@ sub sanitize {
         $self->zone ~~ ['1|1','1|-1','-1|1','-1|-1','0|0','0|1','1|0','-1|0','0|-1']) {
         $self->usable_as_starter_enabled(1);
     }
-    $self->resources->delete;
+    $self->body_resources->delete_all;
+    $self->clear_resource_cache;
     $self->restrict_coverage(0); 
     $self->update;
     return $self;
@@ -680,23 +705,23 @@ around get_status => sub {
                 $out->{build_queue_size}= $self->build_queue_size;
                 $out->{build_queue_len} = $self->build_queue_length;
                 $out->{population}      = $self->population;
-                $out->{water_capacity}  = $self->water_capacity;
-                $out->{water_stored}    = $self->water_stored;
-                $out->{water_hour}      = $self->water_hour;
-                $out->{energy_capacity} = $self->energy_capacity;
-                $out->{energy_stored}   = $self->energy_stored;
-                $out->{energy_hour}     = $self->energy_hour;
-                $out->{food_capacity}   = $self->food_capacity;
-                $out->{food_stored}     = $self->food_stored;
-                $out->{food_hour}       = $self->food_hour;
-                $out->{ore_capacity}    = $self->ore_capacity;
-                $out->{ore_stored}      = $self->ore_stored;
-                $out->{ore_hour}        = $self->ore_hour;
-                $out->{waste_capacity}  = $self->waste_capacity;
-                $out->{waste_stored}    = $self->waste_stored;
-                $out->{waste_hour}      = $self->waste_hour;
-                $out->{happiness}       = $self->happiness;
-                $out->{happiness_hour}  = $self->happiness_hour;
+                $out->{water_capacity}  = $self->get_capacity('water');
+                $out->{water_stored}    = $self->get_stored('water');
+                $out->{water_hour}      = $self->get_production('water');
+                $out->{energy_capacity} = $self->get_capacity('energy');
+                $out->{energy_stored}   = $self->get_stored('energy');
+                $out->{energy_hour}     = $self->get_production('energy');
+                $out->{food_capacity}   = $self->get_capacity('food');
+                $out->{food_stored}     = $self->get_stored('food');
+                $out->{food_hour}       = $self->get_production('food');
+                $out->{ore_capacity}    = $self->get_capacity('ore');
+                $out->{ore_stored}      = $self->get_stored('ore');
+                $out->{ore_hour}        = $self->get_production('ore');
+                $out->{waste_capacity}  = $self->get_capacity('waste');
+                $out->{waste_stored}    = $self->get_stored('waste');
+                $out->{waste_hour}      = $self->get_production('waste');
+                $out->{happiness}       = $self->get_stored('happiness');
+                $out->{happiness_hour}  = $self->get_production('happiness');
                 if ($self->unhappy) {
                     $out->{unhappy_date} = format_date($self->unhappy_date);
                     $out->{propaganda_boost} = $self->propaganda_boost;
@@ -838,11 +863,11 @@ has build_boost => (
     default => sub {
         my $self = shift;
 
-        my $sign = $self->happiness >= 0 ? 1 : -1;
-        my $scale = $self->happiness == 0 ? 0 :
+        my $sign = $self->get_stored('happiness') >= 0 ? 1 : -1;
+        my $scale = $self->get_stored('happiness') == 0 ? 0 :
             #int
             (
-                log(abs($self->happiness)) /
+                log(abs($self->get_stored('happiness'))) /
                 log(1000)
                );
             #1 - $sign * $scale * ($sign < 0 ? 10 : 2) / 100;
@@ -1125,7 +1150,7 @@ sub has_resources_to_build {
         }
     }
     if ($cost->{waste} < 0) { # we're spending waste to build a building, which is unusal, but not wrong
-        if ($self->waste_stored < abs($cost->{waste})) {
+        if ($self->get_stored('waste') < abs($cost->{waste})) {
             confess [1011, "Not enough waste in storage to build this.", 'waste'];
         }
     }
@@ -1242,23 +1267,10 @@ sub found_colony {
     }
 
     # Initialize body
-    my @attributes = qw( happiness_hour happiness waste_hour waste_stored waste_capacity
-        energy_hour energy_stored energy_capacity water_hour water_stored water_capacity ore_capacity
-        rutile_stored chromite_stored chalcopyrite_stored galena_stored gold_stored uraninite_stored bauxite_stored
-        goethite_stored halite_stored gypsum_stored trona_stored kerogen_stored methane_stored anthracite_stored
-        sulfur_stored zircon_stored monazite_stored fluorite_stored beryl_stored magnetite_stored 
-        food_capacity food_consumption_hour lapis_production_hour potato_production_hour apple_production_hour
-        root_production_hour corn_production_hour cider_production_hour wheat_production_hour bread_production_hour
-        soup_production_hour chip_production_hour pie_production_hour pancake_production_hour milk_production_hour
-        meal_production_hour algae_production_hour syrup_production_hour fungus_production_hour burger_production_hour
-        shake_production_hour beetle_production_hour lapis_stored potato_stored apple_stored root_stored corn_stored
-        cider_stored wheat_stored bread_stored soup_stored chip_stored pie_stored pancake_stored milk_stored meal_stored
-        algae_stored syrup_stored fungus_stored burger_stored shake_stored beetle_stored bean_production_hour bean_stored
-        restrict_coverage cheese_production_hour cheese_stored
-    );
-    foreach my $attribute (@attributes) {
-        $self->$attribute(0);
-    }
+    $self->restrict_coverage(0);
+    $self->body_resources->delete_all;
+    $self->clear_resource_cache;
+
     # add starting resources
     $self->needs_recalc(1);
     $self->tick;
@@ -1266,7 +1278,7 @@ sub found_colony {
     $self->add_energy(700);
     $self->add_water(700);
     $self->add_ore(700);
-    $self->happiness(0);
+    $self->set_stored('happiness', 0);
     $self->update;
 
     # newsworthy
@@ -1298,7 +1310,7 @@ sub convert_to_station {
     my @all_buildings = @{$self->building_cache};
     $self->delete_buildings(\@all_buildings);
     $self->_plans->delete;
-    $self->glyph->delete;
+    $self->glyphs->delete;
 
     # add command building
     my $command = KA->db->resultset('Building')->new({
@@ -1405,50 +1417,50 @@ sub recalc_stats {
     my %stats = ( needs_recalc => 0 );
     #reset foods and ores
     foreach my $type (FOOD_TYPES) {
-        $stats{$type.'_production_hour'} = 0;
+        $self->set_production($type, 0);
     }
     foreach my $type (ORE_TYPES) {
-        $stats{$type.'_hour'} = 0;
+        $self->set_production($type, 0);
     }
     $stats{max_berth} = 1;
     #calculate propaganda bonus
-    my $spy_boost = KA->db->resultset('Spy')
-        ->search(
-                 {
-                     on_body_id => $self->id,
-                     task => 'Political Propaganda',
-                     empire_id => $self->empire_id
-                 },
-                 {
-                     select => \[ "floor((me.defense + me.politics_xp)/250 + 0.5)" ],
-                     as => "boost"
-                 })->get_column("boost")->sum;
+    my $spy_boost = KA->db->resultset('Spy')->boost_sum($self);
 
     $self->propaganda_boost($spy_boost);
     $self->update;
+
     #calculate building production
     my ($gas_giant_platforms, $terraforming_platforms, $station_command,
-        $pantheon_of_hagness, $ore_production_hour, $ore_consumption_hour,
-        $food_production_hour, $food_consumption_hour, $fissure_percent) = 0;
+        $pantheon_of_hagness, $fissure_percent) = 0;
+
+    foreach my $type (qw(waste water energy food ore happiness)) {
+        $self->set_capacity($type, 0);
+        $self->set_production($type, 0);
+    }
+
     foreach my $building (@{$self->building_cache}) {
-        $stats{waste_capacity}          += $building->waste_capacity;
-        $stats{water_capacity}          += $building->water_capacity;
-        $stats{energy_capacity}         += $building->energy_capacity;
-        $stats{food_capacity}           += $building->food_capacity;
-        $stats{ore_capacity}            += $building->ore_capacity;
-        $stats{happiness_hour}          += $building->happiness_hour;
-        $stats{waste_hour}              += $building->waste_hour;               
-        $stats{energy_hour}             += $building->energy_hour;
-        $stats{water_hour}              += $building->water_hour;
-        $ore_consumption_hour           += $building->ore_consumption_hour;
-        $ore_production_hour            += $building->ore_production_hour;
-        $stats{food_consumption_hour}   += $building->food_consumption_hour;
+        
+        $self->add_capacity('waste',  $building->waste_capacity);
+        $self->add_capacity('water',  $building->water_capacity);
+        $self->add_capacity('energy', $building->energy_capacity);
+        $self->add_capacity('food',   $building->food_capacity);
+        $self->add_capacity('ore',    $building->ore_capacity);
+
+        $self->add_production('happiness',  $building->happiness_hour);
+        $self->add_production('waste',      $building->waste_hour);
+        $self->add_production('energy',     $building->energy_hour);
+        $self->add_production('water',      $building->water_hour);
+
+        $self->add_consumption('food',      $building->food_consumption_hour);
+        $self->add_consumption('ore',       $building->ore_consumption_hour);
+        $self->add_production('ore',        $building->ore_production_hour);
 
         foreach my $type (@{$building->produces_food_items}) {
             my $method = $type.'_production_hour';
-            $stats{$method}         += $building->$method();
-            $food_production_hour   += $building->$method();
+            $self->add_production($type, $building->$method);
+            $self->add_production('food', $building->$method);
         }
+
         if ($building->isa('KA::DB::Result::Building::SpacePort') and $building->effective_efficiency == 100) {
             $stats{max_berth} = $building->effective_level if ($building->effective_level > $stats{max_berth});
         }
@@ -1457,7 +1469,7 @@ sub recalc_stats {
             while (my $platform = $platforms->next) {
                 foreach my $type (ORE_TYPES) {
                     my $method = $type.'_hour';
-                    $stats{$method} += $platform->$method();
+                    $self->add_production($type, $platform->$method);
                 }
             }
         }
@@ -1469,7 +1481,7 @@ sub recalc_stats {
                 $percent = $percent > 100 ? 100 : $percent;
                 $percent *= $building->effective_efficiency / 100;
                 my $waste_hour = sprintf('%.0f',$waste_chain->waste_hour * $percent / 100);
-                $stats{waste_hour} -= $waste_hour;
+                $self->add_production('waste', 0-$waste_hour);
             }
             # calculate the resources being chained *from* this planet
             my $output_chains = $self->out_supply_chains->search({
@@ -1481,8 +1493,7 @@ sub recalc_stats {
                 $percent    *= $building->effective_efficiency / 100;
 
                 my $resource_hour = sprintf('%.0f',$out_chain->resource_hour * $percent / 100);
-                my $resource_name   = $self->resource_name($out_chain->resource_type);
-                $stats{$resource_name} -= $resource_hour;
+                $self->add_production($out_chain->resource_type, 0-$resource_hour);
             }
         }
         if ($building->isa('KA::DB::Result::Building::Permanent::GasGiantPlatform')) {
@@ -1505,10 +1516,8 @@ sub recalc_stats {
         }
     }
     # Energy reduced by Fissure action
-    $stats{energy_hour} -= $stats{energy_hour} * $fissure_percent / 100;
-    
-    $stats{food_consumption_hour} = $food_consumption_hour;
-    $stats{ore_consumption_hour} = $ore_consumption_hour;
+    my $new_energy = $self->get_production('energy') - $self->get_production('energy') * $fissure_percent / 100;
+    $self->set_production('energy', $new_energy);
 
     # active supply chains sent *to* this planet
     my $input_chains = $self->in_supply_chains->search({
@@ -1522,41 +1531,38 @@ sub recalc_stats {
         $percent = $percent > 100 ? 100 : $percent;
         $percent *= $in_chain->building->effective_efficiency / 100;
         my $resource_hour = sprintf('%.0f',$in_chain->resource_hour * $percent / 100);
-        my $resource_name = $self->resource_name($in_chain->resource_type);
-        $stats{$resource_name} += $resource_hour;
+        $self->add_production($in_chain->resource_type, $resource_hour);
     }
 
     # local ore production
     foreach my $type (ORE_TYPES) {
-        my $method = $type.'_hour';
-        my $domestic_ore_hour = sprintf('%.0f',$self->$type * $ore_production_hour / $self->total_ore_concentration);
-        $stats{$method} += $domestic_ore_hour;
+        my $domestic_ore_hour = sprintf('%.0f',$self->$type * $self->get_production('ore') / $self->total_ore_concentration);
+        $self->add_production($type, $domestic_ore_hour);
     }
     $self->update;
     $self->discard_changes;
     
     # deal with negative amounts stored
-    $self->water_stored(0) if $self->water_stored < 0;
-    $self->energy_stored(0) if $self->energy_stored < 0;
+    $self->set_stored('water',0) if $self->get_stored('water') < 0;
+    $self->set_stored('energy',0) if $self->get_stored('energy') < 0;
     for my $type (FOOD_TYPES, ORE_TYPES) {
-        my $stype = $type.'_stored';
-        $self->$stype(0) if ($self->$stype < 0);
+        $self->set_stored($type, 0) if ($self->get_stored($type) < 0);
     }
     $self->update;
     $self->discard_changes;
     
     # deal with storage overages
-    if ($self->ore_stored > $stats{ore_capacity}) {
-        $self->spend_ore($self->ore_stored - $stats{ore_capacity});
+    if ($self->get_stored('ore') > $self->get_capacity('ore')) {
+        $self->spend_ore($self->get_stored('ore') - $self->get_capacity('ore'));
     }
-    if ($self->food_stored > $stats{food_capacity}) {
-        $self->spend_food($self->food_stored - $stats{food_capacity}, 1);
+    if ($self->get_stored('food') > $self->get_capacity('food')) {
+        $self->spend_food($self->get_stored('food') - $self->get_capacity('food'), 1);
     }
-    if ($self->water_stored > $stats{water_capacity}) {
-        $self->spend_water($self->water_stored - $stats{water_capacity});
+    if ($self->get_stored('water') > $self->get_capacity('water')) {
+        $self->spend_water($self->get_stored('water') - $self->get_capacity('water'));
     }
-    if ($self->energy_stored > $stats{energy_capacity}) {
-        $self->spend_energy($self->energy_stored - $stats{energy_capacity});
+    if ($self->get_stored('energy') > $self->get_capacity('energy')) {
+        $self->spend_energy($self->get_stored('energy') - $self->get_capacity('energy'));
     }
 
     # deal with plot usage
@@ -1577,7 +1583,7 @@ sub recalc_stats {
     # Adjust happiness_hour to maximum of 30 days from where body went negative. Different max for positive happiness.
     # If using spies to boost happiness rate, best rate can be a bit variable.
     if ($self->unhappy == 1) {
-        my $happy = $self->happiness;
+        my $happy = $self->get_stored('happiness');
         my $max_rate =    150_000_000_000 * ((time < $self->empire->happiness_boost->epoch) ? 1.25 : 1);
         my $max_time =    720 / ((time < $self->empire->happiness_boost->epoch) ? 1.25 : 1);
         my $one_twenty =  120 / ((time < $self->empire->happiness_boost->epoch) ? 1.25 : 1);
@@ -1588,10 +1594,10 @@ sub recalc_stats {
             if ($unh_hours < $max_time) {
                 $div = $max_time - $unh_hours;
             }
-            my $new_rate = int(abs($self->happiness)/$div);
+            my $new_rate = int(abs($self->get_stored('happiness'))/$div);
             $max_rate = $new_rate if $new_rate > $max_rate;
         }
-        $stats{happiness_hour} = $max_rate if ($stats{happiness_hour} > $max_rate);
+        $self->set_production('happiness', $max_rate) if ($self->get_production('happiness') > $max_rate);
     }
 
     $stats{plots_available} = $max_plots - $self->building_count;
@@ -1601,22 +1607,25 @@ sub recalc_stats {
         my $plot_tax = int(50 * 1.62 ** (abs($stats{plots_available})-1));
         
         # Set max to at least -10k
-        my $neg_hr = $self->happiness > 100_000 ? -1 * $self->happiness/10 : -10_000;
- 
-        if ( $stats{happiness_hour} < 0 and $stats{happiness_hour} > $neg_hr) {
-            $stats{happiness_hour} = $neg_hr;
+        my $neg_hr = $self->get_stored('happiness') > 100_000 ? -1 * $self->get_stored('happiness')/10 : -10_000;
+        my $happy_hour = $self->get_production('happiness');
+
+        if ( $happy_hour < 0 and $happy_hour > $neg_hr) {
+            $self->set_production('happiness', $neg_hr);
         }
-        elsif ( ( $stats{happiness_hour} - $neg_hr) < $plot_tax) {
-            $stats{happiness_hour} = $neg_hr;
+        elsif ( ( $happy_hour - $neg_hr) < $plot_tax) {
+            $self->set_production('happiness', $neg_hr);
         }
         else {
-            $stats{happiness_hour} -= $plot_tax;
+            $self->add_production('happiness',  0-$plot_tax);
         }
-        $stats{happiness_hour} = -100_000_000_000 if ($stats{happiness_hour} < -100_000_000_000);
+        $self->set_production('happiness', -100_000_000_000) if ($self->get_production('happiness') < -100_000_000_000);
     }
     $self->update;
     $self->discard_changes;
     $self->update(\%stats);
+    $self->update_resources;
+
     return $self;
 }
 
@@ -1708,7 +1717,7 @@ sub tick_to {
     $self->last_tick($now);
     
     #If we crossed zero happiness, either way, we need to recalc.
-    if ($self->happiness < 0) {
+    if ($self->get_stored('happiness') < 0) {
         if ($self->unhappy) {
             # Nothing for now...
         }
@@ -1750,30 +1759,30 @@ sub tick_to {
     }
 
     # happiness
-    $self->add_happiness(sprintf('%.0f', $self->happiness_hour * $tick_rate));
+    $self->add_happiness(sprintf('%.0f', $self->get_production('happiness') * $tick_rate));
     
     # waste
-    if ($self->waste_hour < 0 ) { # if it gets negative, spend out of storage
-        $self->spend_waste(sprintf('%.0f',abs($self->waste_hour) * $tick_rate));
+    if ($self->get_production('waste') < 0 ) { # if it gets negative, spend out of storage
+        $self->spend_waste(sprintf('%.0f',abs($self->get_production('waste')) * $tick_rate));
     }
     else {
-        $self->add_waste(sprintf('%.0f', $self->waste_hour * $tick_rate));
+        $self->add_waste(sprintf('%.0f', $self->get_production('waste') * $tick_rate));
     }
     
     # energy
-    if ($self->energy_hour < 0 ) { # if it gets negative, spend out of storage
-        $self->spend_energy(sprintf('%.0f',abs($self->energy_hour) * $tick_rate));
+    if ($self->get_production('energy') < 0 ) { # if it gets negative, spend out of storage
+        $self->spend_energy(sprintf('%.0f',abs($self->get_production('energy')) * $tick_rate));
     }
     else {
-        $self->add_energy(sprintf('%.0f', $self->energy_hour * $tick_rate));
+        $self->add_energy(sprintf('%.0f', $self->get_production('energy') * $tick_rate));
     }
     
     # water
-    if ($self->water_hour < 0 ) { # if it gets negative, spend out of storage
-        $self->spend_water(sprintf('%.0f',abs($self->water_hour) * $tick_rate));
+    if ($self->get_production('water') < 0 ) { # if it gets negative, spend out of storage
+        $self->spend_water(sprintf('%.0f',abs($self->get_production('water')) * $tick_rate));
     }
     else {
-        $self->add_water(sprintf('%.0f', $self->water_hour * $tick_rate));
+        $self->add_water(sprintf('%.0f', $self->get_production('water') * $tick_rate));
     }
     
     # ore
@@ -1786,7 +1795,7 @@ sub tick_to {
             $ore_produced += $ore{$type};
         }
     }
-    my $ore_consumed = sprintf('%.0f', $self->ore_consumption_hour * $tick_rate);
+    my $ore_consumed = sprintf('%.0f', $self->get_consumption('ore') * $tick_rate);
     if ($ore_produced > 0 and $ore_produced >= $ore_consumed) {
         # then consumption comes out of production
         foreach my $type (ORE_TYPES) {
@@ -1800,7 +1809,7 @@ sub tick_to {
         # The difference between consumed and produced comes out of storage
         $ore_consumed -= $ore_produced;
         if ($ore_consumed > 0) {
-            my $total_ore = $self->ore_stored;
+            my $total_ore = $self->get_stored('ore');
             if ($total_ore > 0) {
                 my $deduct_ratio = $ore_consumed / $total_ore;
                 $deduct_ratio = 1 if $deduct_ratio > 1;
@@ -1841,7 +1850,7 @@ sub tick_to {
             $food_produced += $food{$type};
         }
     }
-    my $food_consumed = sprintf('%.0f', $self->food_consumption_hour * $tick_rate);
+    my $food_consumed = sprintf('%.0f', $self->get_consumption('food') * $tick_rate);
     if ($food_produced > 0 and $food_produced >= $food_consumed) {
         # Then consumption just comes out of production
         foreach my $type (FOOD_TYPES) {
@@ -1855,7 +1864,7 @@ sub tick_to {
         # The difference between consumed and produced comes out of storage
         $food_consumed -= $food_produced;
         if ($food_consumed > 0) {
-            my $total_food = $self->food_stored;
+            my $total_food = $self->get_stored('food');
             if ($total_food > 0) {
                 # 
                 my $deduct_ratio = $food_consumed / $total_food;
@@ -1889,15 +1898,15 @@ sub tick_to {
     # and stall/unstall any supply-chains
     my @supply_chains = $self->out_supply_chains->all;
 
-    if ($self->water_stored <= 0) {
-        $self->water_stored(0);
+    if ($self->get_stored('water') <= 0) {
+        $self->set_stored('water',0);
         $self->toggle_supply_chain(\@supply_chains, 'water', 1)
     }
     else {
         $self->toggle_supply_chain(\@supply_chains, 'water', 0);
     }
-    if ($self->energy_stored <= 0) {
-        $self->energy_stored(0);
+    if ($self->get_stored('energy') <= 0) {
+        $self->set_stored('energy',0);
         $self->toggle_supply_chain(\@supply_chains, 'energy', 1);
     }
     else {
@@ -1956,19 +1965,17 @@ sub toggle_supply_chain {
 sub type_stored {
     my ($self, $type, $value) = @_;
 
-    my $stored_method = $type.'_stored';
     if (defined $value) {
-        $self->$stored_method($value);
+        return $self->set_stored($type, $value);
     }
-    return $self->$stored_method;
+    return $self->get_stored($type);
 }
 
 # Do we have enough of a resource to spend?
 sub can_spend_type {
     my ($self, $type, $value) = @_;
 
-    my $stored = $type.'_stored';
-    if ($self->$stored < $value) {
+    if ($self->get_stored($type) < $value) {
         confess [1009, "You don't have enough $type in storage."];
     }
     return 1;
@@ -1978,8 +1985,7 @@ sub can_spend_type {
 sub spend_type {
     my ($self, $type, $value) = @_;
 
-    my $method = 'spend_'.$type;
-    $self->$method($value);
+    $self->use_stored($type, $value);
     return $self;
 }
 
@@ -2053,7 +2059,7 @@ sub add_ore {
 sub add_ore_type {
     my ($self, $type, $amount_requested) = @_;
 
-    my $available_storage = $self->ore_capacity - $self->ore_stored;
+    my $available_storage = $self->ore_capacity - $self->get_stored('ore');
     $available_storage = 0 if ($available_storage < 0);
     my $amount_to_add = ($amount_requested <= $available_storage) ? $amount_requested : $available_storage;
     $self->type_stored($type, $self->type_stored($type) + $amount_to_add );
@@ -2116,10 +2122,9 @@ sub ore_hour {
     my ($self) = @_;
     my $tally = 0;
     foreach my $ore (ORE_TYPES) {
-        my $method = $ore."_hour";
-        $tally += $self->$method;
+        $tally += $self->get_production($ore);
     }
-    $tally -= $self->ore_consumption_hour;
+    $tally -= $self->get_consumption('ore');
     return $tally;
 }
 
@@ -2128,10 +2133,9 @@ sub food_hour {
     my ($self) = @_;
     my $tally = 0;
     foreach my $food (FOOD_TYPES) {
-        my $method = $food."_production_hour";
-        $tally += $self->$method;
+        $tally += $self->get_production($food);
     }
-    $tally -= $self->food_consumption_hour;
+    $tally -= $self->get_consumption('food');
     return $tally;
 }
 
@@ -2140,7 +2144,7 @@ sub food_stored {
     my ($self) = @_;
     my $tally = 0;
     foreach my $food (FOOD_TYPES) {
-        $tally += $self->type_stored($food);
+        $tally += $self->get_stored($food);
     }
     return $tally;
 }
@@ -2149,7 +2153,7 @@ sub food_stored {
 sub add_food_type {
     my ($self, $type, $amount_requested) = @_;
 
-    my $available_storage = $self->food_capacity - $self->food_stored;
+    my $available_storage = $self->food_capacity - $self->get_stored('food');
     $available_storage = 0 if ($available_storage < 0);
     my $amount_to_add = ($amount_requested <= $available_storage) ? $amount_requested : $available_storage;
     $self->type_stored($type, $self->type_stored($type) + $amount_to_add );
@@ -2238,9 +2242,9 @@ sub spend_food {
 sub add_energy {
     my ($self, $value) = @_;
 
-    my $store = $self->energy_stored + $value;
+    my $store = $self->get_stored('energy') + $value;
     my $storage = $self->energy_capacity;
-    $self->energy_stored( ($store < $storage) ? $store : $storage );
+    $self->set_stored('energy', ($store < $storage) ? $store : $storage );
     return $self;
 }
 
@@ -2248,14 +2252,14 @@ sub add_energy {
 sub spend_energy {
     my ($self, $amount_spent) = @_;
 
-    my $amount_stored = $self->energy_stored;
+    my $amount_stored = $self->get_stored('energy');
     if ($amount_spent > $amount_stored) {
         $self->spend_happiness($amount_spent - $amount_stored);
-        $self->energy_stored(0);
+        $self->set_stored('energy',0);
         $self->complain_about_lack_of_resources('energy');
     }
     else {
-        $self->energy_stored( $amount_stored - $amount_spent );
+        $self->set_stored('energy', $amount_stored - $amount_spent );
     }
     return $self;
 }
@@ -2264,9 +2268,9 @@ sub spend_energy {
 sub add_water {
     my ($self, $value) = @_;
 
-    my $store = $self->water_stored + $value;
-    my $storage = $self->water_capacity;
-    $self->water_stored( ($store < $storage) ? $store : $storage );
+    my $store = $self->get_stored('water') + $value;
+    my $storage = $self->get_capacity('water');
+    $self->set_stored('water', ($store < $storage) ? $store : $storage );
     return $self;
 }
 
@@ -2274,14 +2278,14 @@ sub add_water {
 sub spend_water {
     my ($self, $amount_spent) = @_;
 
-    my $amount_stored = $self->water_stored;
+    my $amount_stored = $self->get_stored('water');
     if ($amount_spent > $amount_stored) {
         $self->spend_happiness($amount_spent - $amount_stored);
-        $self->water_stored(0);
+        $self->set_stored('water',0);
         $self->complain_about_lack_of_resources('water');
     }
     else {
-        $self->water_stored( $amount_stored - $amount_spent );
+        $self->set_stored('water', $amount_stored - $amount_spent );
     }
     return $self;
 }
@@ -2290,11 +2294,11 @@ sub spend_water {
 sub add_happiness {
     my ($self, $value) = @_;
 
-    my $new = $self->happiness + $value;
+    my $new = $self->get_stored('happiness') + $value;
     if ($new < 0 && $self->empire->is_isolationist) {
         $new = 0;
     }
-    $self->happiness( $new );
+    $self->set_stored('happiness', $new);
     return $self;
 }
 
@@ -2303,7 +2307,7 @@ sub spend_happiness {
     my ($self, $value) = @_;
     $self->tick;
     
-    my $new = $self->happiness - $value;
+    my $new = $self->get_stored('happiness') - $value;
     my $empire = $self->empire;
     if ($empire and $new < 0) {
         if ($empire->is_isolationist) {
@@ -2318,7 +2322,7 @@ sub spend_happiness {
             );
         }
     }
-    $self->happiness( $new );
+    $self->set_stored('happiness', $new);
     return $self;
 }
 
@@ -2326,15 +2330,15 @@ sub spend_happiness {
 sub add_waste {
     my ($self, $value) = @_;
 
-    my $store = $self->waste_stored + $value;
-    my $storage = $self->waste_capacity;
+    my $store = $self->get_stored('waste') + $value;
+    my $storage = $self->get_capacity('waste');
     if ($store < $storage) {
-        $self->waste_stored( $store );
+        $self->set_stored('waste', $store );
     }
     else {
         my $empire = $self->empire;
         return $self unless $empire;
-        $self->waste_stored( $storage );
+        $self->set_stored('waste', $storage );
         $self->spend_happiness( $store - $storage ); # pollution
         if (!$empire->skip_pollution_warnings && $empire->university_level > 2 && !$empire->check_for_repeat_message('complaint_pollution'.$self->id)) {
             $empire->send_predefined_message(
@@ -2352,12 +2356,12 @@ sub add_waste {
 # if waste goes negative, strip waste using buildings
 sub spend_waste {
     my ($self, $value) = @_;
-    if ($self->waste_stored >= $value) {
-        $self->waste_stored( $self->waste_stored - $value );
+    if ($self->get_stored('waste') >= $value) {
+        $self->set_stored('waste', $self->get_stored('waste') - $value );
     }
     else { # if they run out of waste in storage, then the citizens start bitching
-        $self->spend_happiness($value - $self->waste_stored);
-        $self->waste_stored(0);
+        $self->spend_happiness($value - $self->get_stored('waste'));
+        $self->set_stored('waste',0);
         my $empire = $self->empire;
         if (!KA->cache->get('lack_of_waste',$self->id)) {
             my $building_name;
