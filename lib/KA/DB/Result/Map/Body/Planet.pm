@@ -12,6 +12,7 @@ use DateTime;
 use Data::Dumper;
 use Scalar::Util qw(weaken);
 use Log::Any;
+use KA::SDB;
 
 no warnings 'uninitialized';
 
@@ -24,6 +25,12 @@ __PACKAGE__->has_many('waste_chains', 'KA::DB::Result::WasteChain','planet_id');
 __PACKAGE__->has_many('out_supply_chains', 'KA::DB::Result::SupplyChain','planet_id');
 __PACKAGE__->has_many('in_supply_chains', 'KA::DB::Result::SupplyChain','target_id');
 __PACKAGE__->has_many('body_resources','KA::DB::Result::Resource','body_id');
+
+has db => (
+    is      => 'rw',
+    lazy    => 1,
+    builder => '_build_db',
+);
 
 has log => (
     is      => 'rw',
@@ -59,6 +66,10 @@ sub _build_log {
     return Log::Any->get_logger;
 }
 
+sub _build_db {
+    my ($self) = @_;
+    return KA::SDB->instance->db;
+}
 
 sub _build_plan_cache {
     my ($self) = @_;
@@ -94,7 +105,7 @@ sub get_resource {
     if (defined $resource) {
         return $resource;
     }
-    $resource = KA->db->resultset('Resource')->new({
+    $resource = $self->db->resultset('Resource')->new({
         body_id         => $self->id,
         type            => $type,
         production      => 0,
@@ -314,7 +325,7 @@ sub fleets_orbiting {
 sub fleets_building {
     my ($self) = @_;
 
-    my ($sum) = KA->db->resultset('Fleet')->search({
+    my ($sum) = $self->db->resultset('Fleet')->search({
         body_id => $self->id,
         task    => ['Building','Repairing'],
         }, {
@@ -350,7 +361,7 @@ has is_claimed => (
 sub claimed_by {
     my $self = shift;
     my $empire_id = $self->is_claimed;
-    return $empire_id ? KA->db->resultset('Empire')->find($empire_id) : undef;    
+    return $empire_id ? $self->db->resultset('Empire')->find($empire_id) : undef;    
 }
 
 # add a glyph to this planet
@@ -359,7 +370,7 @@ sub add_glyph {
 
     $num_add = 1 unless defined($num_add);
 
-    my $glyph = KA->db->resultset('Glyph')->search({
+    my $glyph = $self->db->resultset('Glyph')->search({
         type    => $type,
         body_id => $self->id,
     })->first;
@@ -381,7 +392,7 @@ sub use_glyph {
     my ($self, $type, $num_used) = @_;
 
     $num_used = 1 unless (defined($num_used));
-    my $glyph = KA->db->resultset('Glyph')->search({
+    my $glyph = $self->db->resultset('Glyph')->search({
         type    => $type,
         body_id => $self->id,
     })->first;
@@ -454,22 +465,22 @@ sub sanitize {
     foreach my $chain ($self->in_supply_chains) {
         $chain->delete;
     }
-    my $incoming = KA->db->resultset('Fleet')->search({foreign_body_id => $self->id, direction => 'out'});
+    my $incoming = $self->db->resultset('Fleet')->search({foreign_body_id => $self->id, direction => 'out'});
     while (my $fleet = $incoming->next) {
         $fleet->turn_around->update;
     }
     $self->fleets->delete_all;
-    my $enemy_spies = KA->db->resultset('Spy')->search({on_body_id => $self->id});
+    my $enemy_spies = $self->db->resultset('Spy')->search({on_body_id => $self->id});
     while (my $spy = $enemy_spies->next) {
         $spy->on_body_id($spy->from_body_id);
         $spy->task("Idle");
         $spy->update;
     }
-    KA->db->resultset('Spy')->search({from_body_id => $self->id})->delete_all;
-    KA->db->resultset('Market')->search({body_id => $self->id})->delete_all;
-    KA->db->resultset('MercenaryMarket')->search({body_id => $self->id})->delete_all;
+    $self->db->resultset('Spy')->search({from_body_id => $self->id})->delete_all;
+    $self->db->resultset('Market')->search({body_id => $self->id})->delete_all;
+    $self->db->resultset('MercenaryMarket')->search({body_id => $self->id})->delete_all;
     # We will delete all probes (observatory or oracle), note, must recreate oracle probes if the planet is recolonised
-    KA->db->resultset('Probe')->search_any({body_id => $self->id})->delete;
+    $self->db->resultset('Probe')->search_any({body_id => $self->id})->delete;
     $self->empire_id(undef);
     if ($self->get_type eq 'habitable planet' &&
         $self->size >= 40 && $self->size <= 50 &&
@@ -496,38 +507,33 @@ before abandon => sub {
 sub get_ore_status {
     my ($self) = @_;
 
-    my $resource_rs = $self->resources;
     my @types = (ORE_TYPES);
 
     my $out;
-    while (my $resource = $resource_rs->next) {
-        my $type = $resource->type;
-        if ($type ~~ \@types) {
-            $out->{"${type}_hour"}          = $resource->production;    # DEPRECATED only for backwards compatibility
-            $out->{"${type}_production"}    = $resource->production;
-            $out->{"${type}_stored"}        = $resource->stored;
-            $out->{"${type}_consumed"}      = $resource->consumed;
-        }
-    }
+    foreach my $type (@types) {
+        my $resource = $self->get_resource($type);
+        $out->{"${type}_hour"}          = $resource->production;    # DEPRECATED only for backwards compatibility
+        $out->{"${type}_production"}    = $resource->production;
+        $out->{"${type}_stored"}        = $resource->stored;
+        $out->{"${type}_consumption"}   = $resource->consumption;
+    }         
     return $out;
 }
 
 sub get_food_status {
     my ($self) = @_;
 
-    my $resource_rs = $self->resources;
     my @types = (FOOD_TYPES);
 
     my $out;
-    while (my $resource = $resource_rs->next) {
-        my $type = $resource->type;
-        if ($type ~~ \@types) {
-            $out->{"${type}_hour"}          = $resource->production;    # DEPRECATED only for backwards compatibility
-            $out->{"${type}_production"}    = $resource->production;
-            $out->{"${type}_stored"}        = $resource->stored;
-            $out->{"${type}_consumed"}      = $resource->consumed;
-        }
-    }
+    foreach my $type (@types) {
+        my $resource = $self->get_resource($type);
+        $out->{"${type}_hour"}          = $resource->production;    # DEPRECATED only for backwards compatibility
+        $out->{"${type}_production"}    = $resource->production;
+        $out->{"${type}_stored"}        = $resource->stored;
+        $out->{"${type}_consumption"}   = $resource->consumption;
+    }         
+    return $out;
 }
 
 around get_status_lite => sub {
@@ -601,7 +607,7 @@ around get_status => sub {
                     my $foreign_bodies;
                     # Process all fleets that have already arrived
 
-                    my $incoming_rs = KA->db->resultset('Fleet')->search({
+                    my $incoming_rs = $self->db->resultset('Fleet')->search({
                         foreign_body_id     => $self->id,
                         direction           => 'out',
                         task                => 'Travelling',
@@ -611,7 +617,7 @@ around get_status => sub {
                         $foreign_bodies->{$fleet->body_id} = 1;
                     }
                     foreach my $body_id (keys %$foreign_bodies) {
-                        my $body = KA->db->resultset('Map::Body')->find($body_id);
+                        my $body = $self->db->resultset('Map::Body')->find($body_id);
                         if ($body) {
                             $body->tick;
                         }
@@ -621,7 +627,7 @@ around get_status => sub {
                     my @incoming_ally;
                     # If we are in an alliance, all fleets coming from ally (which are not ourself)
                     if ($self->empire->alliance_id) {
-                        my $incoming_ally_rs = KA->db->resultset('Fleet')->search({
+                        my $incoming_ally_rs = $self->db->resultset('Fleet')->search({
                             foreign_body_id     => $self->id,
                             direction           => 'out',
                             task                => 'Travelling',
@@ -635,7 +641,7 @@ around get_status => sub {
                         @incoming_ally = $incoming_ally_rs->search({},{rows => 10});
                     }
                     # All fleets coming from ourself
-                    my $incoming_own_rs = KA->db->resultset('Fleet')->search({
+                    my $incoming_own_rs = $self->db->resultset('Fleet')->search({
                         foreign_body_id     => $self->id,
                         direction           => 'out',
                         task                => 'Travelling',
@@ -648,7 +654,7 @@ around get_status => sub {
                     my @incoming_own = $incoming_own_rs->search({},{rows => 10});
 
                     # All foreign incoming
-                    my $incoming_foreign_rs = KA->db->resultset('Fleet')->search({
+                    my $incoming_foreign_rs = $self->db->resultset('Fleet')->search({
                         foreign_body_id     => $self->id,
                         direction           => 'out',
                         task                => 'Travelling',
@@ -904,7 +910,7 @@ sub find_free_spaces
 
     # I have no idea how to make this query in DBIC, so resort to direct
     # SQL calls.
-    my $dbh = KA->db->storage->dbh();
+    my $dbh = $self->db->storage->dbh();
 
     my $gen_tmp = sub {
         my $col = shift;
@@ -989,7 +995,7 @@ sub find_free_space {
 
 sub has_outgoing_ships {
     my ($self, $min) = @_;
-    my $ships = KA->db->resultset('Fleet')->search({
+    my $ships = $self->db->resultset('Fleet')->search({
             body_id         => $self->id,
             task            => 'Travelling',
     });
@@ -1249,7 +1255,7 @@ sub found_colony {
     }
 
     # add command building
-    my $command = KA->db->resultset('Building')->new({
+    my $command = $self->db->resultset('Building')->new({
         x       => 0,
         y       => 0,
         class   => 'KA::DB::Result::Building::PlanetaryCommand',
@@ -1321,7 +1327,7 @@ sub convert_to_station {
     $self->glyphs->delete;
 
     # add command building
-    my $command = KA->db->resultset('Building')->new({
+    my $command = $self->db->resultset('Building')->new({
         x       => 0,
         y       => 0,
         class   => 'KA::DB::Result::Building::Module::StationCommand',
@@ -1330,7 +1336,7 @@ sub convert_to_station {
     $command->finish_upgrade;
 
     # add parliament
-    my $parliament = KA->db->resultset('Building')->new({
+    my $parliament = $self->db->resultset('Building')->new({
         x       => -1,
         y       => 0,
         class   => 'KA::DB::Result::Building::Module::Parliament',
@@ -1339,7 +1345,7 @@ sub convert_to_station {
     $parliament->finish_upgrade;
 
     # add warehouse
-    my $warehouse = KA->db->resultset('Building')->new({
+    my $warehouse = $self->db->resultset('Building')->new({
         x       => 1,
         y       => 0,
         class   => 'KA::DB::Result::Building::Module::Warehouse',
@@ -1433,7 +1439,7 @@ sub recalc_stats {
     }
     $stats{max_berth} = 1;
     #calculate propaganda bonus
-    my $spy_boost = KA->db->resultset('Spy')->boost_sum($self);
+    my $spy_boost = $self->db->resultset('Spy')->boost_sum($self);
 
     $self->propaganda_boost($spy_boost);
     $self->update;
@@ -1474,7 +1480,7 @@ sub recalc_stats {
             $stats{max_berth} = $building->effective_level if ($building->effective_level > $stats{max_berth});
         }
         if ($building->isa('KA::DB::Result::Building::Ore::Ministry')) {
-            my $platforms = KA->db->resultset('MiningPlatform')->search({planet_id => $self->id});
+            my $platforms = $self->db->resultset('MiningPlatform')->search({planet_id => $self->id});
             while (my $platform = $platforms->next) {
                 foreach my $type (ORE_TYPES) {
                     my $method = $type.'_hour';
@@ -1484,7 +1490,7 @@ sub recalc_stats {
         }
         if ($building->isa('KA::DB::Result::Building::Trade')) {
             # Calculate the amount of waste to deduct based on the waste_chains
-            my $waste_chains = KA->db->resultset('WasteChain')->search({planet_id => $self->id});
+            my $waste_chains = $self->db->resultset('WasteChain')->search({planet_id => $self->id});
             while (my $waste_chain = $waste_chains->next) {
                 my $percent = $waste_chain->percent_transferred;
                 $percent = $percent > 100 ? 100 : $percent;
@@ -1651,7 +1657,7 @@ sub add_news {
     }
     if (randint(1,100) <= $chance) {
         $headline = sprintf $headline, @_ if @_;
-        KA->db->resultset('News')->new({
+        $self->db->resultset('News')->new({
             date_posted => DateTime->now,
             zone        => $self->zone,
             headline    => $headline,

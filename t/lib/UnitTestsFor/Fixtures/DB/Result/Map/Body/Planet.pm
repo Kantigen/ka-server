@@ -6,17 +6,36 @@ use namespace::autoclean;
 
 my %definitions = (
     my_empire => {
-        id             => 1,
-        name           => 'me',
+        new => 'Empire',
+        using => {
+            id                 => 1,
+            name               => 'me',
+            date_created       => '2016-07-20 06:33:16',
+            self_destruct_date => '2016-07-20 06:33:16',
+            status_message     => '',
+            password           => 'secret',
+            sitter_password    => 'secret',
+            last_login         => '2016-07-20 06:33:16',
+            storage_boost      => '2016-07-20 06:33:16',
+            food_boost         => '2016-07-20 06:33:16',
+            water_boost        => '2016-07-20 06:33:16',
+            energy_boost       => '2016-07-20 06:33:16',
+            happiness_boost    => '2016-07-20 06:33:16',
+            building_boost     => '2016-07-20 06:33:16',
+            spy_training_boost => '2016-07-20 06:33:16',
+        },
     },
 
     my_star => {
-        id             => 1,
-        name           => "Dillon",
-        x              => 98,
-        y              => 98,
-        zone           => "0|0",
-        color          => "yellow",
+        new => 'Map::Star',
+        using => {
+            id             => 1,
+            name           => "Dillon",
+            x              => 98,
+            y              => 98,
+            zone           => "0|0",
+            color          => "yellow",
+        }
     },
 
     my_planet => {
