@@ -50,7 +50,10 @@ Ususally, Docker Compose is much simpler to install than Docker itself. Simply f
 
 The next step is to download a bunch of stuff. This next command will download all the Docker images that are needed to run the server.
 
-  1. In the root of the repo, run `docker-compose pull`.
+```bash
+# In the root of the repo, run:
+docker-compose pull
+```
 
 This command may take quite a while. It depends on the speed of your internet connection.
 
@@ -58,20 +61,29 @@ This command may take quite a while. It depends on the speed of your internet co
 
 This next command starts up the entire server and its dependencies.
 
-  1. In the root of the repository run `docker-compose up`.
+```bash
+# In the root of the repo, run:
+docker-compose up
+```
 
 ## 6. Setup Database
 
 Now that we've got things started, we alomost have a working server. What remains is to initialize the database and to populate the starmap.
 
-  1. Leave `docker-compose up` running and in another terminal window `cd` into the repo root.
-  2. `docker-compose exec ka-websocket /bin/bash`
-  3. `cd /home/keno/ka-server/bin`
-  4. `mysql -h ka-mysql-server --password=keno`
-  5. `source docker.sql`
-  6. `exit`
-  7. `cd /home/keno/ka-server/bin/setup`
-  8. `perl init-keno.pl`
+```bash
+# Leave `docker-compose up` running and in another
+# terminal window `cd` into the repo root.
+docker-compose exec ka-websocket /bin/bash
+
+cd /home/keno/ka-server/bin
+mysql -h ka-mysql-server --password=keno
+
+source docker.sql
+exit
+
+cd /home/keno/ka-server/bin/setup
+perl init-keno.pl
+```
 
 This process will take a while depending on the speed of your machine, but once it's done, it's done! Congratulations on setting up a Keno Antigen server.
 
@@ -79,8 +91,10 @@ This process will take a while depending on the speed of your machine, but once 
 
 Once you have `docker-compose up` running, connecting to the server and doing whatever database manipulation you desire is simple.
 
-  1. Open another terminal and `cd` into the repo root.
-  2. Run `./connect-mysql.sh`.
+```bash
+# Open another terminal and `cd` into the repo root.
+./connect-mysql.sh
+```
 
 You should now be logged into the database. To test, you can run `select name from empire;` which will output a list of empire's names.
 
@@ -90,11 +104,11 @@ If there's something you need to run on the server, here's how you do it...
 
 Once you have `docker-compose up` running do the following:
 
-  1. Open another terminal and `cd` into the repo root.
-  2. Run `./connect-server.sh`.
+```bash
+# Open another terminal and `cd` into the repo root.
+./connect-server.sh
+```
 
 ## Making Changes to the Code
 
-Code changes should be made outside the Docker containers (aka, on the host machine). The `lib`, `bin`, `etc`, and `var` are all made accessible inside the server container for them to work. To make changes work, restart the `docker-compose up` command.
-
-And don't worry, it's a common mistake to make a code change and be unable to figure out why it's not taking effect. Everyone forgets from time to time. Just restart `docker-compose up`.
+Code changes should be made outside the Docker containers (aka, on the host machine). The `lib`, `bin`, `etc`, and `var` are all made accessible inside the server container for them to work. When making code changes, make sure to restart the `docker-compose up` command.
