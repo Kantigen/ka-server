@@ -49,7 +49,9 @@ has resource_cache => (
     is      => 'rw',
     lazy    => 1,
     builder => '_build_resource_cache',
-    clearer => 'clear_resource_cache',
+    #default  => sub { my $self = shift; return $self->_build_resource_cache },
+    #clearer => 'clear_resource_cache',
+    predicate => 'has_resource_cache',
 );
 
 sub fleets_travelling {
@@ -88,12 +90,28 @@ sub _build_plan_cache {
 sub _build_resource_cache {
     my ($self) = @_;
 
+    $self->log->debug("BUILD_RESOURCE_CACHE");
+    $self->log->debug("BUILD_RESOURCE_CACHE: [".$self->resource_cache."]") if $self->has_resource_cache;
     my $resources = {};
     my $resource_rs = $self->body_resources->search({});
     while (my $resource = $resource_rs->next) {
+        $self->log->debug("BUILD_CACHE: new $self, $resource ".Dumper($resource->{_column_data})) if $resource->type eq 'water';
         $resources->{$resource->type} = $resource;
     }
     return $resources;
+}
+
+sub BUILD {
+    my ($self) = @_;
+
+    $self->log->debug("BUILD");
+}
+
+sub DEMOLISH {
+    my ($self) = @_;
+
+    $self->log->debug("DEMOLISH: ") ;
+    $self->update_resources;
 }
 
 # Get methods for stored, production (per hour), consumption (per hour) and capacity
@@ -103,6 +121,7 @@ sub get_resource {
 
     my $resource = $self->resource_cache->{$type};
     if (defined $resource) {
+#        $self->log->debug("GET_RESOURCE: existing $self, $resource ".Dumper($resource->{_column_data})) if $resource->type eq 'water';
         return $resource;
     }
     $resource = $self->db->resultset('Resource')->new({
@@ -114,6 +133,7 @@ sub get_resource {
         capacity        => 0,
     });
     $self->resource_cache->{$type} = $resource;
+    $self->log->debug("GET_RESOURCE: new ".Dumper($resource->{_column_data})) if $resource->type eq 'water';
     return $resource;
 }
 
@@ -184,17 +204,16 @@ sub add_capacity {
     my $resource = $self->get_resource($type);
     my $new_qty = $resource->capacity + $qty;
     $resource->capacity($new_qty);
-    $self->log->debug("ADD_CAPACITY $resource - $new_qty");
+    $self->log->debug("ADD_CAPACITY: $self, $resource ".Dumper($resource->{_column_data})) if $type eq 'water';
 }
 
 sub add_stored {
     my ($self, $type, $qty) = @_;
 
-    $self->log->debug("ADD_STORED: $type $qty");
     my $resource = $self->get_resource($type);
     my $new_qty = $resource->stored + $qty;
     $resource->stored($new_qty);
-    $self->log->debug("ADDED: $new_qty");
+    $self->log->debug("ADD_STORED: $self, $resource ".Dumper($resource->{_column_data})) if $type eq 'water';
 }
 
 # Note, stored can be negative (e.g. happiness) this must be
@@ -214,7 +233,7 @@ sub update_resources {
     foreach my $key (keys %{$self->resource_cache}) {
         my $resource = $self->resource_cache->{$key};
         if ($resource->id) {
-            $self->log->debug("UPDATE $resource");
+            $self->log->debug("UPDATE $self, $resource ".Dumper($resource->{_column_data})) if $resource->type eq 'water';
             $resource->update;
         }
         else {
@@ -489,7 +508,7 @@ sub sanitize {
         $self->usable_as_starter_enabled(1);
     }
     $self->body_resources->delete_all;
-    $self->clear_resource_cache;
+    #$self->clear_resource_cache;
     $self->restrict_coverage(0); 
     $self->update;
     return $self;
@@ -1283,7 +1302,7 @@ sub found_colony {
     # Initialize body
     $self->restrict_coverage(0);
     $self->body_resources->delete_all;
-    $self->clear_resource_cache;
+    #$self->clear_resource_cache;
 
     # add starting resources
     $self->needs_recalc(1);
@@ -1555,6 +1574,7 @@ sub recalc_stats {
         $self->add_production($type, $domestic_ore_hour);
     }
     $self->update;
+    $self->update_resources;
     $self->discard_changes;
     
     # deal with negative amounts stored
@@ -1564,6 +1584,7 @@ sub recalc_stats {
         $self->set_stored($type, 0) if ($self->get_stored($type) < 0);
     }
     $self->update;
+    $self->update_resources;
     $self->discard_changes;
     
     # deal with storage overages
@@ -1637,6 +1658,7 @@ sub recalc_stats {
         $self->set_production('happiness', -100_000_000_000) if ($self->get_production('happiness') < -100_000_000_000);
     }
     $self->update;
+    $self->update_resources;
     $self->discard_changes;
     $self->update(\%stats);
     $self->update_resources;
@@ -1678,7 +1700,7 @@ sub tick {
         return undef;
     }
     else {
-        $cache->set('ticking',$self->id, 1, 300);
+        $cache->set('ticking',$self->id, 1, 30);
     }
     
     my $now = DateTime->now;
@@ -2073,7 +2095,7 @@ sub add_ore {
 sub add_ore_type {
     my ($self, $type, $amount_requested) = @_;
 
-    my $available_storage = $self->ore_capacity - $self->get_stored('ore');
+    my $available_storage = $self->get_capacity('ore') - $self->get_stored('ore');
     $available_storage = 0 if ($available_storage < 0);
     my $amount_to_add = ($amount_requested <= $available_storage) ? $amount_requested : $available_storage;
     $self->type_stored($type, $self->type_stored($type) + $amount_to_add );
@@ -2167,7 +2189,7 @@ sub food_stored {
 sub add_food_type {
     my ($self, $type, $amount_requested) = @_;
 
-    my $available_storage = $self->food_capacity - $self->get_stored('food');
+    my $available_storage = $self->get_capacity('food') - $self->get_stored('food');
     $available_storage = 0 if ($available_storage < 0);
     my $amount_to_add = ($amount_requested <= $available_storage) ? $amount_requested : $available_storage;
     $self->type_stored($type, $self->type_stored($type) + $amount_to_add );
