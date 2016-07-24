@@ -101,7 +101,7 @@ services:
     container_name: 'ka-nginx'
     depends_on:
       - 'ka-server'
-    image: 'kenoantigen/ka-ngnix'
+    image: 'kenoantigen/ka-nginx'
     ports:
       - '8000:80'
     volumes:
