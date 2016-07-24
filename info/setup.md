@@ -51,7 +51,7 @@ Ususally, Docker Compose is much simpler to install than Docker itself. Simply f
 The next step is to download a bunch of stuff. This next command will download all the Docker images that are needed to run the server.
 
 ```bash
-# In the root of the repo, run:
+# In the root of the repo:
 docker-compose pull
 ```
 
@@ -59,24 +59,28 @@ This command may take quite a while. It depends on the speed of your internet co
 
 ## 5. Start Everything
 
-This next command starts up the entire server and its dependencies.
+This next step starts up the entire server and its dependencies. When doing development work, this is the command to use.
 
 ```bash
-# In the root of the repo, run:
+# In the root of the repo:
 docker-compose up
 ```
 
+As this is your first time running the whole mess, you may see some errors about `ka-server` being unable to connect to the database. We're going to fix that next. For now, leave this running and perform the next step in a new terminal window.
+
 ## 6. Setup Database
 
-Now that we've got things started, we alomost have a working server. What remains is to initialize the database and to populate the starmap.
+We're almost there. What remains is to initialize the database and to generate the starmap.
 
 ```bash
-# Leave `docker-compose up` running and in another
-# terminal window `cd` into the repo root.
+# Make sure you have `docker-compose up` running in another
+# terminal window before continuing on.
+
+# In the repo root:
 docker-compose exec ka-websocket /bin/bash
 
 cd /home/keno/ka-server/bin
-mysql -h ka-mysql-server --password=keno
+TERM=xterm mysql -h ka-mysql-server --password=keno
 
 source docker.sql
 exit
@@ -85,7 +89,11 @@ cd /home/keno/ka-server/bin/setup
 perl init-keno.pl
 ```
 
-This process will take a while depending on the speed of your machine, but once it's done, it's done! Congratulations on setting up a Keno Antigen server.
+This process will take a while depending on the speed of your machine.
+
+## 7. Finishing Up
+
+Once you have the database setup, close that terminal window and go back to where you had `docker-compose up` running. Restart that command and the whole server mess should start up.
 
 ## Connecting to the Database
 
