@@ -269,7 +269,7 @@ sub check_objectives {
     # resources
     if (exists $objectives->{resources}) {
         foreach my $resource (keys %{$objectives->{resources}}) {
-            if ($body->type_stored($resource) < $objectives->{resources}{$resource}) {
+            if ($body->get_stored($resource) < $objectives->{resources}{$resource}) {
                 confess [1013, 'You do not have the '.$resource.' needed to complete this mission.'];
             }
         }

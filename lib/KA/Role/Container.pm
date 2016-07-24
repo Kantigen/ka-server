@@ -10,12 +10,12 @@ sub format_body_stats_for_log {
     my ($self, $body ) = @_;
     my %stats;
     foreach my $type (qw(water energy waste), ORE_TYPES, FOOD_TYPES) {
-        $stats{$type} = $body->type_stored($type);
-        $stats{food_capacity} = $body->food_capacity;
-        $stats{water_capacity} = $body->water_capacity;
-        $stats{waste_capacity} = $body->waste_capacity;
-        $stats{ore_capacity} = $body->ore_capacity;
-        $stats{energy_capacity} = $body->energy_capacity;
+        $stats{$type} = $body->get_stored($type);
+        $stats{food_capacity} = $body->get_capacity('food');
+        $stats{water_capacity} = $body->get_capacity('water');
+        $stats{waste_capacity} = $body->get_capacity('waste');
+        $stats{ore_capacity} = $body->get_capacity('ore');
+        $stats{energy_capacity} = $body->get_capacity('energy');
     }
     return \%stats;
 }

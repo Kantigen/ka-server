@@ -649,7 +649,7 @@ sub www_view_resources {
     $out .= sprintf('<a href="/admin/view/body?id=%s">Back To Body</a>', $body_id);
     $out .= '<table style="width: 100%;"><tr><th>Type</th><th>Stored</th><th>Add</th></tr>';
     foreach my $resource (@types) {
-        $out .= sprintf('<tr><td>%s</td><td>%s</td><form method="post" action="/admin/add/resources"><td><input name="amount"><input type="submit" value="add"><input type="hidden" name="body_id" value="%s"><input type="hidden" name="resource" value="%s"</td></form></tr>', $resource, $body->type_stored($resource), $body_id, $resource);
+        $out .= sprintf('<tr><td>%s</td><td>%s</td><form method="post" action="/admin/add/resources"><td><input name="amount"><input type="submit" value="add"><input type="hidden" name="body_id" value="%s"><input type="hidden" name="resource" value="%s"</td></form></tr>', $resource, $body->get_stored($resource), $body_id, $resource);
     }
     $out .= '</table>';
     return $self->wrap($out);

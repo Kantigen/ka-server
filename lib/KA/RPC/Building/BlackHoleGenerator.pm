@@ -386,7 +386,7 @@ sub task_chance {
         $return->{side_chance} = $bhg_param->{side_chance} if ($bhg_param->{side_chance});
         $return->{success}     = $bhg_param->{success}     if ($bhg_param->{success});
     }
-    unless ($building->body->waste_stored >= $task->{waste_cost}) {
+    unless ($building->body->get_stored('energy') >= $task->{waste_cost}) {
         $return->{throw}  = 1011;
         $return->{reason} = sprintf(
             "You need at least %s waste to run that function of the Black Hole Generator.",
@@ -744,7 +744,7 @@ sub generate_singularity {
         }
         $tid = $target->id;
     }
-    unless ($body->waste_stored >= $task->{waste_cost}) {
+    unless ($body->get_stored('waste') >= $task->{waste_cost}) {
         confess [1011, 'You need at least '.$task->{waste_cost}.' waste to run that function of the Black Hole Generator.'];
     }
     unless ($task->{occupied}) {
@@ -1902,7 +1902,7 @@ sub bhg_self_destruct {
         id        => $body->id,
         name      => $body->name,
     };
-    $body->waste_stored(0);
+    $body->set_stored('waste',0);
 
     # yes, ->level, not ->effective_level
     for (1..$building->level) {
@@ -2002,8 +2002,6 @@ sub bhg_decor {
 sub bhg_resource {
     my ($body, $variance) = @_;
     # If -1 deduct resources, if 0 randomize, if 1 add
-    my @food = map { $_.'_stored' } FOOD_TYPES;
-    my @ore  = map { $_.'_stored' } ORE_TYPES;
 
     my $return = {
         variance  => $variance,
@@ -2015,68 +2013,68 @@ sub bhg_resource {
     my $waste_msg;
     my $waste_rnd = randint(1,5);
     if ($waste_rnd > 3) {
-        $body->waste_stored($body->waste_capacity);
+        $body->set_stored('waste', $body->get_capacity('waste'));
         $return->{waste} = "Filled";
         $waste_msg = "filled our waste containers";
     }
     elsif ($waste_rnd < 3) {
-        $body->waste_stored(0);
+        $body->set_stored('waste', 0);
         $return->{waste} = "Zero";
         $waste_msg = "emptied our waste containers";
     }
     else {
-        $body->waste_stored(randint(0, $body->waste_capacity));
+        $body->set_stored('waste', randint(0, $body->get_capacity('waste')));
         $return->{waste} = "Random";
         $waste_msg = "randomized our waste storage";
     }
     # Other resources
     my $resource_msg;
     if ($variance == 1) {
-        $body->water_stored(randint($body->water_stored, $body->water_capacity));
-        $body->energy_stored(randint($body->energy_stored, $body->energy_capacity));
-        my $arr = rand_perc(scalar @food);
+        $body->set_stored('water', randint($body->get_stored('water'), $body->get_capacity('water')));
+        $body->set_stored('energy', randint($body->get_stored('energy'), $body->get_capacity('energy')));
+        my $arr = rand_perc(scalar FOOD_TYPES);
         my $food_stored = 0;
-        for my $attrib (@food) {
-            $food_stored += $body->$attrib;
+        for my $type (FOOD_TYPES) {
+            $food_stored += $body->get_stored($type);
         }
         my $food_room = $body->food_capacity - $food_stored;
-        for (0..(scalar @food - 1)) {
-            my $attribute = $food[$_];
-            $body->$attribute(randint($attribute, int($food_room * $arr->[$_]/100) ));
+        for (0..(scalar FOOD_TYPES - 1)) {
+            my $type = (FOOD_TYPES)[$_];
+            $body->set_stored($type, randint(0, int($food_room * $arr->[$_]/100) ));
         }
-        $arr = rand_perc(scalar @ore);
+        $arr = rand_perc(scalar ORE_TYPES);
         my $ore_stored = 0;
-        for my $attrib (@ore) {
-            $ore_stored += $body->$attrib;
+        for my $type (ORE_TYPES) {
+            $ore_stored += $body->get_stored($type);
         }
         my $ore_room = $body->ore_capacity - $ore_stored;
-        for (0..(scalar @ore - 1)) {
-            my $attribute = $ore[$_];
-            $body->$attribute(randint($attribute, int($ore_room * $arr->[$_]/100) ));
+        for (0..(scalar ORE_TYPES - 1)) {
+            my $type = (ORE_TYPES)[$_];
+            $body->set_stored($type, randint(0, int($ore_room * $arr->[$_]/100) ));
         }
         $resource_msg = "added various resources";
     }
     elsif ($variance == -1) {
-        $body->water_stored(randint(0, $body->water_stored));
-        $body->energy_stored(randint(0, $body->energy_stored));
-        foreach my $attribute (@food, @ore) {
-            next unless $body->$attribute;
-            $body->$attribute(randint(0, $body->$attribute));
+        $body->set_stored('water', randint(0, $body->get_stored('water')));
+        $body->set_stored('energy', randint(0, $body->get_stored('energy')));
+        foreach my $type (FOOD_TYPES, ORE_TYPES) {
+            next unless $body->get_stored($type);
+            $body->set_stored($type, randint(0, $body->get_stored($type)));
         }
         $resource_msg = "took away various resources";
     }
     else {
-        $body->water_stored(randint(0, $body->water_capacity));
-        $body->energy_stored(randint(0, $body->energy_capacity));
-        my $arr = rand_perc(scalar @food);
-        for (0..(scalar @food - 1)) {
-            my $attribute = $food[$_];
-            $body->$attribute(randint(0, int($body->food_capacity * $arr->[$_]/100) ));
+        $body->set_stored('water', randint(0, $body->get_capacity('water')));
+        $body->set_stored('energy', randint(0, $body->get_capacity('energy')));
+        my $arr = rand_perc(scalar FOOD_TYPES);
+        for (0..(scalar FOOD_TYPES - 1)) {
+            my $type = (FOOD_TYPES)[$_];
+            $body->set_stored($type, randint(0, int($body->food_capacity * $arr->[$_]/100) ));
         }
-        $arr = rand_perc(scalar @ore);
-        for (0..(scalar @ore - 1)) {
-            my $attribute = $ore[$_];
-            $body->$attribute(randint(0, int($body->ore_capacity * $arr->[$_]/100) ));
+        $arr = rand_perc(scalar ORE_TYPES);
+        for (0..(scalar ORE_TYPES - 1)) {
+            my $type = (ORE_TYPES)[$_];
+            $body->set_stored($type, randint(0, int($body->ore_capacity * $arr->[$_]/100) ));
         }
         $resource_msg = "randomized our resources. We may need to do a full inventory";
     }

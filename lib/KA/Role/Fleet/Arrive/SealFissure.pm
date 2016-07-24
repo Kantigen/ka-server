@@ -80,13 +80,13 @@ after send => sub {
     my $ore_stored = 0;
     my $ore_type_count = 0;
     for my $type (ORE_TYPES) {
-      my $stored = $body->type_stored($type);
+      my $stored = $body->get_stored($type);
       $ore_stored += $stored;
       $ore_type_count++ if ($stored);
     }
     $ore = $ore_stored if ($ore > $ore_stored);
     foreach my $type (ORE_TYPES) {
-        my $stored = $body->type_stored($type);
+        my $stored = $body->get_stored($type);
         if ($stored) {
           my $amt = int(($ore * $stored)/$ore_stored) - 100;
           if ( $amt > 0 ) {

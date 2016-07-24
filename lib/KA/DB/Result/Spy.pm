@@ -2679,7 +2679,7 @@ sub destroy_resources {
     my @types = qw(food water energy ore);
     my $resource = $types[ rand @types ];
     my $stolen = 'bunch of '. $resource;
-    $self->on_body->spend_type($resource, int($self->on_body->type_stored($resource) / 2))->update;
+    $self->on_body->spend_type($resource, int($self->on_body->get_stored($resource) / 2))->update;
     $self->on_body->empire->send_predefined_message(
         tags        => ['Spies','Alert'],
         filename    => 'item_destroyed.txt',
@@ -2831,14 +2831,14 @@ sub steal_resources {
     else { unshift( @types, 'energy'); }
     my %resources;
     foreach my $type (@types) {
-        next unless ($on_body->type_stored($type) > 0);
+        next unless ($on_body->get_stored($type) > 0);
         my $amt;
         if (randint(0,9) < 3) {
-          $amt = randint(0, $on_body->type_stored($type));
+          $amt = randint(0, $on_body->get_stored($type));
         }
         else {
           $amt = randint(0, $space);
-          $amt = $on_body->type_stored($type) if ($amt > $on_body->type_stored($type));
+          $amt = $on_body->get_stored($type) if ($amt > $on_body->get_stored($type));
         }
         if ($amt >= $space) {
             $resources{$type} = $space;

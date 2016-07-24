@@ -225,7 +225,7 @@ sub view_stash {
     my $body = $building->body;
     my %stored;
     foreach my $resource ('water','energy',FOOD_TYPES,ORE_TYPES) {
-        $stored{$resource} = $body->type_stored($resource);
+        $stored{$resource} = $body->get_stored($resource);
     }
     return {
         stash           => $building->alliance->stash || {},

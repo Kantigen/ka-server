@@ -1390,7 +1390,7 @@ has total_ore_concentration => (
 
         my $tally = 0;
         foreach my $type (ORE_TYPES) {
-            $tally += $self->get_stored($type);
+            $tally += $self->$type;
         }
         return $tally;
     },

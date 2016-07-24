@@ -19,13 +19,13 @@ after send => sub {
     my $food_stored = 0;
     my $food_type_count = 0;
     for my $type (FOOD_TYPES) {
-        my $stored = $body->type_stored($type);
+        my $stored = $body->get_stored($type);
         $food_stored += $stored;
         $food_type_count++ if ($stored);
     }
     $food = $food_stored if ($food > $food_stored);
     foreach my $type (FOOD_TYPES) {
-        my $stored = $body->type_stored($type);
+        my $stored = $body->get_stored($type);
         if ($stored) {
             my $amt = int(($food * $stored)/$food_stored) - 100;
             if ( $amt > 0 ) {
@@ -37,13 +37,13 @@ after send => sub {
     my $ore_stored = 0;
     my $ore_type_count = 0;
     for my $type (ORE_TYPES) {
-        my $stored = $body->type_stored($type);
+        my $stored = $body->get_stored($type);
         $ore_stored += $stored;
         $ore_type_count++ if ($stored);
     }
     $ore = $ore_stored if ($ore > $ore_stored);
     foreach my $type (ORE_TYPES) {
-        my $stored = $body->type_stored($type);
+        my $stored = $body->get_stored($type);
         if ($stored) {
             my $amt = int(($ore * $stored)/$ore_stored) - 100;
             if ( $amt > 0 ) {
@@ -52,7 +52,7 @@ after send => sub {
             }
         }
     }
-    my $energy = $body->type_stored('energy') - 100;
+    my $energy = $body->get_stored('energy') - 100;
     if ($energy >= $part) {
         $body->spend_type('energy', $part);
         $payload->{resources}{energy} = $part;
@@ -64,7 +64,7 @@ after send => sub {
     else {
         $payload->{resources}{energy} = 0;
     }
-    my $water = $body->type_stored('water') - 100;
+    my $water = $body->get_stored('water') - 100;
     if ($water >= $part) {
         $body->spend_type('water', $part);
         $payload->{resources}{water} = $part;

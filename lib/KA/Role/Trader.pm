@@ -52,7 +52,7 @@ sub check_payload {
       when ([qw(water energy waste), ORE_TYPES, FOOD_TYPES]) {
         confess $offer_nothing_exception unless ($item->{quantity} > 0);
         confess $fractional_offer_exception if ($item->{quantity} != int($item->{quantity}));
-        confess $have_exception unless ($body->type_stored($item->{type}) >= $item->{quantity});
+        confess $have_exception unless ($body->get_stored($item->{type}) >= $item->{quantity});
         push @expanded_items, $item;
         $space_used += $item->{quantity};
       }

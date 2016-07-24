@@ -72,7 +72,7 @@ before has_special_resources => sub {
   my $planet = $self->body;
   unless ($planet->get_plan(ref $self, $self->level + 1)) {
     my $amount_needed = sprintf('%.0f', $self->ore_to_build * $self->upgrade_cost * 0.50);
-    if ($planet->get_stored('rutile') + $planet->get_stored('chromite_stored +
+    if ($planet->get_stored('rutile') + $planet->get_stored('chromite') +
       $planet->get_stored('bauxite') + $planet->get_stored('magnetite') +
       $planet->get_stored('beryl') + $planet->get_stored('goethite') < $amount_needed) {
         confess [1012,"You do not have a sufficient supply (".
