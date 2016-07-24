@@ -222,16 +222,44 @@ sub use_stored {
     $resource->stored($new_qty);
 }
 
+
+after 'update' => sub {
+    my ($self) = @_;
+
+    $self->update_resources;
+};
+
 # Update the resources (store them in the database)
 #
 sub update_resources {
     my ($self) = @_;
 
+    # Aggregate food and ore
+    my $ore_resource = $self->get_resource('ore');
+    $ore_resource->production(0);
+    $ore_resource->consumption(0);
+    $ore_resource->stored(0);
+    my $food_resource = $self->get_resource('food');
+    $food_resource->production(0);
+    $food_resource->consumption(0);
+    $food_resource->stored(0);
+
     $self->log->debug("UPDATE_RESOURCES");
-    foreach my $key (keys %{$self->resource_cache}) {
+    foreach my $key (keys %{$self->resource_cache}, 'ore', 'food') {
         my $resource = $self->resource_cache->{$key};
+
+        if ($key ~~ [ORE_TYPES]) {
+            $ore_resource->production($ore_resource->production + $resource->production);
+            $ore_resource->consumption($ore_resource->consumption + $resource->consumption);
+            $ore_resource->stored($ore_resource->stored + $resource->stored);
+        }
+        if ($key ~~ [FOOD_TYPES]) {
+            $food_resource->production($food_resource->production + $resource->production);
+            $food_resource->consumption($food_resource->consumption + $resource->consumption);
+            $food_resource->stored($food_resource->stored + $resource->stored);
+        }
         if ($resource->id) {
-            $self->log->debug("UPDATE $self, $resource ".Dumper($resource->{_column_data})) if $resource->type eq 'water';
+            $self->log->debug("UPDATE $resource [".$resource->type."]");
             $resource->update;
         }
         else {
@@ -1569,7 +1597,6 @@ sub recalc_stats {
         $self->add_production($type, $domestic_ore_hour);
     }
     $self->update;
-    $self->update_resources;
     $self->discard_changes;
     
     # deal with negative amounts stored
@@ -1579,7 +1606,6 @@ sub recalc_stats {
         $self->set_stored($type, 0) if ($self->get_stored($type) < 0);
     }
     $self->update;
-    $self->update_resources;
     $self->discard_changes;
     
     # deal with storage overages
@@ -1653,10 +1679,8 @@ sub recalc_stats {
         $self->set_production('happiness', -100_000_000_000) if ($self->get_production('happiness') < -100_000_000_000);
     }
     $self->update;
-    $self->update_resources;
     $self->discard_changes;
     $self->update(\%stats);
-    $self->update_resources;
 
     return $self;
 }
@@ -1966,7 +1990,6 @@ sub tick_to {
         }
     }
     $self->update;
-    $self->update_resources;
 }
 
 # Change the state of a supply chain (stalled/not-stalled)
@@ -2004,6 +2027,14 @@ sub can_spend_type {
         confess [1009, "You don't have enough $type in storage."];
     }
     return 1;
+}
+
+# Spend $value amount of a resource $type
+sub spend_type {
+    my ($self, $type, $value) = @_;
+
+    $self->add_stored($type, 0-$value);
+    return $self;
 }
 
 # Can we add $value more of a $type of resource?
