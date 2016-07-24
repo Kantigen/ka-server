@@ -24,6 +24,27 @@ services:
     ports:
       - '11300:11300'
 
+  ###############
+  ## BG WORKER ##
+  ###############
+
+  ka-bg-worker:
+    command: 'perl bg_worker.pl daemon --nodaemonize --verbose'
+    container_name: 'ka-bg-worker'
+    depends_on:
+      - 'ka-server'
+    image: 'kenoantigen/ka-server'
+    volumes:
+        - ./bin:/home/keno/ka-server/bin
+        - ./docs:/home/keno/ka-server/docs
+        - ./etc:/home/keno/ka-server/etc
+        - ./lib:/home/keno/ka-server/lib
+        - ./t:/home/keno/ka-server/t
+        - ./var:/home/keno/ka-server/var
+    volumes_from:
+      - 'ka-captcha-data'
+
+
   ##################
   ## CAPTCHA DATA ##
   ##################
@@ -32,6 +53,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/build-captcha-data/Dockerfile
+    command: '/bin/bash'
     container_name: 'ka-captcha-data'
     image: 'kenoantigen/ka-captcha-data'
     volumes:
@@ -50,7 +72,7 @@ services:
   ################
 
   ka-mysql-data:
-    command: '/usr/bin/bash'
+    command: '/bin/bash'
     container_name: 'ka-mysql-data'
     image: 'arungupta/mysql-data-container'
 
@@ -73,10 +95,12 @@ services:
   ###########
 
   ka-nginx:
-    container_name: 'ka-nginx'
     build:
       context: .
       dockerfile: ./docker/build-nginx/Dockerfile
+    container_name: 'ka-nginx'
+    depends_on:
+      - 'ka-server'
     image: 'kenoantigen/ka-ngnix'
     ports:
       - '8000:80'
@@ -108,7 +132,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/build-server/Dockerfile
-    command: '/usr/bin/bash startdev.sh'
+    command: '/bin/bash startdev.sh'
     container_name: 'ka-server'
     depends_on:
       - 'ka-captcha-data'
@@ -116,7 +140,6 @@ services:
       - 'ka-redis'
       - 'ka-memcached'
       - 'ka-beanstalkd'
-      - 'ka-nginx'
     environment:
       - 'KA_NO_MIDDLEWARE=1'
     image: 'kenoantigen/ka-server'
