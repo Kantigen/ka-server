@@ -166,7 +166,7 @@ sub can_train_spy {
     }
     my $body = $self->body;
     foreach my $resource (qw(water ore food energy)) {
-        unless ($body->type_stored($resource) >= $costs->{$resource}) {
+        unless ($body->get_stored($resource) >= $costs->{$resource}) {
             confess [1011, 'Not enough '.$resource.' to train a spy.'];
         }
     }

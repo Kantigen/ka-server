@@ -322,10 +322,10 @@ sub pod_check {
     $colony->recalc_stats;
     my $add_it = $colony->water_capacity  - $colony->water_stored;
     say "Adding Water: $add_it";
-    $colony->add_type("water",  $add_it);
+    $colony->add_stored_limit("water",  $add_it);
     $add_it = $colony->energy_capacity  - $colony->energy_stored;
     say "Adding Energy: $add_it";
-    $colony->add_type("energy", $add_it);
+    $colony->add_stored_limit("energy", $add_it);
     my $food_room = $colony->food_capacity - $food_stored;
     say "Adding Food: $food_room";
     my $ore_room = $colony->ore_capacity - $ore_stored;
@@ -335,10 +335,10 @@ sub pod_check {
     my @food_type = splice(@foods, 0, 4);
     my @ore_type  = splice(@ores,  0, 4);
     for my $food (@food_type) {
-      $colony->add_type("$food", int($food_room/4));
+      $colony->add_stored_limit("$food", int($food_room/4));
     }
     for my $ore (@ore_type) {
-      $colony->add_type("$ore", int($ore_room/4));
+      $colony->add_stored_limit("$ore", int($ore_room/4));
     }
   }
   $colony->update;

@@ -101,27 +101,13 @@ sub _build_resource_cache {
     return $resources;
 }
 
-sub BUILD {
-    my ($self) = @_;
-
-    $self->log->debug("BUILD");
-}
-
-sub DEMOLISH {
-    my ($self) = @_;
-
-    $self->log->debug("DEMOLISH: ") ;
-    $self->update_resources;
-}
-
-# Get methods for stored, production (per hour), consumption (per hour) and capacity
+# Get a specific resource from the resource, or create it
 #
 sub get_resource {
     my ($self, $type) = @_;
 
     my $resource = $self->resource_cache->{$type};
     if (defined $resource) {
-#        $self->log->debug("GET_RESOURCE: existing $self, $resource ".Dumper($resource->{_column_data})) if $resource->type eq 'water';
         return $resource;
     }
     $resource = $self->db->resultset('Resource')->new({
@@ -161,29 +147,35 @@ sub get_capacity {
 }
 
 
-# Set methods for stored, production (per hour), consumption (per hour) and capacity
+# Set the amount stored
 #
 sub set_stored {
     my ($self, $type, $qty) = @_;
     $self->get_resource($type)->stored($qty);
 }
 
+# Set the hourly production rate
+#
 sub set_production {
     my ($self, $type, $qty) = @_;
     $self->get_resource($type)->production($qty);
 }
 
+# Set the hourly consumption rate
+#
 sub set_consumption {
     my ($self, $type, $qty) = @_;
     $self->get_resource($type)->consumption($qty);
 }
 
+# Absolutely set the total capacity of a resource
+#
 sub set_capacity {
     my ($self, $type, $qty) = @_;
     $self->get_resource($type)->capacity($qty);
 }
 
-# Methods to add or spend stored resources
+# Increase the hourly production rate
 #
 sub add_production {
     my ($self, $type, $qty) = @_;
@@ -192,6 +184,8 @@ sub add_production {
     $resource->production($new_qty);
 }
 
+# Increase the hourly consumption rate
+#
 sub add_consumption {
     my ($self, $type, $qty) = @_;
     my $resource = $self->get_resource($type);
@@ -199,21 +193,23 @@ sub add_consumption {
     $resource->consumption($new_qty);
 }
 
+# Increase the capacity
+#
 sub add_capacity {
     my ($self, $type, $qty) = @_;
     my $resource = $self->get_resource($type);
     my $new_qty = $resource->capacity + $qty;
     $resource->capacity($new_qty);
-    $self->log->debug("ADD_CAPACITY: $self, $resource ".Dumper($resource->{_column_data})) if $type eq 'water';
 }
 
+# Increase the amount stored, with no check on capacity
+#
 sub add_stored {
     my ($self, $type, $qty) = @_;
 
     my $resource = $self->get_resource($type);
     my $new_qty = $resource->stored + $qty;
     $resource->stored($new_qty);
-    $self->log->debug("ADD_STORED: $self, $resource ".Dumper($resource->{_column_data})) if $type eq 'water';
 }
 
 # Note, stored can be negative (e.g. happiness) this must be
@@ -226,6 +222,8 @@ sub use_stored {
     $resource->stored($new_qty);
 }
 
+# Update the resources (store them in the database)
+#
 sub update_resources {
     my ($self) = @_;
 
@@ -587,11 +585,9 @@ around get_status => sub {
 
     my $out = $orig->($self);
     my $ore;
-
-    
     
     foreach my $type (ORE_TYPES) {
-        $ore->{$type} = $self->$type();
+        $ore->{$type} = $self->get_stored($type);
     }
     $out->{ore}             = $ore;
     $out->{water}           = $self->water;
@@ -1102,7 +1098,7 @@ sub has_room_in_build_queue {
     return 1; 
 }
 
-use constant operating_resource_names => qw(food_hour energy_hour ore_hour water_hour);
+use constant operating_resource_names => qw(food energy ore water);
 
 # Get the operating costs when all builds are complete
 has future_operating_resources => (
@@ -1114,16 +1110,17 @@ has future_operating_resources => (
         
         # get current
         my %future;
-        foreach my $method ($self->operating_resource_names) {
-            $future{$method} = $self->$method;
+        foreach my $type ($self->operating_resource_names) {
+            $future{$type.'_hour'} = $self->get_production($type);
         }
 
         # adjust for what's already in build queue
         my @queued_builds = @{$self->builds};
         foreach my $build (@queued_builds) {
             my $other = $build->stats_after_upgrade;
-            foreach my $method ($self->operating_resource_names) {
-                $future{$method} += $other->{$method} - $build->$method;
+            foreach my $type ($self->operating_resource_names) {
+                my $method = $type.'_hour';
+                $future{$method} += $other->{$type} - $build->$method;
             }
         }
         return \%future;
@@ -1141,13 +1138,12 @@ sub has_resources_to_operate {
     my $after = $building->stats_after_upgrade;
 
     # check our ability to sustain ourselves
-    foreach my $method ($self->operating_resource_names) {
+    foreach my $type ($self->operating_resource_names) {
+        my $method = $type.'_hour';
         my $delta = $after->{$method} - $building->$method;
         # don't allow it if it sucks resources && its sucking more than we're producing
         if ($delta < 0 && $future->{$method} + $delta < 0) {
-            my $resource = $method;
-            $resource =~ s/(\w+)_hour/$1/;
-            confess [1012, "Unsustainable given the current and planned resource consumption. Not enough resources being produced to build this.", $resource];
+            confess [1012, "Unsustainable given the current and planned resource consumption. Not enough resources being produced to build this.", $type];
         }
     }
     return 1;
@@ -1158,15 +1154,14 @@ sub has_resources_to_operate_after_building_demolished {
     my ($self, $building) = @_;
 
     # get future
-    my $planet = $self->future_operating_resources;
+    my $future = $self->future_operating_resources;
 
     # check our ability to sustain ourselves
-    foreach my $method ($self->operating_resource_names) {
+    foreach my $type ($self->operating_resource_names) {
         # don't allow it if it sucks resources && its sucking more than we're producing
-        if ($planet->{$method} - $building->$method < 0) {
-            my $resource = $method;
-            $resource =~ s/(\w+)_hour/$1/;
-            confess [1012, "Unsustainable. Not enough resources being produced by other sources to destroy this.", $resource];
+        my $method = $type.'_hour';
+        if ($future->{$method} - $building->$method < 0) {
+            confess [1012, "Unsustainable. Not enough resources being produced by other sources to destroy this.", $type];
         }
     }
     return 1;
@@ -1178,7 +1173,7 @@ sub has_resources_to_build {
 
     $cost ||= $building->cost_to_upgrade;
     foreach my $resource (qw(food energy ore water)) {
-        if ($self->type_stored($resource) < $cost->{$resource}) {
+        if ($self->get_stored($resource) < $cost->{$resource}) {
             confess [1011, "Not enough $resource in storage to build this.", $resource];
         }
     }
@@ -1310,7 +1305,7 @@ sub found_colony {
     $self->add_algae(700);
     $self->add_energy(700);
     $self->add_water(700);
-    $self->add_ore(700);
+    $self->add_random_ore(700);
     $self->set_stored('happiness', 0);
     $self->update;
 
@@ -1395,11 +1390,11 @@ has total_ore_concentration => (
 
         my $tally = 0;
         foreach my $type (ORE_TYPES) {
-        $tally += $self->$type;
+            $tally += $self->get_stored($type);
         }
         return $tally;
-        },
-        );
+    },
+);
 
 # Check if a resource is a food type
 sub is_food {
@@ -1570,7 +1565,7 @@ sub recalc_stats {
 
     # local ore production
     foreach my $type (ORE_TYPES) {
-        my $domestic_ore_hour = sprintf('%.0f',$self->$type * $self->get_production('ore') / $self->total_ore_concentration);
+        my $domestic_ore_hour = sprintf('%.0f',$self->get_stored($type) * $self->get_production('ore') / $self->total_ore_concentration);
         $self->add_production($type, $domestic_ore_hour);
     }
     $self->update;
@@ -1851,7 +1846,7 @@ sub tick_to {
                 my $deduct_ratio = $ore_consumed / $total_ore;
                 $deduct_ratio = 1 if $deduct_ratio > 1;
                 foreach my $type (ORE_TYPES) {
-                    my $type_stored = $self->type_stored($type);
+                    my $type_stored = $self->get_stored($type);
                     $ore{$type} = 0 if $ore{$type} > 0;
                     my $to_deduct = sprintf('%.0f', $type_stored * $deduct_ratio);
                     $self->spend_ore_type($type, $to_deduct);
@@ -1881,17 +1876,21 @@ sub tick_to {
     my %food;
     my $food_produced   = 0;
     foreach my $type (FOOD_TYPES) {
-        $food{$type} = sprintf('%.0f', $self->get_production($type) * $tick_rate);
-        if ($food{$type} > 0) {
-            $food_produced += $food{$type};
+        my $food_item = $self->get_production($type) * $tick_rate;
+        $food{$type} = sprintf('%.0f', $food_item);
+        if ($food_item > 0) {
+            $food_produced += $food_item;
         }
     }
+    $food_produced = sprintf('%.0f', $food_produced);
+
     my $food_consumed = sprintf('%.0f', $self->get_consumption('food') * $tick_rate);
     if ($food_produced > 0 and $food_produced >= $food_consumed) {
         # Then consumption just comes out of production
         foreach my $type (FOOD_TYPES) {
             if ($food{$type} > 0) {
-                $food{$type} -= sprintf('%.0f', $food{$type} * $food_consumed / $food_produced);
+                $food{$type} -= $food{$type} * $food_consumed / $food_produced;
+                $food{$type} = sprintf('%.0f', $food{$type});
             }
         }
     }
@@ -1906,7 +1905,7 @@ sub tick_to {
                 my $deduct_ratio = $food_consumed / $total_food;
                 $deduct_ratio = 1 if $deduct_ratio > 1;
                 foreach my $type (FOOD_TYPES) {
-                    my $type_stored = $self->type_stored($type);
+                    my $type_stored = $self->get_stored($type);
                     $food{$type} = 0 if $food{$type} > 0;
                     my $to_deduct = sprintf('%.0f', $type_stored * $deduct_ratio);
                     $self->spend_food_type($type, $to_deduct);
@@ -1950,8 +1949,8 @@ sub tick_to {
     }
 
     for my $type (FOOD_TYPES, ORE_TYPES) {
-        if ($self->type_stored($type) <= 0) {
-            $self->type_stored($type, 0);
+        if ($self->get_stored($type) <= 0) {
+            $self->set_stored($type, 0);
             $self->toggle_supply_chain(\@supply_chains, $type, 1);
         }
         else {
@@ -1997,17 +1996,6 @@ sub toggle_supply_chain {
     }
 }
 
-# Return the amount of a resource type stored
-# or modify the amount stored if '$value' is specified
-sub type_stored {
-    my ($self, $type, $value) = @_;
-
-    if (defined $value) {
-        return $self->set_stored($type, $value);
-    }
-    return $self->get_stored($type);
-}
-
 # Do we have enough of a resource to spend?
 sub can_spend_type {
     my ($self, $type, $value) = @_;
@@ -2018,16 +2006,8 @@ sub can_spend_type {
     return 1;
 }
 
-# Spend $value amount of a resource $type
-sub spend_type {
-    my ($self, $type, $value) = @_;
-
-    $self->use_stored($type, $value);
-    return $self;
-}
-
 # Can we add $value more of a $type of resource?
-sub can_add_type {
+sub can_add_stored {
     my ($self, $type, $value) = @_;
 
     if ($type ~~ [ORE_TYPES]) {
@@ -2045,13 +2025,12 @@ sub can_add_type {
     return 1;
 }
 
-# Add $value amound of a resource $type
-sub add_type {
+# Add $value amount of a resource $type
+sub add_stored_limit {
     my ($self, $type, $value) = @_;
 
-    my $method = 'add_'.$type;
     eval {
-        $self->can_add_type($type, $value);
+        $self->can_add_stored($type, $value);
     };
     if ($@) {
         my $empire = $self->empire;
@@ -2066,26 +2045,16 @@ sub add_type {
             );
         }
     }
-    $self->$method($value);
+    $self->add_stored($type, $value);
     return $self;
 }
 
-# How much ore is stored?
-sub ore_stored {
-    my ($self) = @_;
-    my $tally = 0;
-    foreach my $ore (ORE_TYPES) {
-        $tally += $self->type_stored($ore);
-    }
-    return $tally;
-}
-
 # add a random ore type
-sub add_ore {
+sub add_random_ore {
     my ($self, $value) = @_;
     foreach my $type (shuffle ORE_TYPES) {
-        next if $self->$type < 100; 
-        $self->add_stored($type);
+        next if $self->get_stored($type) < 100; 
+        $self->add_stored($type,$value);
         last;
     }
     return $self;
@@ -2098,18 +2067,19 @@ sub add_ore_type {
     my $available_storage = $self->get_capacity('ore') - $self->get_stored('ore');
     $available_storage = 0 if ($available_storage < 0);
     my $amount_to_add = ($amount_requested <= $available_storage) ? $amount_requested : $available_storage;
-    $self->type_stored($type, $self->type_stored($type) + $amount_to_add );
+    $self->add_stored($type, $amount_to_add);
+    $self->add_stored('ore', $amount_to_add);
     return $self;
 }
 
 # spend a specific $type of ore
 sub spend_ore_type {
     my ($self, $type, $amount_spent, $complain) = @_;
-    my $amount_stored = $self->type_stored($type);
+    my $amount_stored = $self->get_stored($type);
     if ($amount_spent > $amount_stored && $amount_spent > 0) {
         my $difference = $amount_spent - $amount_stored;
         $self->spend_happiness($difference);
-        $self->type_stored($type, 0);
+        $self->set_stored($type, 0);
 
         if ($complain &&
             ($difference * 100) / $amount_spent > 5) {
@@ -2118,37 +2088,21 @@ sub spend_ore_type {
         }
     }
     else {
-        $self->type_stored($type, $amount_stored - $amount_spent );
+        $self->add_stored($type, 0 - $amount_spent );
     }
     return $self;
-}
-
-# Created methods for ore, e.g. 'add_magnetite', 'spend_magnetite'
-for my $ore (ORE_TYPES) {
-    __PACKAGE__->meta->add_method("add_$ore" => sub {
-        my ($self, $value) = @_;
-        return $self->add_ore_type($ore, $value);
-    });
-    __PACKAGE__->meta->add_method("spend_$ore" => sub {
-        my ($self, $value) = @_;
-        return $self->spend_ore_type($ore, $value);
-    });
 }
 
 # Spend proportionally from all ore
 sub spend_ore {
     my ($self, $ore_consumed) = @_;
 
-    # take inventory
-    my $ore_stored;
-    foreach my $type (ORE_TYPES) {
-        $ore_stored += $self->type_stored($type);
-    }
+    my $ore_stored = $self->get_stored('ore');
 
     # spend proportionally and save
     if ($ore_stored) {
         foreach my $type (ORE_TYPES) {
-            $self->spend_ore_type($type, sprintf('%.0f', ($ore_consumed * $self->type_stored($type)) / $ore_stored),'complain');
+            $self->spend_ore_type($type, sprintf('%.0f', ($ore_consumed * $self->get_stored($type)) / $ore_stored),'complain');
         }
     }
     return $self;
@@ -2175,16 +2129,6 @@ sub food_hour {
     return $tally;
 }
 
-# determine the total food stored
-sub food_stored {
-    my ($self) = @_;
-    my $tally = 0;
-    foreach my $food (FOOD_TYPES) {
-        $tally += $self->get_stored($food);
-    }
-    return $tally;
-}
-
 # add to a specific $type of food stored
 sub add_food_type {
     my ($self, $type, $amount_requested) = @_;
@@ -2192,18 +2136,20 @@ sub add_food_type {
     my $available_storage = $self->get_capacity('food') - $self->get_stored('food');
     $available_storage = 0 if ($available_storage < 0);
     my $amount_to_add = ($amount_requested <= $available_storage) ? $amount_requested : $available_storage;
-    $self->type_stored($type, $self->type_stored($type) + $amount_to_add );
+    $self->add_stored($type, $amount_to_add );
+    $self->add_stored('food', $amount_to_add);
+
     return $self;
 }
 
 # spend from a specific $type of food
 sub spend_food_type {
     my ($self, $type, $amount_spent, $complain) = @_;
-    my $amount_stored = $self->type_stored($type);
+    my $amount_stored = $self->get_stored($type);
     if ($amount_spent > 0 && $amount_spent > $amount_stored) {
         my $difference = $amount_spent - $amount_stored;
         $self->spend_happiness($difference);
-        $self->type_stored($type, 0);
+        $self->set_stored($type, 0);
 
         # Complain about lack of resources if required but avoid rounding errors
         if ($complain &&
@@ -2213,21 +2159,9 @@ sub spend_food_type {
         }
     }
     else {
-        $self->type_stored($type, $amount_stored - $amount_spent );
+        $self->add_stored($type, 0 - $amount_spent );
     }
     return $self;
-}
-
-# add methods for all food types, such as 'add_algae' and 'spend_algae'
-for my $food (FOOD_TYPES) {
-    __PACKAGE__->meta->add_method("add_$food" => sub {
-        my ($self, $value) = @_;
-        return $self->add_food_type($food, $value);
-    });
-    __PACKAGE__->meta->add_method("spend_$food" => sub {
-        my ($self, $value) = @_;
-        return $self->spend_food_type($food, $value);
-    });
 }
 
 # Spend proportionally from all foods
@@ -2239,7 +2173,7 @@ sub spend_food {
     my $food_stored;
     my $food_type_count = 0;
     foreach my $type (FOOD_TYPES) {
-        my $stored = $self->type_stored($type);
+        my $stored = $self->get_stored($type);
         $food_stored += $stored;
         $food_type_count++ if ($stored);
     }
@@ -2249,7 +2183,7 @@ sub spend_food {
         foreach my $type (FOOD_TYPES) {
             # We 'complain' about lack of food if we are spending out of generic food
             # we don't complain about specific foods, because we can always substitute.
-            $self->spend_food_type($type, sprintf('%.0f', ($food_consumed * $self->type_stored($type)) / $food_stored),'complain');
+            $self->spend_food_type($type, sprintf('%.0f', ($food_consumed * $self->get_stored($type)) / $food_stored),'complain');
         }
     }
     

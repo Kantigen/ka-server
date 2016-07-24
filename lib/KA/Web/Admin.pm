@@ -661,7 +661,7 @@ sub www_add_resources {
     unless (defined $body) {
         confess [404, 'Body not found.'];
     }
-    $body->add_type($request->param('resource'), $request->param('amount'));
+    $body->add_stored_type($request->param('resource'), $request->param('amount'));
     $body->update;
     return $self->www_view_resources($request, $body->id);
 }

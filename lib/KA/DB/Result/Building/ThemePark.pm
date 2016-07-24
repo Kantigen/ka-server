@@ -87,7 +87,7 @@ sub can_operate {
     my $types;
     my $body = $self->body;
     foreach my $food (FOOD_TYPES) {
-        $types++ if $body->type_stored($food) >= 1000;
+        $types++ if $body->get_stored($food) >= 1000;
     }
     if ($self->is_working) {
         my $current_types = $self->work->{food_type_count};
@@ -108,7 +108,7 @@ sub operate {
     my $body = $self->body;
     my $types = 0;
     foreach my $food (FOOD_TYPES) {
-        if ($body->type_stored($food) >= 1000) {
+        if ($body->get_stored($food) >= 1000) {
             $types++;
             $body->spend_food_type($food, 1000, 0);
         }

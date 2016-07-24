@@ -15,7 +15,7 @@ before has_special_resources => sub {
     my $self = shift;
     my $planet = $self->body;
     my $amount_needed = sprintf('%.0f', $self->ore_to_build * $self->upgrade_cost * 0.05);
-    if ($planet->halite_stored + $planet->sulfur_stored < $amount_needed) {
+    if ($planet->get_stored('halite') + $planet->get_stored('sulfur') < $amount_needed) {
         confess [1012,"You do not have a sufficient supply (".$amount_needed.") of mineral agents such as Halite and Sulfur for water treatment."];
     }
 };

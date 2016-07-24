@@ -9,7 +9,7 @@ before has_special_resources => sub {
     my $self = shift;
     my $planet = $self->body;
     my $amount_needed = sprintf('%.0f', $self->ore_to_build * $self->upgrade_cost * 0.05);
-    if ($planet->galena_stored + $planet->halite_stored < $amount_needed) {
+    if ($planet->get_stored('galena') + $planet->get_stored('halite') < $amount_needed) {
         confess [1012,"You do not have a sufficient supply (".$amount_needed.") of coolants such as Galena and Halite to operate this reactor."];
     }
 };

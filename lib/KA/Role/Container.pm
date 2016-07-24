@@ -72,7 +72,7 @@ sub unload {
         $body->update;
         $body->discard_changes;
         foreach my $type (keys %resources) {
-            $body->add_type($type, $resources{$type});
+            $body->add_stored_limit($type, $resources{$type});
         }
         $body->update;
         delete $payload->{resources};

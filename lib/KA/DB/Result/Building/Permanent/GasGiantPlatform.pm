@@ -72,9 +72,9 @@ before has_special_resources => sub {
   my $planet = $self->body;
   unless ($planet->get_plan(ref $self, $self->level + 1)) {
     my $amount_needed = sprintf('%.0f', $self->ore_to_build * $self->upgrade_cost * 0.50);
-    if ($planet->rutile_stored + $planet->chromite_stored +
-      $planet->bauxite_stored + $planet->magnetite_stored +
-      $planet->beryl_stored + $planet->goethite_stored < $amount_needed) {
+    if ($planet->get_stored('rutile') + $planet->get_stored('chromite_stored +
+      $planet->get_stored('bauxite') + $planet->get_stored('magnetite') +
+      $planet->get_stored('beryl') + $planet->get_stored('goethite') < $amount_needed) {
         confess [1012,"You do not have a sufficient supply (".
           $amount_needed.
           ") of structural minerals such as Rutile, Chromite, Bauxite, Magnetite, Beryl, and Goethite to build the components that can handle the stresses of gas giant missions."];

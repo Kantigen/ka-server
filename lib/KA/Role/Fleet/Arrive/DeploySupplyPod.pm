@@ -32,7 +32,7 @@ after handle_arrival_procedures => sub {
         if (exists $payload->{resources}) {
             my %resources = %{$payload->{resources}};
             foreach my $type (keys %resources) {
-                $body->add_type($type, $resources{$type});
+                $body->add_stored_limit($type, $resources{$type});
             }
         }
         $body->update;

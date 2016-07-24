@@ -63,7 +63,7 @@ sub dump {
     my $building = $session->current_building;
     my $body = $building->body;
     $body->spend_type($type, $amount);
-    $body->add_type('waste', $amount);
+    $body->add_stored_limit('waste', $amount);
     $body->update;
     return {
         status      => $self->format_status($session, $body),

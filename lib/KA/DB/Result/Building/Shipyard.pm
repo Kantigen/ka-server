@@ -174,7 +174,7 @@ sub can_repair_fleet {
     my $body = $self->body;
     foreach my $key (keys %$costs) {
         next if ($key eq 'seconds' || $key eq 'waste');
-        if ($costs->{$key} > $body->type_stored($key)) {
+        if ($costs->{$key} > $body->get_stored($key)) {
             confess [1011, 'Not enough resources.', $key];
         }
     }
@@ -225,7 +225,7 @@ sub can_build_fleet {
     my $body = $self->body;
     foreach my $key (keys %{$costs}) {
         next if ($key eq 'seconds' || $key eq 'waste');
-        if ($costs->{$key} > $body->type_stored($key)) {
+        if ($costs->{$key} > $body->get_stored($key)) {
             confess [1011, 'Not enough resources.', $key];
         }
     }

@@ -109,21 +109,21 @@ sub trade_one_for_one {
         confess [1009, 'There is no resource called '.$want.'.'];
     }
     my $body = $self->body;
-    unless ($body->type_stored($have) >= $quantity) {
+    unless ($body->get_stored($have) >= $quantity) {
         confess [1011, 'There is not enough '.$have.' in storage to trade.'];
     }
     my $empire = $body->empire;
     unless ($empire->essentia >= 3) {
         confess [1011, 'You need 3 essentia to conduct this trade.'];
     }
-    $body->can_add_type($want, $quantity);
+    $body->can_add_stored($want, $quantity);
     $empire->spend_essentia({
         amount  => 3, 
         reason  => 'KAns Trade',
     });
     $empire->update;
     $body->spend_type($have, $quantity);
-    $body->add_type($want, $quantity);
+    $body->add_stored_limit($want, $quantity);
     $body->update;
 }
 

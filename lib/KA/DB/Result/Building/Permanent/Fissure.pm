@@ -66,7 +66,7 @@ before downgrade => sub {
     my $self = shift;
     my $body = $self->body;
     my $cost = $self->cost_to_fill_in_fissure;
-    my $stored = $body->ore_stored;
+    my $stored = $body->get_stored('ore');
     if ($stored >= $cost) {
         $body->spend_ore($cost);
     }
@@ -97,7 +97,7 @@ sub cost_to_fill_in_fissure {
 sub has_resources_to_fill_in_fissure {
     my $self = shift;
     my $body = $self->body;
-    my $available = $body->ore_stored;
+    my $available = $body->get_stored('ore');
     return ($self->cost_to_fill_in_fissure <= $available) ? 1 : 0;
 }
 

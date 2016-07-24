@@ -118,7 +118,7 @@ sub add_rewards {
     # resources
     if (exists $rewards->{resources}) {
         foreach my $resource (keys %{$rewards->{resources}}) {
-            $body->add_type($resource, $rewards->{resources}{$resource});
+            $body->add_stored_limit($resource, $rewards->{resources}{$resource});
         }
     }
     $body->update;

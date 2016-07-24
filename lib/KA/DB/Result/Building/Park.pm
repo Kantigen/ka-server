@@ -21,7 +21,7 @@ sub can_throw_a_party {
     if ($self->is_working) {
         confess [1010, "There is already a party in progress."];
     }
-    unless ($self->body->food_stored >= 10_000) {
+    unless ($self->body->get_stored('food') >= 10_000) {
         confess [1011, "Insufficient food to throw a party."];
     }
     return 1;
@@ -35,7 +35,7 @@ sub throw_a_party {
     my $eat = 10_000;
     my $food_multiplier = $self->effective_level * 0.3;
     foreach my $food (FOOD_TYPES) {
-        if ($body->type_stored($food) >= 500) {
+        if ($body->get_stored($food) >= 500) {
             $food_multiplier++;
             $body->spend_food_type($food, 500, 0);
             $eat -= 500;

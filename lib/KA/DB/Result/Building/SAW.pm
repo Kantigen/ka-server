@@ -14,10 +14,10 @@ before has_special_resources => sub {
     my $self = shift;
     my $planet = $self->body;
     my $amount_needed = sprintf('%.0f', $self->ore_to_build * $self->upgrade_cost * 0.20);
-    if ($planet->chalcopyrite_stored + $planet->gold_stored + $planet->bauxite_stored < $amount_needed) {
+    if ($planet->get_stored('chalcopyrite') + $planet->get_stored('gold') + $planet->get_stored('bauxite') < $amount_needed) {
         confess [1012,"You do not have a sufficient supply (".$amount_needed.") of conductive metals such as Chalcopyrite, Gold, and Bauxite to build magnetic pulse cannons."];
     }
-    if ($planet->rutile_stored + $planet->chromite_stored + $planet->bauxite_stored + $planet->magnetite_stored + $planet->monazite_stored < $amount_needed) {
+    if ($planet->get_stored('rutile') + $planet->get_stored('chromite') + $planet->get_stored('bauxite') + $planet->get_stored('magnetite') + $planet->get_stored('monazite') < $amount_needed) {
         confess [1012,"You do not have a sufficient supply (".$amount_needed.") of magnetic and paramagnetic minerals such as Magnetite, Monazite, Rutile, Bauxite, and Chromite needed to build high-impact shells."];
     }
 };

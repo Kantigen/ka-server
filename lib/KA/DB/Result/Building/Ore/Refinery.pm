@@ -9,7 +9,7 @@ before has_special_resources => sub {
     my $self = shift;
     my $planet = $self->body;
     my $amount_needed = sprintf('%.0f', $self->ore_to_build * $self->upgrade_cost * 0.05);
-    if ($planet->sulfur_stored + $planet->fluorite_stored < $amount_needed) {
+    if ($planet->get_stored('sulfur') + $planet->get_stored('fluorite') < $amount_needed) {
         confess [1012,"You do not have a sufficient supply (".$amount_needed.") of processing minerals such as Sulfur and Fluorite to refine ore."];
     }
 };

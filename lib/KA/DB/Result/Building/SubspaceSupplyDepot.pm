@@ -54,7 +54,7 @@ sub transmit_food {
     $self->reschedule_work($new_work_ends);
 
     my @types = (FOOD_TYPES);
-    $self->body->add_type($types[ rand @types ], 3600)->update;
+    $self->body->add_stored_limit($types[ rand @types ], 3600)->update;
 }
 
 sub transmit_ore {
@@ -67,7 +67,7 @@ sub transmit_ore {
     $self->reschedule_work($new_work_ends);
 
     my @types = (ORE_TYPES);
-    $self->body->add_type($types[ rand @types ], 3600)->update;
+    $self->body->add_stored_limit($types[ rand @types ], 3600)->update;
 }
 
 sub transmit_water {
@@ -79,7 +79,7 @@ sub transmit_water {
     my $new_work_ends = $self->work_ends->subtract(seconds => 3600);
     $self->reschedule_work($new_work_ends);
 
-    $self->body->add_type('water', 3600)->update;
+    $self->body->add_stored_limit('water', 3600)->update;
 }
 
 sub transmit_energy {
@@ -91,7 +91,7 @@ sub transmit_energy {
     my $new_work_ends = $self->work_ends->subtract(seconds => 3600);
     $self->reschedule_work($new_work_ends);
 
-    $self->body->add_type('energy', 3600)->update;
+    $self->body->add_stored_limit('energy', 3600)->update;
 }
 
 sub complete_build_queue {

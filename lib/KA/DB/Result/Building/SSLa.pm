@@ -183,12 +183,12 @@ sub can_make_plan {
     my $fraction = sprintf('%.0f',$resource_cost * 0.01);
     my $body = $self->body;
     foreach my $ore (ORE_TYPES) {
-        if ($body->type_stored($ore) < $fraction) {
+        if ($body->get_stored($ore) < $fraction) {
             confess [1011, 'Not enough '.$ore.' in storage. You need at least '.$fraction.'.'];
         }
     }
     foreach my $resource (qw(ore water food energy)) {
-        if ($body->type_stored($resource) < $resource_cost) {
+        if ($body->get_stored($resource) < $resource_cost) {
             confess [1011, 'Not enough '.$resource.' in storage. You need at least '.$resource_cost.'.'];
         }
     }

@@ -132,12 +132,12 @@ before finish_work => sub {
       $food_reserve += $resource->{quantity} if (grep { $resource->{type} eq $_ } FOOD_TYPES);
       $ore_reserve  += $resource->{quantity} if (grep { $resource->{type} eq $_ } ORE_TYPES);
     }
-    my $food_res = ($food_reserve + $body->food_stored) - $body->food_capacity;
+    my $food_res = ($food_reserve + $body->get_stored('food')) - $body->get_capacity('food');
     if ($food_res > 0) { $body->spend_food($food_res + 100, 1) };
-    my $ore_res = ($ore_reserve + $body->ore_stored) - $body->ore_capacity;
+    my $ore_res = ($ore_reserve + $body->get_stored('ore')) - $body->get_capacity('ore');
     if ($ore_res > 0) { $body->spend_ore($ore_res + 100) };
     for $resource ( @$resources ) {
-        $body->add_type($resource->{type}, $resource->{quantity});
+        $body->add_stored_limit($resource->{type}, $resource->{quantity});
     }
     $body->update;
 };

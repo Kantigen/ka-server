@@ -110,7 +110,7 @@ sub remove_from_stash {
     my $stash = $self->stash;
     foreach my $resource (keys %{$request}) {
         $stash->{$resource} -= $request->{$resource};
-        $body->add_type($resource, $request->{$resource});
+        $body->add_stored_limit($resource, $request->{$resource});
     }
     $self->stash($stash);
 }

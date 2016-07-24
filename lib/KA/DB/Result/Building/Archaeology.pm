@@ -215,7 +215,7 @@ sub dig_it {
     when ("resource") {
       my $type = random_element([ORE_TYPES, FOOD_TYPES, qw(water energy)]);
       my $amount = randint(10 * $level, 500 * $level);
-      $self->body->add_type($type, $amount)->update;
+      $self->body->add_stored_limit($type, $amount)->update;
       $result = {
         message => "Found $amount of $type.",
         outcome => "Resource",

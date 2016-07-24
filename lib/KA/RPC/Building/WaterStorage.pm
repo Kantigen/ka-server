@@ -22,7 +22,7 @@ sub dump {
     my $empire   = $session->current_empire;
     my $body     = $session->current_body;
     $body->spend_type('water', $amount);
-    $body->add_type('waste', $amount);
+    $body->add_stored_limit('waste', $amount);
     $body->update;
     return {
         status      => $self->format_status($session, $body),
