@@ -587,7 +587,7 @@ around get_status => sub {
     my $ore;
     
     foreach my $type (ORE_TYPES) {
-        $ore->{$type} = $self->get_stored($type);
+        $ore->{$type} = $self->$type;
     }
     $out->{ore}             = $ore;
     $out->{water}           = $self->water;
@@ -1565,7 +1565,7 @@ sub recalc_stats {
 
     # local ore production
     foreach my $type (ORE_TYPES) {
-        my $domestic_ore_hour = sprintf('%.0f',$self->get_stored($type) * $self->get_production('ore') / $self->total_ore_concentration);
+        my $domestic_ore_hour = sprintf('%.0f',$self->$type * $self->get_production('ore') / $self->total_ore_concentration);
         $self->add_production($type, $domestic_ore_hour);
     }
     $self->update;
@@ -2053,7 +2053,7 @@ sub add_stored_limit {
 sub add_random_ore {
     my ($self, $value) = @_;
     foreach my $type (shuffle ORE_TYPES) {
-        next if $self->get_stored($type) < 100; 
+        next if $self->$type < 100; 
         $self->add_stored($type,$value);
         last;
     }
