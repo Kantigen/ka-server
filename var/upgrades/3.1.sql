@@ -44,12 +44,6 @@ alter table body drop column fluorite_stored;
 alter table body drop column beryl_stored;
 alter table body drop column magnetite_stored;
 
-INSERT INTO db_version (major_version, minor_version, description) values (3, 1, "factor out resource columns from body");
-
-
-
-
-
 alter table body drop column algae_production_hour;
 alter table body drop column cheese_production_hour;
 alter table body drop column bean_production_hour;
@@ -120,4 +114,6 @@ CREATE TABLE body_resource (
     capacity    integer(11) NOT NULL default 0,
     PRIMARY KEY (id) 
 );
+
+INSERT INTO db_version (major_version, minor_version, description) values (3, 1, "factor out resource columns from body");
 

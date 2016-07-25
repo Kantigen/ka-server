@@ -50,7 +50,7 @@ has resource_cache => (
     lazy    => 1,
     builder => '_build_resource_cache',
     #default  => sub { my $self = shift; return $self->_build_resource_cache },
-    #clearer => 'clear_resource_cache',
+    clearer => 'clear_resource_cache',
     predicate => 'has_resource_cache',
 );
 
@@ -119,7 +119,7 @@ sub get_resource {
         capacity        => 0,
     });
     $self->resource_cache->{$type} = $resource;
-    $self->log->debug("GET_RESOURCE: new ".Dumper($resource->{_column_data})) if $resource->type eq 'water';
+    $self->log->debug("GET_RESOURCE: new [".$resource->id."]".Dumper($resource->{_column_data})) if $resource->type eq 'water';
     return $resource;
 }
 
@@ -247,7 +247,7 @@ sub update_resources {
     $self->log->debug("UPDATE_RESOURCES");
     foreach my $key (keys %{$self->resource_cache}, 'ore', 'food') {
         my $resource = $self->resource_cache->{$key};
-
+        
         if ($key ~~ [ORE_TYPES]) {
             $ore_resource->production($ore_resource->production + $resource->production);
             $ore_resource->consumption($ore_resource->consumption + $resource->consumption);
@@ -259,12 +259,12 @@ sub update_resources {
             $food_resource->stored($food_resource->stored + $resource->stored);
         }
         if ($resource->id) {
-            $self->log->debug("UPDATE $resource [".$resource->type."]");
+            $self->log->debug("UPDATE $resource [".$resource->type."][".$resource->id."]");
             $resource->update;
         }
         else {
-            $self->log->debug("INSERT $resource");
             $resource->insert;
+            $self->log->debug("INSERT $resource [".$resource->type."][".$resource->id."]");
         }
     }
 }
@@ -534,7 +534,7 @@ sub sanitize {
         $self->usable_as_starter_enabled(1);
     }
     $self->body_resources->delete_all;
-    #$self->clear_resource_cache;
+    $self->clear_resource_cache;
     $self->restrict_coverage(0); 
     $self->update;
     return $self;
@@ -1325,14 +1325,14 @@ sub found_colony {
     # Initialize body
     $self->restrict_coverage(0);
     $self->body_resources->delete_all;
-    #$self->clear_resource_cache;
+    $self->clear_resource_cache;
 
     # add starting resources
     $self->needs_recalc(1);
     $self->tick;
-    $self->add_algae(700);
-    $self->add_energy(700);
-    $self->add_water(700);
+    $self->set_stored('algae',700);
+    $self->set_stored('energy',700);
+    $self->set_stored('water',700);
     $self->add_random_ore(700);
     $self->set_stored('happiness', 0);
     $self->update;
