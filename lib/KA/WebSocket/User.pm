@@ -24,7 +24,7 @@ sub on_connect {
 sub log {
     my ($self) = @_;
     my $server = "User";
-    return Log::Log4perl->get_logger( "WS::$server" );
+    return Log::Log4perl->get_logger( __PACKAGE__ );
 }
 
 #--- Receive a Message Queue message
@@ -122,6 +122,7 @@ sub ws_register {
     $queue->publish({
         queue       => 'bg_email',
         payload     => {
+            route       => '/email/registrationCode',
             username    => $user->username,
             email       => $user->email,
         }
@@ -165,6 +166,7 @@ sub ws_forgotPassword {
         $queue->publish({
             queue       => 'bg_email',
             payload     => {
+                route       => '/email/forgotPassword',
                 username    => $user->username,
                 email       => $user->email,
             }
