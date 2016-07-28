@@ -63,8 +63,8 @@ __PACKAGE__->result_source_instance->view_definition(q[
         empire.alliance_id AS empire_alliance_id,
         building.id AS body_has_fissure
     from star
-    LEFT JOIN probes
-      ON star.id = probes.star_id AND (probes.alliance_id=? OR probes.empire_id=?)
+    LEFT JOIN probe
+      ON star.id = probe.star_id AND (probe.alliance_id=? OR probe.empire_id=?)
     LEFT JOIN body
       ON star.id = body.star_id
     LEFT JOIN empire
