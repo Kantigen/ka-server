@@ -9,6 +9,7 @@ use Time::HiRes qw(gettimeofday);
 
 use KA::SDB;
 use KA::Queue;
+use KA::PubSub;
 
 sub log {
     my ($self) = @_;
@@ -37,6 +38,17 @@ sub bg_finishUpgrade {
     else {
         $self->log->error("Could not find building ID [".$content->{building_id}."]");
     }
+    # Publish the building completion (in case anyone is interested)
+    my $pubsub = KA::PubSub->instance;
+    $pubsub->publish('ps_building', {
+        route   => '/building/upgraded',
+        user_id => 1,       # TODO This is just until we link empire and user IDs
+        content => {
+            building_id => $building->id,
+            body_id     => $building->body_id,
+            empire_id   => $building->body->empire_id,
+        },
+    });
 }
 
 #--- Building finishes Work

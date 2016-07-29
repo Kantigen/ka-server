@@ -71,7 +71,7 @@ sub subscribe {
 
     my $pipe = "${channel}_$id";
     my $queue = KA::Queue->instance;
-    $queue->watch($queue);
+    $queue->watch($pipe);
 
     $queue->publish({
         queue   => 'bg_pubsub',
@@ -111,7 +111,7 @@ sub unsubscribe {
         },
     });
 
-    $queue->ignore($queue);
+    $queue->ignore($pipe);
 }
 
 __PACKAGE__->meta->make_immutable;

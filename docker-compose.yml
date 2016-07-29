@@ -38,6 +38,7 @@ services:
         - ./bin:/home/keno/ka-server/bin
         - ./docs:/home/keno/ka-server/docs
         - ./etc:/home/keno/ka-server/etc
+        - ./log:/home/keno/ka-server/log
         - ./lib:/home/keno/ka-server/lib
         - ./t:/home/keno/ka-server/t
         - ./var:/home/keno/ka-server/var
@@ -108,6 +109,7 @@ services:
       - ./etc:/etc/nginx
       - ./etc:/home/keno/ka-server/etc
       - ./var:/home/keno/ka-server/var
+      - ./log:/home/keno/ka-server/log
       - ./captcha:/home/keno/ka-server/captcha
       - ./../ka-assets:/home/keno/ka-server/var/www/public/assets
       - ./var/www/public/api/api.css:/home/keno/ka-server/var/www/public/api/api.css
@@ -149,6 +151,7 @@ services:
       - ./bin:/home/keno/ka-server/bin
       - ./docs:/home/keno/ka-server/docs
       - ./etc:/home/keno/ka-server/etc
+      - ./log:/home/keno/ka-server/log
       - ./lib:/home/keno/ka-server/lib
       - ./t:/home/keno/ka-server/t
       - ./var:/home/keno/ka-server/var
@@ -174,6 +177,7 @@ services:
         - ./bin:/home/keno/ka-server/bin
         - ./docs:/home/keno/ka-server/docs
         - ./etc:/home/keno/ka-server/etc
+        - ./log:/home/keno/ka-server/log
         - ./lib:/home/keno/ka-server/lib
         - ./t:/home/keno/ka-server/t
         - ./var:/home/keno/ka-server/var

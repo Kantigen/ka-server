@@ -95,7 +95,6 @@ sub _build_resource_cache {
     my $resources = {};
     my $resource_rs = $self->body_resources->search({});
     while (my $resource = $resource_rs->next) {
-        $self->log->debug("BUILD_CACHE: new $self, $resource ".Dumper($resource->{_column_data})) if $resource->type eq 'water';
         $resources->{$resource->type} = $resource;
     }
     return $resources;
@@ -119,7 +118,6 @@ sub get_resource {
         capacity        => 0,
     });
     $self->resource_cache->{$type} = $resource;
-    $self->log->debug("GET_RESOURCE: new [".$resource->id."]".Dumper($resource->{_column_data})) if $resource->type eq 'water';
     return $resource;
 }
 
@@ -244,7 +242,6 @@ sub update_resources {
     $food_resource->consumption(0);
     $food_resource->stored(0);
 
-    $self->log->debug("UPDATE_RESOURCES");
     foreach my $key (keys %{$self->resource_cache}, 'ore', 'food') {
         my $resource = $self->resource_cache->{$key};
         
@@ -259,12 +256,10 @@ sub update_resources {
             $food_resource->stored($food_resource->stored + $resource->stored);
         }
         if ($resource->id) {
-            $self->log->debug("UPDATE $resource [".$resource->type."][".$resource->id."]");
             $resource->update;
         }
         else {
             $resource->insert;
-            $self->log->debug("INSERT $resource [".$resource->type."][".$resource->id."]");
         }
     }
 }

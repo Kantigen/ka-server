@@ -382,10 +382,9 @@ sub queue {
         # 
         foreach my $key (keys %{$self->client_data}) {
             if (my $user = $self->client_data->{$key}{user}) {
-                $self->log->debug("QQQQ ".Dumper($user));
                 if ($user->{id} == $payload->{user_id}) {
                     $connection = $self->connections->{$key};
-                    $self->route_call('bg_', $job->payload, $connection);
+                    $self->route_call('mq_', $job->payload, $connection);
                 }
             }
         }

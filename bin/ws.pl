@@ -62,6 +62,8 @@ my $client_url = $config->{client_url};
 my $condvar = AnyEvent->condvar;
 
 Log::Log4perl->init('/home/keno/ka-server/etc/log4perl.conf');
+my $log = Log::Log4perl->get_logger('WS');
+
 
 my $web_socket = KA::WebSocket->new;
 
@@ -78,10 +80,15 @@ my $timer = AE::timer 0, 1, sub {
 };
 my $queue = KA::Queue->instance;
 
+# Watch the foreground message queue.
+$queue->watch('fg_websocket');
+
+# Subscribe to the Building PubSub channel
+my $pipe = KA::PubSub->subscribe('ps_building');
+$log->debug("PS_BUILDING subscribe [$pipe]");
+
 while (1) {
-    print STDERR "Reserving Job...\n";
-    my $job = $queue->consume('fg_websocket');
-    print STDERR "Deleting Job...[".Dumper($job->payload)."]\n";
+    my $job = $queue->consume;
 
     # The fg_websocket queue is handled by the WebSocket queue router
     $web_socket->queue($job);

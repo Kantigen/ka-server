@@ -4,7 +4,7 @@ use Moose;
 use MooseX::App::Command;
 use Data::Dumper;
 use namespace::autoclean;
-use App::Daemon qw(daemonize);
+#use App::Daemon qw(daemonize);
 use Log::Log4perl qw(:levels);
 use Try::Tiny;
 
@@ -35,8 +35,8 @@ sub run {
 
     print "Run the Message Queue daemon [".$self->nodaemonize."]\n";
 
-    $App::Daemon::loglevel = $self->verbose ? $DEBUG : $WARN;
-    $App::Daemon::logfile = '/home/keno/ka-server/log/MQWorkerDaemon.log';
+#    $App::Daemon::loglevel = $self->verbose ? $DEBUG : $WARN;
+#    $App::Daemon::logfile = '/home/keno/ka-server/log/MQWorkerDaemon.log';
 
     my $pid_file = '/home/keno/ka-server/log/MQWorkerDaemon.pid';
     my $start = time;
@@ -87,6 +87,8 @@ sub run {
 
         try {
             $self->out("Process job ".Dumper($payload));
+            $log->error("PROCESS JOB ".Dumper($payload));
+
             $message_queue->queue($job);
 
             $job->delete;
