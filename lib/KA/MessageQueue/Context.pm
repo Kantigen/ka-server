@@ -22,6 +22,11 @@ has 'user_id' => (
     isa     => 'Int',
 );
 
+has 'class_data' => (
+    is      => 'rw',
+    isa     => 'Maybe[HashRef]',
+);
+
 # Get a parameter from the content.
 #
 sub param {

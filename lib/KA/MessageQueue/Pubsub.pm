@@ -13,6 +13,7 @@ sub log {
     return Log::Log4perl->get_logger( __PACKAGE__ );
 }
 
+
 #--- Publish a message
 #
 #   To publish a message sent it to the route '/pubsub/publish'.
@@ -42,7 +43,24 @@ sub log {
 sub bg_publish {
     my ($self, $context) = @_;
 
-    $self->log->debug("bg_publish: ".Dumper($context));
+    $self->log->debug("bg_publish: context[".$context->class_data."] ".Dumper($context));
+
+    my $content = $context->content;
+    my $message = $content->{message};
+    my $channel = $content->{channel};
+    my $pipes = $context->class_data->{pipes};
+
+    my $queue = KA::Queue->instance;
+    $self->log->debug("There are channels $pipes [".Dumper($pipes)."]");
+
+    foreach my $pipe ( grep { m/^${channel}_(\d*)$/ } keys %$pipes ) {
+        $self->log->debug("publishing to [$pipe]");
+        $queue->publish({
+            queue   => $pipe,
+            payload => $message,
+        });
+    }
+
 }
 
 #--- Subscribe to a channel
@@ -55,13 +73,18 @@ sub bg_publish {
 #
 #   {
 #     route     => '/pubsub/subscribe',
-#     channel   => 'my_channel_2',
+#     pipe      => 'my_channel_2',
 #   }
 #   
 sub bg_subscribe {
     my ($self, $context) = @_;
 
-    $self->log->debug("bg_subscribe: ".Dumper($context));
+    $self->log->debug("bg_subscribe: context[".$context->class_data."] ".Dumper($context));
+    my $content = $context->content;
+    my $pipe    = $content->{pipe};
+
+    $context->class_data->{pipes}{$pipe} = 1;
+    $self->log->debug("Added channel ".$context->class_data->{pipes}." [".Dumper($context->class_data)."]");
 }
 
 #--- Unsubscribe from a channel
@@ -70,12 +93,18 @@ sub bg_subscribe {
 #
 #   {
 #     route     => '/pubsub/unsubscribe'
-#     channel   => 'my_channel_2',
+#     pipe      => 'my_channel_2',
 #   }
 #
 sub bg_unsubscribe {
     my ($self, $context) = @_;
 
-    $self->log->debug("bg_unsubscribe: ".Dumper($context));
+    $self->log->debug("bg_unsubscribe: context[".$context->class_data."] ".Dumper($context));
+    my $content = $context->content;
+    my $pipe    = $content->{pipe};
+    my $pipes   = $context->class_data->{pipes};
+    delete $pipes->{$pipe};
+    $self->log->debug("Removed channel $pipes [".Dumper($context->class_data)."]");
+
 }
 1;

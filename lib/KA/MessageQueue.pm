@@ -35,6 +35,11 @@ has [qw(stats_sent_messages stats_bad_messages stats_bad_routes)] => (
     default     => 0,
 );
 
+has class_data => (
+    is          => 'rw',
+    isa         => 'Maybe[HashRef]',
+    default     => sub { {} },
+);
 
 ## Give the module a heartbeat (every 10 seconds)
 ##
@@ -165,12 +170,16 @@ sub route_call {
             $route = $self;
             $obj = $self;
         }
+        my $class_data = $self->class_data;
+        $class_data->{$route} = {} unless defined $class_data->{$route};
+
         $self->log->debug("route = [$route]");
         my $context = KA::MessageQueue::Context->new({
             name        => $self->name,
             content     => $content,
             msg_id      => $msg_id,
             user_id     => $user_id,
+            class_data  => $class_data->{$route},
         });
         $self->log->debug("Call [$obj][$method]");
 

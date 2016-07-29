@@ -144,6 +144,12 @@ sub watch {
     $self->_beanstalk->watch($tube)->recv;
 }
 
+sub ignore {
+    my ($self, $tube) = @_;
+
+    $self->_beanstalk->ignore($tube)->recv;
+}
+
 sub kick {
     my ($self, $bound) = @_;
 

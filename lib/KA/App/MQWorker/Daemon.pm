@@ -79,6 +79,7 @@ sub run {
     $queue->watch('bg_fleet');
     $queue->watch('bg_captcha');
     $queue->watch('bg_starmap');
+    $queue->watch('bg_pubsub');
 
     while (1) {
         my $job = $queue->consume;

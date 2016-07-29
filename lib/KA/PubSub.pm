@@ -1,11 +1,23 @@
 package KA::PubSub;
 
 use MooseX::Singleton;
+use KA::Queue;
 
 use namespace::autoclean;
 
 # Interface to the PubSub subscription service.
 #
+# This is currently implemented as a 'fan-out' using beanstalk
+# queues. Beanstalk does not offer pub-sub directly so this could
+# be considered a bit of a hack.
+#
+# Look in the future to using something like the RabbitMQ Pub/Sub
+# options instead.
+#
+# Conversely, we have tools in place to monitor and manage beanstalk
+# so adding yet another service may just give added complexity
+#
+
 
 #--- Publish
 #
@@ -24,6 +36,21 @@ use namespace::autoclean;
 sub publish {
     my ($self, $channel, $message) = @_;
 
+    my $queue = KA::Queue->instance;
+
+    my $content = {
+        channel     => $channel,
+        message     => $message,
+    };
+
+    my $job = $queue->publish({
+        queue   => 'bg_pubsub',
+        payload => {
+            route   => '/pubsub/publish',
+            content => $content,
+        },
+    });
+
 }
 
 
@@ -36,9 +63,26 @@ sub publish {
 #   which the subscriber should listen to.
 #
 sub subscribe {
-    my ($self, $queue, $channel) = @_;
+    my ($self, $channel) = @_;
 
-    my $pipe = "${channel}_2";
+    my $cache = KA::Cache->instance;
+
+    my $id = $cache->incr('pubsub', $channel);
+
+    my $pipe = "${channel}_$id";
+    my $queue = KA::Queue->instance;
+    $queue->watch($queue);
+
+    $queue->publish({
+        queue   => 'bg_pubsub',
+        payload => {
+            route   => '/pubsub/subscribe',
+            content => {
+                pipe => $pipe,
+            },
+        },
+    });
+
     return $pipe;
 
 }
@@ -53,8 +97,21 @@ sub subscribe {
 #   messages.
 #
 sub unsubscribe {
-    my ($self, $queue, $pipe) = @_;
+    my ($self, $pipe) = @_;
 
+    my $queue = KA::Queue->instance;
+
+    $queue->publish({
+        queue   => 'bg_pubsub',
+        payload => {
+            route   => '/pubsub/unsubscribe',
+            content => {
+                pipe => $pipe,
+            },
+        },
+    });
+
+    $queue->ignore($queue);
 }
 
 __PACKAGE__->meta->make_immutable;
