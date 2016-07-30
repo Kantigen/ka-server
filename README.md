@@ -9,3 +9,8 @@ Setting up your own KA game server requires [Docker](https://www.docker.com/) an
 # License
 
 See the [LICENSE](info/LICENSE) file.
+
+# Additional
+
+For updates, or helping out, contact: kenoantigen@gmail.com
+This will get swapped out for a file on how to help.
