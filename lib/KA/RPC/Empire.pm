@@ -449,6 +449,15 @@ sub create {
     # handle invitation
     $empire->attach_invite_code($args{invite_code});
 
+    # TODO link User and Empire accounts, but for now just create a User account
+    #
+    KA->db->resultset('User')->create({
+        id          => $empire->id,
+        username    => $empire->name,
+        password    => $args{password},
+    });
+
+
     return { empire_id => $empire->id };
 }
 

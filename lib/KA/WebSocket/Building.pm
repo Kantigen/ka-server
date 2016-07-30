@@ -23,10 +23,19 @@ sub log {
     return Log::Log4perl->get_logger( "WS::$server" );
 }
 
+#--- When a building completes it's upgrade, a message is published
+#   On the pub-sub queue and this is passed on to any connected user
+#   who owns that building.
+#
+#   If the user has multiple clients, the info is passed on to all
+#   clients. We do not (as yet) filter based on the body id so the
+#   client will receive notifications for all buildings completed in
+#   their empire
+#
 sub mq_upgraded {
-    my ($self) = @_;
+    my ($self, $context) = @_;
 
-    $self->log->debug("XXXXXXXXXXXX Building upgraded");
+    return $context->content;
 }
 
 1;

@@ -90,7 +90,7 @@ $log->debug("PS_BUILDING subscribe [$pipe]");
 while (1) {
     my $job = $queue->consume;
 
-    # The fg_websocket queue is handled by the WebSocket queue router
+    # The message is handled by the WebSocket queue router
     $web_socket->queue($job);
 }
 

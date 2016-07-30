@@ -42,7 +42,7 @@ sub bg_finishUpgrade {
     my $pubsub = KA::PubSub->instance;
     $pubsub->publish('ps_building', {
         route   => '/building/upgraded',
-        user_id => 1,       # TODO This is just until we link empire and user IDs
+        user_id => $building->body->empire_id,
         content => {
             building_id => $building->id,
             body_id     => $building->body_id,
