@@ -7,7 +7,7 @@ use Config::JSON;
 
 useall __PACKAGE__;
 
-our $VERSION = 3.0920;
+our $VERSION = 3.0923;
 
 my $config = Config::JSON->new('/home/keno/ka-server/etc/keno-antigen.conf');
 my $db = KA::DB->connect($config->get('db/dsn'),$config->get('db/username'),$config->get('db/password'), { mysql_enable_utf8 => 1});

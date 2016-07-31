@@ -717,7 +717,7 @@ sub get_status {
         bodies              => \%bodies,
         next_colony_cost    => 0+$self->next_colony_cost("colony_ship",0,$travelling_ships),
         next_colony_srcs    => 0+$self->next_colony_cost("short_range_colony_ship",0,$travelling_ships),
-        next_station_cost   => 0+$self->next_colony_cost("space_station",0,$travelling_ships),
+        next_station_cost   => 0+$self->next_colony_cost("space_station"),
         insurrect_value     => 0+$self->next_colony_cost("spy",0,$travelling_ships),
         self_destruct_active=> $self->self_destruct_active,
         self_destruct_date  => $self->self_destruct_date_formatted,
@@ -1152,13 +1152,15 @@ sub next_colony_cost {
         my $count = $self->planets->search({ class => { '!=' => 'KA::DB::Result::Map::Body::Planet::Station' }})->count;
 
         if (not defined $travelling_ships) {
-        $count += $travelling_ships;
             $travelling_ships = $self->db->resultset('Fleet')->search(
-                { type=> { in => [qw(colony_ship short_range_colony_ship)]}, task=>'travelling', direction=>'out', 'body.empire_id' => $self->id},
+                { type=> { in => [qw(colony_ship short_range_colony_ship)]},
+                  task=>'travelling',
+                  direction=>'out',
+                  'body.empire_id' => $self->id},
                 { join => 'body' }
             )->count;
         }
-        $count += $adjustment;
+        $count += $travelling_ships + $adjustment;
         my $srcs = $type eq "short_range_colony_ship" ? 25 : 0;
         my $inflation = 1 + INFLATION_F - (($srcs + $self->effective_growth_affinity * 5) / 100);
         $tally = 100_000 * ($inflation**($count-1));
