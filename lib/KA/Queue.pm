@@ -82,12 +82,12 @@ sub publish {
     my $ttr         = $args->{ttr} || $self->ttr;
 
     my $log         = $self->log;
-    $log->debug("queue [$queue] payload [$payload)] ");
+    $log->debug("queue [$queue] payload: ".Dumper($payload));
 
     my $beanstalk   = $self->_beanstalk;
     $beanstalk->use($queue);
     $payload = encode_json($payload);
-    
+
     $beanstalk->put({
         data        => $payload,
         priority    => $priority,
@@ -229,5 +229,3 @@ sub consume {
 __PACKAGE__->meta->make_immutable;
 
 1;
-
-

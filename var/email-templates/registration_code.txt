@@ -1,0 +1,9 @@
+Hey %s,
+
+You're receiving this email because you signed up for an account for the game Keno Antigen. If this was not you, you can safely disregard this email and nothing will happen. On the other hand, if this as you, click the link below to verify your email.
+
+%s
+
+
+Sincerly,
+KA Accounts Department

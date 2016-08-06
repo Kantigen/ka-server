@@ -78,6 +78,7 @@ sub run {
     $queue->watch('bg_building');
     $queue->watch('bg_fleet');
     $queue->watch('bg_captcha');
+    $queue->watch('bg_email');
     $queue->watch('bg_starmap');
     $queue->watch('bg_pubsub');
 
@@ -108,4 +109,3 @@ sub out {
 }
 
 __PACKAGE__->meta->make_immutable;
-
