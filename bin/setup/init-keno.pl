@@ -129,7 +129,7 @@ sub setup {
     say "Creating database version";
     $db->resultset('DBVersion')->create({
         major_version   => 3,
-        minor_version   => 0,
+        minor_version   => 1,
         description     => "Initial version",
     });
 
