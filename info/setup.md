@@ -80,10 +80,7 @@ We're almost there. What remains is to initialize the database and to generate t
 docker-compose exec ka-websocket /bin/bash
 
 cd /home/keno/ka-server/bin
-TERM=xterm mysql -h ka-mysql-server --password=keno
-
-source docker.sql
-exit
+mysql -h ka-mysql-server --password=keno < docker.sql
 
 cd /home/keno/ka-server/bin/setup
 perl init-keno.pl
