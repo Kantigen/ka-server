@@ -25,7 +25,7 @@ sub _build_redis {
 sub namespace_key {
     my ($self, $namespace, $id) = @_;
 
-    my $key = $namespace.":".$id;
+    my $key = join ':', grep defined, $namespace, $id;
     $key =~ s/\s+/_/g;
     return $key;
 }
