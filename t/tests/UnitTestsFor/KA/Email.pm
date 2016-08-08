@@ -15,6 +15,7 @@ sub test_that_something_happens {
             'Hello there!'
         ]
     });
+    ok(1);
 }
 
 1;

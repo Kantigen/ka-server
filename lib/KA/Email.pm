@@ -5,18 +5,26 @@ use Moose;
 use Email::Stuff;
 use File::Slurp;
 
+use KA::Config;
+
+sub log {
+    return Log::Log4perl->get_logger( __PACKAGE__ );
+}
+
 sub send_email {
     my ($self, $options) = @_;
 
-    my $path = '/home/keno/ka-server/var/email-templates/'.$options->{filename};
-    my $to_email = $options->{to};
+    my $path = '/home/keno/ka-server/var/email-templates/'.$options->{template}.'.txt';
+    $self->log->debug("filename = [$path]");
 
-    if (KA->config->get('develop_mode')) {
-        $to_email = KA->config->get('dev_mode_email_recipient');
+    my $to_email = $options->{to};
+    
+    if (KA::Config->instance->get('develop_mode')) {
+        $to_email = KA::Config->instance->get('dev_mode_email_recipient');
     }
 
     if (-e $path) {
-        my $message = File::Slurp->read_file($path);
+        my $message = read_file($path);
 
         unless (ref $options->{params} eq 'ARRAY') {
             $options->{params} = [];
