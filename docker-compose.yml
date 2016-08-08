@@ -10,9 +10,12 @@ services:
     container_name: 'ka-beanstalkd-console'
     depends_on:
       - 'ka-beanstalkd'
-    image: 'schickling/beanstalkd-console'
+    environment:
+      - 'BEANSTALKD_HOST=ka-beanstalkd'
+      - 'BEANSTALKD_PORT=11300'
+    image: 'agaveapi/beanstalkd-console'
     ports:
-      - '2080:2080'
+      - '2080:80'
 
   ################
   ## BEANSTALKD ##
