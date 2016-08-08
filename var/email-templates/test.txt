@@ -1,0 +1,3 @@
+This is a test email for the unit tests to send.
+
+%s
