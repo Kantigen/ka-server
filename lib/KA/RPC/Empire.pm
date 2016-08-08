@@ -786,7 +786,7 @@ sub edit_profile {
         }
     }
 
-    return $self->get_profile($empire);
+    return $self->get_own_profile($empire);
 }
 
 sub set_status_message {
@@ -1118,8 +1118,6 @@ sub redefine_species {
 
 sub update_species {
     my ($self, %args) = @_;
-
-    $log->debug(Dumper(\%args));
     my $empire_id = $args{empire_id};
 
     # make sure it's a valid empire
