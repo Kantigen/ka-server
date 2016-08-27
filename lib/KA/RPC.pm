@@ -16,6 +16,7 @@ sub get_session {
     my ($self, $opts) = @_;
     my $session = ref $opts ? $opts->{session_id} : $opts;
 
+    confess [ 1006, 'Unknown session' ] unless defined $session;
     if (ref $session ne 'KA::Session') {
         if (ref $session eq 'KA::DB::Result::Empire') {
             $session = $session->current_session || $session->start_session;
@@ -291,18 +292,49 @@ sub to_app {
     my $ref;
     if ($ref = $self->can('_rpc_method_names')) {
         foreach my $method ($ref->()) {
+            my ($name, $cb, $opts) = (
+                                      $method,
+                                      sub { $self->plack_request(shift); $self->$method(@_) },
+                                      { with_plack_request => 1 },
+                                     );
+
             if (ref $method eq 'HASH') {
-                my $name = $method->{name};
-                if ($method->{options}{with_plack_request}) {
-                    $rpc->register($name, sub { $self->plack_request($_[0]); $self->$name(@_) }, $method->{options});
+                $name = $method->{name};
+                $opts = $method->{options};
+                use Data::Dump;
+                if ($opts->{with_plack_request}) {
+                    if ($opts->{named_params}) {
+                        $cb = sub {
+                            ddx \@_;
+                            $self->plack_request($_[0]);
+                            $self->$name(@_ == 2 ? ($_[0], %{$_[1]}) : @_)
+                        };
+                    }
+                    else {
+                        $cb = sub {
+                            $self->plack_request($_[0]);
+                            $self->$name(@_)
+                        };
+                    }
                 }
                 else {
-                    $rpc->register($name, sub { $self->plack_request(shift); $self->$name(@_) }, { with_plack_request => 1, %{$method->{options}} });
+                    $opts->{with_plack_request} = 1;
+                    if ($opts->{named_params}) {
+                        $cb = sub {
+                            $self->plack_request(shift);
+                            $self->$name(@_ == 1 ? %{$_[0]} : @_)
+                        };
+                    }
+                    else {
+                        $cb = sub {
+                            $self->plack_request(shift);
+                            $self->$name(@_)
+                        };
+                    }
                 }
             }
-            else {
-                $rpc->register($method, sub { $self->plack_request(shift); $self->$method(@_) }, { with_plack_request => 1} );
-            }
+
+            $rpc->register($name, $cb, $opts);
         }
     }
     $rpc->to_app;

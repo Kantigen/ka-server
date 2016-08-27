@@ -786,7 +786,7 @@ sub edit_profile {
         }
     }
 
-    return $self->get_own_profile($empire);
+    return $self->get_own_profile(%args);
 }
 
 sub set_status_message {
@@ -1434,10 +1434,12 @@ sub _rewrite_request_for_logging {
         };
     }
     elsif ($method eq 'edit_profile') {
-        $params->[1] = {
-            %{$params->[1]},
+        my %p = @$params;
+        $p{profile} = {
+            %{$p{profile}},
             sitter_password => 'xxx',
         };
+        $params = \%p;
     }
     return $params;
 }
@@ -1451,6 +1453,7 @@ __PACKAGE__->register_rpc_method_names(
     { name => "reset_password", options => { with_plack_request => 1, log_request_as => \&_rewrite_request_for_logging } },
     { name => 'change_password', options => { log_request_as => \&_rewrite_request_for_logging } },
     { name => 'edit_profile', options => { log_request_as => \&_rewrite_request_for_logging } },
+    { name => 'get_own_profile', options => { named_params => 1 } },
     qw(
     redefine_species get_redefine_species_limits
     get_invite_friend_url
@@ -1461,7 +1464,7 @@ __PACKAGE__->register_rpc_method_names(
     enable_self_destruct disable_self_destruct
     set_status_message
     find
-    get_own_profile get_public_profile
+    get_public_profile
     is_name_available
     logout
     get_full_status get_status
