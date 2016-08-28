@@ -7,13 +7,8 @@ use Log::Log4perl;
 use Log::Any::Adapter;
 use Plack::Builder;
 use JSON qw(encode_json);
-use Redis;
 
 use KA;
-use KA::DB;
-use KA::SDB;
-
-use KA::Redis;
 
 $|=1;
 
@@ -90,33 +85,6 @@ if (defined $latest_file) {
         exit(1);
     }
 }
-
-# Instantiate the singletons
-
-# Connect to the mysql Docker image
-#
-my $dsn = "dbi:mysql:keno:ka-mysql-server:3306";
-
-my $db = KA::DB->connect(
-    $dsn,
-    'keno',
-    'keno', {
-        mysql_enable_utf8   => 1,
-        AutoCommit          => 1,
-    },
-);
-KA::SDB->initialize({
-    db => $db,
-});
-
-
-# Connect to the Redis Docker image
-#
-my $redis = Redis->new(server => "ka-redis:6379");
-KA::Redis->initialize({
-    redis => $redis,
-});
-
 
 my $app = builder {
     if ($^O ne 'darwin' && not defined $ENV{'KA_NO_MIDDLEWARE'} ) {

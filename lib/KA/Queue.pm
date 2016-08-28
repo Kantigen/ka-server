@@ -5,6 +5,7 @@ use AnyEvent::Beanstalk;
 use Data::Dumper;
 use JSON::XS;
 
+use KA;
 use KA::Queue::Job;
 
 has '_beanstalk' => (
@@ -58,7 +59,7 @@ sub __build_beanstalk {
     my ($self) = @_;
 
     my $beanstalk = AnyEvent::Beanstalk->new(
-        server      => 'ka-beanstalkd:11300',
+        server      => KA->config->get('beanstalk/server'),
         ttr         => $self->ttr,
         debug       => $self->debug,
     );

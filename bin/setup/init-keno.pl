@@ -28,18 +28,6 @@ use GD::Image;
 my $config  = KA->config;
 my $db      = KA->db;
 
-KA::SDB->initialize({
-    db  => $db,
-});
-
-# Connect to the Redis Docker image
-#
-my $redis = Redis->new(server => "ka-redis:6379");
-KA::Redis->initialize({
-    redis => $redis,
-});
-
-
 # These might need adjusting to get optimum results
 my $fudge_factor    = 1.8;              # Increase to increase the number of stars and decrease the size of voids.
 my $seed            = 3.14159;          # So we can reproduce the starmap.

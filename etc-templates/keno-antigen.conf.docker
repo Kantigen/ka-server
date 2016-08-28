@@ -101,6 +101,10 @@
       "Sandbox" : "0",
       "Signature" : "XXXX"
    },
+   "redis" : {
+       "host" : "ka-redis",
+       "port" : 6379
+   },
    "rpc_limit" : 2500,
    "rpc_throttle" : 200,
    "secret_key" : "XXXX",
