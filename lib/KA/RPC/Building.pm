@@ -291,7 +291,7 @@ sub demolish {
         };
     }
                                                                                             
-    my $session = $self->get_session({session_id => $args->{building_id}, body_id => $args->{building_id}});
+    my $session = $self->get_session({session_id => $args->{session_id}, body_id => $args->{building_id}});
     my $empire      = $session->current_empire;
     my $building    = $self->get_building($empire, $args->{building_id});
 
