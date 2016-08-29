@@ -5,6 +5,9 @@ use utf8;
 no warnings qw(uninitialized);
 extends qw/DBIx::Class::Schema/;
 
+# DeploymentHandler version
+our $VERSION = 1;
+
 __PACKAGE__->load_namespaces();
 
 sub sqlt_deploy_hook {

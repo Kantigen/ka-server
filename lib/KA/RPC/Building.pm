@@ -290,10 +290,10 @@ sub demolish {
             building_id => shift,
         };
     }
-                                                                                            
-    my $session = $self->get_session({session_id => $args->{session_id}, body_id => $args->{building_id}});
+
+    my $session = $self->get_session($args);
     my $empire      = $session->current_empire;
-    my $building    = $self->get_building($empire, $args->{building_id});
+    my $building    = $session->current_building;
 
     my $body = $building->body;
     $building->can_demolish;
