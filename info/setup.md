@@ -44,7 +44,7 @@ Ususally, Docker Compose is much simpler to install than Docker itself. Simply f
 ## 3. Setup Configuration Files
 
   1. In the root of the repo, create a folder called `etc`
-  2. Copy all the files from `etc-docker-templates` into this newly craeted `etc` directory.
+  2. Copy all the files from `etc-docker-templates` into this newly created `etc` directory.
 
 ## 4. Pull Containers
 
