@@ -1,4 +1,4 @@
-package KA::MessageQueue::Building;
+package KA::MessageQueue::Email;
 
 use Moose;
 use Log::Log4perl;
@@ -7,7 +7,6 @@ use Data::Dumper;
 use KA::Email;
 
 sub log {
-    my ($self) = @_;
     return Log::Log4perl->get_logger(__PACKAGE__);
 }
 

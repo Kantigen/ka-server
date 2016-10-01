@@ -18,29 +18,34 @@ sub send_email {
     $self->log->debug("filename = [$path]");
 
     my $to_email = $options->{to};
-    
-    if (KA::Config->instance->get('develop_mode')) {
-        $to_email = KA::Config->instance->get('dev_mode_email_recipient');
-    }
+    my $message = '';
 
     if (-e $path) {
-        my $message = read_file($path);
+        $message = read_file($path);
 
         unless (ref $options->{params} eq 'ARRAY') {
             $options->{params} = [];
         }
 
+        # TODO: use a proper templating system here
         $message = sprintf($message, @{$options->{params}});
+    }
+    else {
+        warn "Couldn't send message using $path";
+    }
 
+    if (KA::Config->instance->get('develop_mode')) {
+        # Output email to logfile instead.
+        $self->log->info("Sending email to $to_email:");
+        $self->log->info("$message");
+    } else {
         Email::Stuff->from('"Keno Antigen <noreply@kenoantigen.com>"')
             ->to($to_email)
             ->subject($options->{subject})
             ->text_body($message)
             ->send;
     }
-    else {
-        warn "Couldn't send message using $path";
-    }
 }
 
-1;
+no Moose;
+__PACKAGE__->meta->make_immutable;
