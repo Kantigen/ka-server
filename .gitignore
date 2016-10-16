@@ -11,3 +11,4 @@ var/www/public/starmap.json
 var/www/public/api
 var/www/public/captcha
 var/starmaps/*.png
+log/*

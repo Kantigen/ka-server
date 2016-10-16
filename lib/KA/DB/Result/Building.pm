@@ -882,12 +882,13 @@ sub cost_to_upgrade {
     my $time_inflator = ($self->level * 2) - 1;
     $time_inflator = 1 if ($time_inflator < 1);
     my $throttle = KA->config->get('building_build_speed') || 6;
+    my $min_time = KA->config->get('building_min_time') || 15;
     my $time_cost = (( $self->level+1)/$throttle * $self->time_to_build * $time_inflator ** $self->time_inflation) *
                        $self->building_reduction_bonus * $self->time_cost_reduction_bonus *
                        $oversight_reduction * $time_with_plan;
     $time_cost = 5184000 if ($time_cost > 5184000); # 60 Days
     $time_cost *= $self->body->build_boost;
-    $time_cost = 15 if ($time_cost < 15);
+    $time_cost = $min_time if ($time_cost < $min_time);
 
     if ($build_with_halls) {
         return {
