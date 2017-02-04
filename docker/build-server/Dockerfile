@@ -104,11 +104,11 @@ RUN cpanm Firebase::Auth \
 RUN groupadd nogroup
 WORKDIR /home/keno/ka-server/bin
 
-# just a couple settings that help us with debugging and such.
-# TERM being set gets us less working, and PERLLIB gets us
-# "perl -ML -e..." working.
-ENV TERM=xterm PERLLIB=/home/keno/ka-server/lib
-
-RUN cpanm DBIx::Class::DeploymentHandler \
+RUN cpanm DBIx::Class::DeploymentHandler App::DH \
  && rm -fr /root/.cpanm \
  && rm -fr /tmp/*
+
+# just a couple settings that help us with debugging and such.
+# TERM being set gets us less working, PERLLIB gets us
+# "perl -ML -e..." working
+ENV TERM=xterm PERLLIB=/home/keno/ka-server/lib

@@ -106,7 +106,7 @@ services:
     ports:
       - '8000:80'
     volumes:
-      - ./etc/nginx.conf:/etc/nginx/nginx.conf
+      - ./etc/nginx.conf:/home/keno/ka-server/etc/nginx/nginx.conf
       - ./etc:/home/keno/ka-server/etc
       - ./var:/home/keno/ka-server/var
       - ./log:/home/keno/ka-server/log
