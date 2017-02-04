@@ -1,3 +1,5 @@
+#!/usr/bin/env perl
+
 use strict;
 use 5.010;
 use String::Random;
@@ -16,7 +18,7 @@ while (my $name = <$file>) {
 close $file;
 
 say "Loading us...";
-my @us = qw(KA Dillon Knope Vrbsky Smith Runde Rozeske Parker Icydee Norway Vasari Rhutenia Lemming Icd);
+my @us = qw(KA Dillon Knope Vrbsky Smith Runde Rozeske Parker Icydee Norway Vasari Lemming Icd);
 
 say "Generating new...";
 my $rs = String::Random->new;
@@ -61,8 +63,9 @@ say "Making unique from ".scalar(@all)."...";
 my @unique = uniq( @all );
 
 say "Eliminating bad from ".scalar(@unique)."...";
-my @naughty = qw(Fuck Shit Ass Cunt Nigger Dick Pussy Cock Snot Puke Damn Bitch Whore Slut);
-my @part = part {  foreach my $bad (@naughty) { return 1 if ($_ =~ /$bad/); } return 0; } @unique;
+my $naughty = join '|', qw(Fuck Shit Ass Cunt Nigger Dick Pussy Cock Snot Puke Damn Bitch Whore Slut);
+$naughty = qr/$naughty/i;
+my @part = part {  $_ =~ $naughty ? 1 : 0; } @unique;
 my @good = @{$part[0]};
 my @bad = @{$part[1]};
 
