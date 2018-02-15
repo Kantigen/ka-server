@@ -17,6 +17,8 @@ __PACKAGE__->add_columns(
 sub sqlt_deploy_hook {
     my ($self, $sqlt_table) = @_;
     $sqlt_table->add_index(name => 'idx_x_y', fields => ['x','y']);
+    $sqlt_table->add_index(name => 'idx_x', fields => ['x']);
+    $sqlt_table->add_index(name => 'idx_y', fields => ['y']);
     $sqlt_table->add_index(name => 'idx_zone', fields => ['zone']);
     $sqlt_table->add_index(name => 'idx_name', fields => ['name']);
 }
