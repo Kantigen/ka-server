@@ -4,7 +4,7 @@ use Moose;
 use utf8;
 no warnings qw(uninitialized);
 
-use base 'DBIx::Class::Core';
+use parent 'DBIx::Class::Core';
 
 __PACKAGE__->load_components('TimeStamp', 'InflateColumn::DateTime', 'InflateColumn::Serializer', 'Core');
 

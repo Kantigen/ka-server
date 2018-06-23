@@ -3,7 +3,7 @@ package KA::DB::Result;
 no warnings qw(uninitialized);
 use namespace::autoclean -except => ['meta'];
 
-use base 'KA::DB::ResultBase';
+use parent 'KA::DB::ResultBase';
 
 __PACKAGE__->table('noexist_basetable');
 __PACKAGE__->add_columns(

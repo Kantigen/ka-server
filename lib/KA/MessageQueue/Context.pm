@@ -27,6 +27,21 @@ has 'class_data' => (
     isa     => 'Maybe[HashRef]',
 );
 
+has 'job' => (
+    is      => 'ro',
+    isa     => 'Maybe[AnyEvent::Beanstalk::Job]',
+);
+
+# touch the job to reset the ttr.  If there is no associated job,
+# such as testing, then no-op.
+sub touch {
+    my $self = shift;
+    if (my $job = $self->job)
+    {
+        $job->touch()->recv;
+    }
+}
+
 # Get a parameter from the content.
 #
 sub param {

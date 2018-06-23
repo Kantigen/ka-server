@@ -180,6 +180,7 @@ sub route_call {
             msg_id      => $msg_id,
             user_id     => $user_id,
             class_data  => $class_data->{$route},
+            job         => $job,
         });
         $self->log->debug("Call [$obj][$method]");
 

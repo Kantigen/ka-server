@@ -44,47 +44,21 @@ my $gameover = [ 500,
 
 # Compare the current DB Version with the SQL patch files
 my $db = KA->db;
-my $db_version;
+my $db_version = `./dbupdate.pl database_version 2> /dev/null`;
+my $schema_version = `./dbupdate.pl schema_version 2> /dev/null`;
 
-eval {
-    ($db_version) = $db->resultset('DBVersion')->search({},{
-        order_by => { -desc => [qw(major_version minor_version)]}
-    });
-    if (not defined $db_version) {
-        die "Please run the 'init-keno.pl' script to create your initial database (1)\n";
-    }
-};
-my $error = $@;
-if ($@) {
-    die "Please run the 'init-keno.pl' script to create your initial database ($error)\n";
+if ($db_version =~ /^\s*$/)
+{
+    die "Please run the 'init-keno.pl' script to create your initial database (1)\n";
+}
+elsif ($db_version != $schema_version)
+{
+    system('./dbupdate.pl upgrade');
 }
 
 print STDERR "Latest version is [".$db_version->major_version."] [".$db_version->minor_version."]\n";
 
 # Check the latest patch file in the update directory
-
-#my ($latest_file) = sort {$b <=> $a} grep {/(\d+)\.(\d+)\.sql/} readdir('/home/keno/ka-server/var/upgrades');
-opendir(my $dh, '/home/keno/ka-server/var/upgrades') || die "Can't opendir: $!";
-my ($latest_file) = sort {$b <=> $a} grep {/(\d+)\.(\d+)\.sql/} readdir($dh);
-
-if (defined $latest_file) {
-    my ($major_version, $minor_version) = $latest_file =~ m/(\d+)\.(\d+)/;
-    print STDERR "Latest patch file version is [$major_version.$minor_version]\n";
-
-    if ($major_version > $db_version->major_version) {
-        die "Please run the 'init-keno.pl' script. Major version change\n";
-    }
-    if ($minor_version > $db_version->minor_version) {
-        print STDERR "Please run the following scripts to update your database\n";
-        my @all_files = sort grep {/(\d+)\.(\d+)\.sql/} readdir($dh);
-        my $test_version = $db_version->minor_version;
-        while ($test_version++ < $minor_version) {
-            print STDERR "/home/keno/ka-server/var/upgrades/$major_version.$test_version.sql\n";
-            
-        };
-        exit(1);
-    }
-}
 
 my $app = builder {
     if ($^O ne 'darwin' && not defined $ENV{'KA_NO_MIDDLEWARE'} ) {

@@ -1,7 +1,7 @@
 package KA::Constants;
 
 use strict;
-use base 'Exporter';
+use parent 'Exporter';
 
 use constant SLUG        => 1.30;
 use constant SLOW        => 1.35;

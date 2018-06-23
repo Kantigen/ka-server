@@ -104,7 +104,8 @@ exit;
 
 sub create_database {
     say "Deploying database";
-    $db->deploy({ add_drop_table => 1 });
+    #$db->deploy({ add_drop_table => 1 });
+    system("../dbupdate.pl install");
 }
 
 # Break the map down into chunks.
@@ -113,15 +114,6 @@ sub create_database {
 # stars and the ores.
 #
 sub setup {
-
-    say "Creating database version";
-    $db->resultset('DBVersion')->create({
-        major_version   => 3,
-        minor_version   => 1,
-        description     => "Initial version",
-    });
-
-
     say "Creating planet Ore data";
 
     # Read the default ore values for each planet/asteroid/GG type

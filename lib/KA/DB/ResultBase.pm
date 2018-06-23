@@ -2,7 +2,7 @@ package KA::DB::ResultBase;
 
 use namespace::autoclean -except => ['meta'];
 
-use base 'DBIx::Class::Core';
+use parent 'DBIx::Class::Core';
 
 __PACKAGE__->load_components('TimeStamp', 'InflateColumn::DateTime', 'InflateColumn::Serializer', 'Core');
 
