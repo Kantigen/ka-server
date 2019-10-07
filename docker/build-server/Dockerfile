@@ -69,7 +69,7 @@ RUN cpanm DBIx::Class \
    DBIx::Class::DynamicSubclass DBIx::Class::InflateColumn::Serializer DBIx::Class::Schema DBIx::Class::TimeStamp \
  && rm -fr /root/.cpanm
 
-RUN cpanm MARKOV/MailTools-2.14.tar.gz Email::Send Email::Send::Test Digest::HMAC_SHA1 Digest::MD5 Email::Stuff Email::Valid \
+RUN cpanm MARKOV/MailTools-2.21.tar.gz Email::Send Email::Send::Test Digest::HMAC_SHA1 Digest::MD5 Email::Stuff Email::Valid \
    Facebook::Graph File::Copy File::Path Guard IO::Socket::SSL \
    JSON JSON::Any JSON::WebToken JSON::XS List::MoreUtils List::Util \
    List::Util::WeightedChoice \
