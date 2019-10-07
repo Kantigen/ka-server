@@ -87,11 +87,13 @@ RUN cpanm Test::Pod::Coverage Moose Module::Find namespace::autoclean \
     Path::Class Plack::Middleware::CrossOrigin Pod::Simple::HTML \
     Regexp::Common Server::Starter SOAP::Lite String::Random \
     Text::CSV_XS Tie::IxHash URI::Encode UUID::Tiny XML::FeedPP \
-    XML::Hash::LX XML::Parser Text::Xslate \
+    XML::Parser Text::Xslate \
     Term::ProgressBar Term::ProgressBar::Quiet PerlX::Maybe \
     Gravatar::URL Digest::MD4 Bad::Words \
     Business::PayPal::API  \
  && rm -fr /root/.cpanm
+
+RUN cpanm XML::Hash::LX --force && rm -fr /root/.cpanm
 
 RUN cpanm YANICK/Parallel-ForkManager-1.16.tar.gz \
  && cpanm AnyEvent::WebSocket::Client Test::Compile Test::Class::Moose DBIx::Class::EasyFixture Test::Number::Delta \
