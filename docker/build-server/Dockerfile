@@ -70,12 +70,14 @@ RUN cpanm DBIx::Class \
  && rm -fr /root/.cpanm
 
 RUN cpanm MARKOV/MailTools-2.21.tar.gz Email::Send Email::Send::Test Digest::HMAC_SHA1 Digest::MD5 Email::Stuff Email::Valid \
-   Facebook::Graph File::Copy File::Path Guard IO::Socket::SSL \
+   File::Copy File::Path Guard IO::Socket::SSL \
    JSON JSON::Any JSON::WebToken JSON::XS List::MoreUtils List::Util \
    List::Util::WeightedChoice \
    LWP::Protocol::https LWP::UserAgent \
    JSON::RPC::Dispatcher JSON::RPC::Dispatcher::App \
  && rm -fr /root/.cpanm
+
+RUN cpanm Facebook::Graph --force && rm -fr /root/.cpanm
 
 RUN cpanm --verbose Memcached::libmemcached Net::Server::SS::PreFork \
  && rm -fr /root/.cpanm
