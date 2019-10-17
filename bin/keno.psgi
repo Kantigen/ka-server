@@ -56,7 +56,7 @@ elsif ($db_version != $schema_version)
     system('./dbupdate.pl upgrade');
 }
 
-print STDERR "Latest version is [".$db_version->major_version."] [".$db_version->minor_version."]\n";
+# print STDERR "Latest version is [".$db_version->major_version."] [".$db_version->minor_version."]\n";
 
 # Check the latest patch file in the update directory
 
