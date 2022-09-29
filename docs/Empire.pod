@@ -395,15 +395,15 @@ A session id.
       "bodies" : {
         "colonies" : [
           # bodies are provided sorted by name already.
-          { "id" : "xxxx", "name" : "...", "x": "#", "y": "#", "orbit": #, "empire_name": "your name", "empire_id": 12345 },
+          { "id" : "xxxx", "name" : "...", "x": "#", "y": "#", "orbit": #, "type": "p35", "empire_name": "your name", "empire_id": 12345 },
           ...
         ],
         "mystations" : [
-          { "id" : "xxxx", "name" : "...", "x": "#", "y": "#", "orbit": #, "empire_name": "your name", "empire_id": 12345 },
+          { "id" : "xxxx", "name" : "...", "x": "#", "y": "#", "orbit": #,, "type": "station", "empire_name": "your name", "empire_id": 12345 },
           ...
         ],
         "ourstations" : [
-          { "id" : "xxxx", "name" : "...", "x": "#", "y": "#", "orbit": #, "empire_name": "their name", "empire_id": 12346 },
+          { "id" : "xxxx", "name" : "...", "x": "#", "y": "#", "orbit": #, "type": "station", "empire_name": "their name", "empire_id": 12346 },
           ...
         ],
         "babies" : {
@@ -412,7 +412,7 @@ A session id.
             "id" : 12355, # empire ID
             "has_new_messages" : 30,
             "bodies" : [
-              { "id" : "xxxx", "name" : "...", "x": "#", "y": "#", "orbit": #, "empire_name": "their name", "empire_id": 12346 },
+              { "id" : "xxxx", "name" : "...", "x": "#", "y": "#", "orbit": #, "type": "p35", "empire_name": "their name", "empire_id": 12346 },
               ...
             ],
         },
@@ -420,7 +420,7 @@ A session id.
           "has_new_messages" : 30,
           "id" : 12884,
           "bodies" : [
-            { "id" : "xxxx", "name" : "...", "x": "#", "y": "#", "orbit": #, "empire_name": "their name too", "empire_id": 12347 },
+            { "id" : "xxxx", "name" : "...", "x": "#", "y": "#", "orbit": #, "type": "p35", "empire_name": "their name too", "empire_id": 12347 },
             ...
           ],
         }

@@ -638,8 +638,9 @@ sub get_status {
             star_id     => $planet->star_id,
             star_name   => $planet->star->name,
             orbit       => $planet->orbit,
+            type        => $planet->image,
             x           => $planet->x,
-            y           => $planet->y, #,,,
+            y           => $planet->y,
             empire_name => $planet->empire->name,
             empire_id   => $planet->empire_id,
         }
