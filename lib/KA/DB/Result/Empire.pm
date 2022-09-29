@@ -729,11 +729,13 @@ sub get_status {
 
 sub start_session {
     my ($self, $options) = @_;
-    if (   $options
-        && !$options->{is_admin} )
-    {
+    if ($options && !$options->{is_admin}) {
         $self->last_login(DateTime->now);
         $self->update;
+
+        if ($self->tutorial_stage ne 'turing') {
+            KA::Tutorial->new(empire=>$self)->finish;
+        }
     }
     return KA::Session->new->start($self, $options);
 }
