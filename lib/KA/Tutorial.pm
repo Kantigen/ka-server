@@ -72,8 +72,8 @@ sub get_food {
     if ($finish) {
         my $malcud = $home->get_building_of_class('KA::DB::Result::Building::Food::Malcud');
         if (defined $malcud && $malcud->level >= 1) {
-            $home->add_trona(700);
-            $home->add_bread(700);
+            $home->add_food_type('trona', 700);
+            $home->add_food_type('bread', 700);
             $home->add_energy(700);
             $home->add_water(700);
             $home->update;
@@ -82,7 +82,7 @@ sub get_food {
         }
     }
     return {
-        filename    => 'tutorial/get_food.txt',  
+        filename    => 'tutorial/get_food.txt',
     };
 }
 
@@ -93,8 +93,8 @@ sub keep_the_lights_on {
     if ($finish) {
         my $geo = $home->get_building_of_class('KA::DB::Result::Building::Energy::Geo');
         if (defined $geo && $geo->level >= 1) {
-            $home->add_trona(700);
-            $home->add_bread(700);
+            $home->add_food_type('trona', 700);
+            $home->add_food_type('bread', 700);
             $home->add_energy(700);
             $home->add_water(700);
             $home->update;
@@ -103,7 +103,7 @@ sub keep_the_lights_on {
         }
     }
     return {
-        filename    => 'tutorial/keep_the_lights_on.txt',  
+        filename    => 'tutorial/keep_the_lights_on.txt',
     };
 }
 
@@ -114,8 +114,8 @@ sub mine {
     if ($finish) {
         my $building = $home->get_building_of_class('KA::DB::Result::Building::Ore::Mine');
         if (defined $building && $building->level >= 1) {
-            $home->add_trona(700);
-            $home->add_bread(700);
+            $home->add_food_type('trona', 700);
+            $home->add_food_type('bread', 700);
             $home->add_energy(700);
             $home->add_water(700);
             $home->update;
@@ -124,7 +124,7 @@ sub mine {
         }
     }
     return {
-        filename    => 'tutorial/mine.txt',  
+        filename    => 'tutorial/mine.txt',
     };
 }
 
@@ -133,9 +133,9 @@ sub more_resources {
     my $empire = $self->empire;
     my $home = $empire->home_planet;
     if ($finish) {
-        if ($home->water_hour >= 100 && $home->energy_hour >= 100 && $home->ore_hour >= 100 && $home->food_hour >= 100) {
-            $home->add_trona(700);
-            $home->add_bread(700);
+        if ($home->get_production('water') >= 100 && $home->get_production('energy') >= 100 && $home->get_production('ore') >= 100 && $home->get_production('food') >= 100) {
+            $home->add_food_type('trona', 700);
+            $home->add_food_type('bread', 700);
             $home->add_energy(700);
             $home->add_water(700);
             $home->update;
@@ -144,7 +144,7 @@ sub more_resources {
         }
     }
     return {
-        filename    => 'tutorial/more_resources.txt',  
+        filename    => 'tutorial/more_resources.txt',
     };
 }
 
@@ -155,8 +155,8 @@ sub spaceport {
     if ($finish) {
         my $building = $home->get_building_of_class('KA::DB::Result::Building::SpacePort');
         if (defined $building && $building->level >= 1) {
-            $home->add_bauxite(700);
-            $home->add_apple(700);
+            $home->add_food_type('bauxite', 700);
+            $home->add_food_type('apple', 700);
             $home->add_water(700);
             $home->add_energy(700);
             $home->update;
@@ -165,7 +165,7 @@ sub spaceport {
         }
     }
     return {
-        filename    => 'tutorial/spaceport.txt',  
+        filename    => 'tutorial/spaceport.txt',
     };
 }
 
@@ -176,8 +176,8 @@ sub shipyard {
     if ($finish) {
         my $building = $home->get_building_of_class('KA::DB::Result::Building::Shipyard');
         if (defined $building && $building->level >= 1) {
-            $home->add_bauxite(700);
-            $home->add_apple(700);
+            $home->add_food_type('bauxite', 700);
+            $home->add_food_type('apple', 700);
             $home->add_water(700);
             $home->add_energy(700);
             $home->update;
@@ -186,7 +186,7 @@ sub shipyard {
         }
     }
     return {
-        filename    => 'tutorial/shipyard.txt',  
+        filename    => 'tutorial/shipyard.txt',
     };
 }
 
@@ -203,7 +203,7 @@ sub pawn {
         }
     }
     return {
-        filename    => 'tutorial/pawn.txt',  
+        filename    => 'tutorial/pawn.txt',
     };
 }
 
@@ -214,8 +214,8 @@ sub counter_spy {
     if ($finish) {
         my $counter = KA->db->resultset('Spy')->search({empire_id => $empire->id, task=>'Counter Espionage'})->count;
         if ($counter >= 2) {
-            $home->add_trona(700);
-            $home->add_bread(700);
+            $home->add_food_type('trona', 700);
+            $home->add_food_type('bread', 700);
             $home->add_energy(700);
             $home->add_water(700);
             $home->update;
@@ -224,7 +224,7 @@ sub counter_spy {
         }
     }
     return {
-        filename    => 'tutorial/counter_spy.txt',  
+        filename    => 'tutorial/counter_spy.txt',
     };
 }
 
@@ -247,14 +247,14 @@ sub observatory {
             }
             else {
                 $self->send({
-                    filename    => 'tutorial/rebuild_the_shipyard.txt',  
+                    filename    => 'tutorial/rebuild_the_shipyard.txt',
                 });
                 return undef;
             }
         }
     }
     return {
-        filename    => 'tutorial/observatory.txt',  
+        filename    => 'tutorial/observatory.txt',
     };
 }
 
@@ -269,7 +269,7 @@ sub explore {
         }
     }
     return {
-        filename    => 'tutorial/explore.txt',  
+        filename    => 'tutorial/explore.txt',
     };
 }
 
@@ -278,8 +278,8 @@ sub the_end {
     my $empire = $self->empire;
     my $home = $empire->home_planet;
     if ($finish) {
-        $home->add_bauxite(2000);
-        $home->add_cheese(2000);
+        $home->add_food_type('bauxite', 2000);
+        $home->add_food_type('cheese', 2000);
         $home->add_energy(2000);
         $home->add_water(2000);
         $home->update;
@@ -294,7 +294,7 @@ sub the_end {
         return undef;
     }
     return {
-        filename    => 'tutorial/the_end.txt',  
+        filename    => 'tutorial/the_end.txt',
     };
 }
 
@@ -305,7 +305,7 @@ sub turing {
         return undef;
     }
     return {
-        filename    => 'tutorial/turing.txt',  
+        filename    => 'tutorial/turing.txt',
     };
 }
 
@@ -316,8 +316,8 @@ sub drinking_water {
     if ($finish) {
         my $building = $home->get_building_of_class('KA::DB::Result::Building::Water::Purification');
         if (defined $building && $building->level >= 1) {
-            $home->add_algae(700);
-            $home->add_rutile(700);
+            $home->add_food_type('algae', 700);
+            $home->add_ore_type('rutile', 700);
             $home->add_energy(700);
             $home->add_water(700);
             $home->update;
@@ -327,7 +327,7 @@ sub drinking_water {
     }
     return {
         params      => [sprintf '%.1f', ($home->water/100)],
-        filename    => 'tutorial/drinking_water.txt',  
+        filename    => 'tutorial/drinking_water.txt',
     };
 }
 
@@ -338,8 +338,8 @@ sub university {
     if ($finish) {
         my $building = $home->get_building_of_class('KA::DB::Result::Building::University');
         if (defined $building && $building->level >= 1) {
-            $home->add_trona(1000);
-            $home->add_bread(1000);
+            $home->add_food_type('trona', 1000);
+            $home->add_food_type('bread', 1000);
             $home->add_energy(1000);
             $home->add_water(1000);
             $home->update;
@@ -353,7 +353,7 @@ sub university {
     }
     return {
         params      => [$empire->name],
-        filename    => 'tutorial/university.txt',  
+        filename    => 'tutorial/university.txt',
     };
 }
 
@@ -364,8 +364,8 @@ sub mission_command {
     if ($finish) {
         my $building = $home->get_building_of_class('KA::DB::Result::Building::MissionCommand');
         if (defined $building && $building->level >= 1) {
-            $home->add_trona(700);
-            $home->add_bread(700);
+            $home->add_food_type('trona', 700);
+            $home->add_food_type('bread', 700);
             $home->add_energy(700);
             $home->add_water(700);
             $home->update;
@@ -375,7 +375,7 @@ sub mission_command {
     }
     return {
         params      => [$empire->name],
-        filename    => 'tutorial/mission_command.txt',  
+        filename    => 'tutorial/mission_command.txt',
     };
 }
 
@@ -392,8 +392,8 @@ sub storage {
                 if (defined $building && $building->level >= 1) {
                     my $building = $home->get_building_of_class('KA::DB::Result::Building::Food::Reserve');
                     if (defined $building && $building->level >= 1) {
-                        $home->add_algae(700);
-                        $home->add_rutile(700);
+                        $home->add_food_type('algae', 700);
+                        $home->add_food_type('rutile', 700);
                         $home->add_energy(700);
                         $home->add_water(700);
                         $home->update;
@@ -405,7 +405,7 @@ sub storage {
         }
     }
     return {
-        filename    => 'tutorial/storage.txt',  
+        filename    => 'tutorial/storage.txt',
     };
 }
 
@@ -416,8 +416,8 @@ sub news {
     if ($finish) {
         my $building = $home->get_building_of_class('KA::DB::Result::Building::Network19');
         if (defined $building && $building->level >= 1) {
-            $home->add_algae(700);
-            $home->add_rutile(700);
+            $home->add_food_type('algae', 700);
+            $home->add_food_type('rutile', 700);
             $home->add_energy(700);
             $home->add_water(700);
             $home->update;
@@ -426,7 +426,7 @@ sub news {
         }
     }
     return {
-        filename    => 'tutorial/news.txt',  
+        filename    => 'tutorial/news.txt',
     };
 }
 
@@ -436,8 +436,8 @@ sub rogue {
     my $home = $empire->home_planet;
     if ($finish) {
         if ($empire->description ne '') {
-            $home->add_algae(1700);
-            $home->add_rutile(1700);
+            $home->add_food_type('algae', 1700);
+            $home->add_food_type('rutile', 1700);
             $home->add_energy(1700);
             $home->add_water(1700);
             $home->update;
@@ -446,7 +446,7 @@ sub rogue {
         }
     }
     return {
-        filename    => 'tutorial/rogue.txt',  
+        filename    => 'tutorial/rogue.txt',
     };
 }
 
@@ -455,10 +455,10 @@ sub fool {
     my $empire = $self->empire;
     my $home = $empire->home_planet;
     if ($finish) {
-        if ($home->food_hour >= $empire->tutorial_scratch) {
+        if ($home->get_production('food') >= $empire->tutorial_scratch) {
             $home->add_plan('KA::DB::Result::Building::Food::Reserve', 2);
             $empire->add_essentia({
-                amount  => 35, 
+                amount  => 35,
                 type    => 'free',
                 reason  => 'tutorial',
             });
@@ -474,7 +474,7 @@ sub fool {
     }
     return {
         params      => [$food_hour,$food_hour],
-        filename    => 'tutorial/fool.txt',  
+        filename    => 'tutorial/fool.txt',
     };
 }
 
@@ -485,8 +485,8 @@ sub essentia {
     if ($finish) {
         my $now = time;
         if ($empire->food_boost->epoch >= $now && $empire->water_boost->epoch >= $now && $empire->ore_boost->epoch >= $now && $empire->energy_boost->epoch >= $now) {
-            $home->add_trona(700);
-            $home->add_bread(700);
+            $home->add_food_type('trona', 700);
+            $home->add_food_type('bread', 700);
             $home->add_energy(700);
             $home->add_water(700);
             $home->update;
@@ -495,7 +495,7 @@ sub essentia {
         }
     }
     return {
-        filename    => 'tutorial/essentia.txt',  
+        filename    => 'tutorial/essentia.txt',
     };
 }
 
@@ -504,7 +504,7 @@ sub energy {
     my $empire = $self->empire;
     my $home = $empire->home_planet;
     if ($finish) {
-        if ($home->energy_hour >= $empire->tutorial_scratch) {
+        if ($home->get_production('energy') >= $empire->tutorial_scratch) {
             $home->add_plan('KA::DB::Result::Building::Energy::Reserve', 2);
             $self->start('the_300');
             return undef;
@@ -517,7 +517,7 @@ sub energy {
     }
     return {
         params      => [$energy_hour,$energy_hour],
-        filename    => 'tutorial/energy.txt',  
+        filename    => 'tutorial/energy.txt',
     };
 }
 
@@ -526,7 +526,7 @@ sub the_300 {
     my $empire = $self->empire;
     my $home = $empire->home_planet;
     if ($finish) {
-        if ($home->ore_hour >= 50 && $home->water_hour >= 50) {
+        if ($home->get_production('ore') >= 50 && $home->get_production('water') >= 50) {
             $home->add_plan('KA::DB::Result::Building::Ore::Storage', 2);
             $home->add_plan('KA::DB::Result::Building::Water::Storage', 2);
             $self->start('news');
@@ -534,10 +534,9 @@ sub the_300 {
         }
     }
     return {
-        filename    => 'tutorial/the_300.txt',  
+        filename    => 'tutorial/the_300.txt',
     };
 }
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
-
