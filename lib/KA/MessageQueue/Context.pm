@@ -29,7 +29,7 @@ has 'class_data' => (
 
 has 'job' => (
     is      => 'ro',
-    isa     => 'Maybe[AnyEvent::Beanstalk::Job]',
+    # isa     => 'Maybe[AnyEvent::Beanstalk::Job]',
 );
 
 # touch the job to reset the ttr.  If there is no associated job,
@@ -51,4 +51,3 @@ sub param {
 }
 
 __PACKAGE__->meta->make_immutable;
-
