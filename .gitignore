@@ -12,3 +12,4 @@ var/www/public/api
 var/www/public/captcha
 var/starmaps/*.png
 log/*
+data/

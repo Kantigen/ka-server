@@ -661,7 +661,7 @@ before finish_work => sub {
             attachments => {
                 image => {
                     title   => $ore,
-                    url     => 'https://d16cbq0l6kkf21.cloudfront.net/assets/glyphs/'.$ore.'.png',
+                    url     => KA->config->get('assets_url').'glyphs/'.$ore.'.png',
                 }
             }
         );

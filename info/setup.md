@@ -41,18 +41,11 @@ docker-machine create --driver virtualbox --virtualbox_memory 8192 default
 
 Ususally, Docker Compose is much simpler to install than Docker itself. Simply follow the [install instructions](https://docs.docker.com/compose/install/) and you should be good to go.
 
-## 3. Setup Configuration Files
-
-  1. In the root of the repo, create a folder called `etc`
-  2. Copy all the files from `etc-docker-templates` into this newly created `etc` directory.
-
-## 4. Pull Containers
-
-The next step is to download a bunch of stuff. This next command will download all the Docker images that are needed to run the server.
+## 3. Build theContainers
 
 ```bash
 # In the root of the repo:
-docker-compose pull
+docker-compose build
 ```
 
 This command may take quite a while. It depends on the speed of your internet connection.

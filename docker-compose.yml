@@ -36,8 +36,8 @@ services:
     image: 'kenoantigen/ka-server'
     volumes:
         - ./bin:/home/keno/ka-server/bin
-        - ./docs:/home/keno/ka-server/docs
-        - ./etc:/home/keno/ka-server/etc
+        - ./docs:/hom-dockere/keno/ka-server/docs
+        - ./etc-docker:/home/keno/ka-server/etc
         - ./log:/home/keno/ka-server/log
         - ./lib:/home/keno/ka-server/lib
         - ./t:/home/keno/ka-server/t
@@ -68,28 +68,35 @@ services:
     container_name: 'ka-memcached'
     image: 'memcached'
 
-  ################
-  ## MYSQL DATA ##
-  ################
-
-  ka-mysql-data:
-    command: '/bin/bash'
-    container_name: 'ka-mysql-data'
-    image: 'arungupta/mysql-data-container'
-
   ##################
   ## MYSQL SERVER ##
   ##################
 
   ka-mysql-server:
     container_name: 'ka-mysql-server'
-    depends_on:
-      - 'ka-mysql-data'
     environment:
       - 'MYSQL_ROOT_PASSWORD=keno'
     image: 'mysql:5.5'
-    volumes_from:
-      - 'ka-mysql-data'
+    volumes:
+      - './data:/var/lib/mysql'
+    ports:
+      - '3306:3306'
+
+  ################
+  ## PHPMYADMIN ##
+  ################
+
+  ka-phpmyadmin:
+    container_name: 'ka-phpmyadmin'
+    image: 'phpmyadmin:5.2-apache'
+    environment:
+      - 'PMA_HOST=ka-mysql-server'
+    ports:
+      - '8000:80'
+    depends_on:
+      - 'ka-mysql-server'
+    links:
+      - 'ka-mysql-server'
 
   ###########
   ## NGINX ##
@@ -107,8 +114,8 @@ services:
       - '8080:80'
       - '8443:443'
     volumes:
-      - ./etc/nginx.conf:/etc/nginx/nginx.conf
-      - ./etc:/home/keno/ka-server/etc
+      - ./etc-docker/nginx.conf:/etc/nginx/nginx.conf
+      - ./etc-docker:/home/keno/ka-server/etc
       - ./var:/home/keno/ka-server/var
       - ./log:/home/keno/ka-server/log
       - ./captcha:/home/keno/ka-server/captcha
@@ -139,7 +146,8 @@ services:
     container_name: 'ka-server'
     depends_on:
       - 'ka-captcha-data'
-      - 'ka-mysql-data'
+      - 'ka-mysql-server'
+      - 'ka-phpmyadmin'
       - 'ka-redis'
       - 'ka-memcached'
       - 'ka-beanstalkd'
@@ -151,7 +159,7 @@ services:
     volumes:
       - ./bin:/home/keno/ka-server/bin
       - ./docs:/home/keno/ka-server/docs
-      - ./etc:/home/keno/ka-server/etc
+      - ./etc-docker:/home/keno/ka-server/etc
       - ./log:/home/keno/ka-server/log
       - ./lib:/home/keno/ka-server/lib
       - ./t:/home/keno/ka-server/t
@@ -177,7 +185,7 @@ services:
     volumes:
         - ./bin:/home/keno/ka-server/bin
         - ./docs:/home/keno/ka-server/docs
-        - ./etc:/home/keno/ka-server/etc
+        - ./etc-docker:/home/keno/ka-server/etc
         - ./log:/home/keno/ka-server/log
         - ./lib:/home/keno/ka-server/lib
         - ./t:/home/keno/ka-server/t
