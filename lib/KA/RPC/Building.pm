@@ -26,6 +26,10 @@ sub upgrade {
     my $self = shift;
     my $args = shift;
 
+    #
+    # TODO: passing a hash into this method call fails
+    #
+
     if (ref($args) ne "HASH") {
         $args = {
             session_id  => $args,
