@@ -43,19 +43,11 @@ sub fetch {
 
 
 sub solve {
-    my $self = shift;
-    my $args = shift;
+    my ($self, %args) = @_;
 
-    if (ref($args) ne "HASH") {
-        $args = {
-            session_id      => $args,
-            guid            => shift,
-            solution        => shift,
-        };
-    }
-    my $session_id  = $args->{session_id};
-    my $guid        = $args->{guid};
-    my $solution    = $args->{solution};
+    my $session_id  = $args{session_id};
+    my $guid        = $args{guid};
+    my $solution    = $args{solution};
     
     my $cache   = KA->cache;
     my $session = $self->get_session({session_id => $session_id });
