@@ -877,14 +877,28 @@ sub set_boost {
     my ($self, %args) = @_;
 
     my $session_id = $args{session_id};
-    my $type       = $args{type};
+    my $type       = $args{type}.'_boost';
     my $weeks      = $args{weeks} || 1;
 
     my $session  = $self->get_session({session_id => $session_id});
     my $empire   = $session->current_empire;
     $weeks //= 1;
 
-    confess [1001, "Weeks must be a positive integer"]
+    confess [1009, "Invalid boost type specified"]
+        unless grep($type, qw(
+            building_boost
+            energy_boost
+            food_boost
+            happiness_boost
+            ore_boost
+            ship_build_boost
+            ship_speed_boost
+            spy_training_boost
+            storage_boost
+            water_boost
+        ));
+
+    confess [1009, "Weeks must be a positive integer"]
         unless $weeks >=0 and int($weeks) == $weeks;
 
     unless ($empire->essentia >= 5 * $weeks) {
@@ -900,7 +914,7 @@ sub set_boost {
     $empire->planets->update({needs_recalc=>1, boost_enabled=>1});
     $empire->$type($start);
     $empire->update;
-    return $self->view_boosts($session_id);
+    return $self->get_boosts(session_id=>$session_id);
 }
 
 sub get_boosts {
@@ -1468,7 +1482,7 @@ __PACKAGE__->register_rpc_method_names(
     is_name_available
     logout
     get_full_status get_status
-    boost get_boosts
+    set_boost get_boosts
     get_authorized_sitters authorize_sitters deauthorize_sitters
     ),
 );
