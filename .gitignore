@@ -13,3 +13,5 @@ var/www/public/captcha
 var/starmaps/*.png
 log/*
 data/
+captcha/
+!captcha/dummy.png

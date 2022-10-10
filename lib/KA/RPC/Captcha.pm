@@ -19,7 +19,7 @@ sub fetch {
         # but not put it in the database
         $captcha = KA->db->resultset('Captcha')->new({
             riddle      => 'Answer 1',
-            solution    => 1,
+            solution    => '123',
             guid        => 'dummy',
         });
     }

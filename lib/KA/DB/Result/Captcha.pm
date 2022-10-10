@@ -16,7 +16,8 @@ __PACKAGE__->add_columns(
 
 sub uri {
     my $self = shift;
-    return KA->config->get('server_url').'/captcha/'.substr($self->guid,0,2).'/'.$self->guid.'.png';
+    my $filename = $self->guid eq 'dummy' ? 'dummy.png' : substr($self->guid,0,2).'/'.$self->guid.'.png';
+    return KA->config->get('server_url').'captcha/'.$filename;
 }
 
 

@@ -42,23 +42,6 @@ services:
         - ./lib:/home/keno/ka-server/lib
         - ./t:/home/keno/ka-server/t
         - ./var:/home/keno/ka-server/var
-    volumes_from:
-      - 'ka-captcha-data'
-
-
-  ##################
-  ## CAPTCHA DATA ##
-  ##################
-
-  ka-captcha-data:
-    build:
-      context: .
-      dockerfile: ./docker/build-captcha-data/Dockerfile
-    command: '/bin/bash'
-    container_name: 'ka-captcha-data'
-    image: 'kenoantigen/ka-captcha-data'
-    volumes:
-      - '/home/keno/captcha'
 
   ###############
   ## MEMCACHED ##
@@ -121,8 +104,6 @@ services:
       - ./captcha:/home/keno/ka-server/captcha
       - ./../Lacuna-Assets:/home/keno/ka-server/var/www/public/assets
       - ./var/www/public/api/api.css:/home/keno/ka-server/var/www/public/api/api.css
-    volumes_from:
-      - 'ka-captcha-data'
 
   ###########
   ## REDIS ##
@@ -145,7 +126,6 @@ services:
     command: '/bin/bash startdev.sh'
     container_name: 'ka-server'
     depends_on:
-      - 'ka-captcha-data'
       - 'ka-mysql-server'
       - 'ka-phpmyadmin'
       - 'ka-redis'
@@ -158,6 +138,7 @@ services:
       - '5000:5000'
     volumes:
       - ./bin:/home/keno/ka-server/bin
+      - ./captcha:/home/keno/ka-server/captcha
       - ./docs:/home/keno/ka-server/docs
       - ./etc-docker:/home/keno/ka-server/etc
       - ./log:/home/keno/ka-server/log
@@ -165,8 +146,6 @@ services:
       - ./t:/home/keno/ka-server/t
       - ./var:/home/keno/ka-server/var
       - ./var/www/public/api/api.css:/home/keno/ka-server/var/www/public/api/api.css
-    volumes_from:
-      - 'ka-captcha-data'
 
   ################
   ## WEB SOCKET ##
@@ -184,11 +163,10 @@ services:
       - '8090:80'
     volumes:
         - ./bin:/home/keno/ka-server/bin
+        - ./captcha:/home/keno/ka-server/captcha
         - ./docs:/home/keno/ka-server/docs
         - ./etc-docker:/home/keno/ka-server/etc
         - ./log:/home/keno/ka-server/log
         - ./lib:/home/keno/ka-server/lib
         - ./t:/home/keno/ka-server/t
         - ./var:/home/keno/ka-server/var
-    volumes_from:
-      - 'ka-captcha-data'
