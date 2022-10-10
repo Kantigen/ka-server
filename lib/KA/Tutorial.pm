@@ -469,7 +469,7 @@ sub fool {
     }
     my $food_hour = $empire->tutorial_scratch;
     if ($food_hour eq '') {
-        $food_hour = $empire->tutorial_scratch($home->food_hour + 20);
+        $food_hour = $empire->tutorial_scratch($home->get_production('food') + 20);
         $empire->update;
     }
     return {
@@ -512,7 +512,7 @@ sub energy {
     }
     my $energy_hour = $empire->tutorial_scratch;
     if ($energy_hour eq '') {
-        $energy_hour = $empire->tutorial_scratch($home->energy_hour + 20);
+        $energy_hour = $empire->tutorial_scratch($home->get_production('energy') + 20);
         $empire->update;
     }
     return {

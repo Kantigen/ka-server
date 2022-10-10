@@ -143,8 +143,8 @@ sub training_costs {
     my $self = shift;
     my $multiplier = $self->training_multiplier;
     my $time_to_train = sprintf('%.0f', 2060 * $multiplier / $self->body->empire->effective_management_affinity);
-    if ($self->body->happiness < 0) {
-      my $unhappy_workers = abs($self->body->happiness)/100_000;
+    if ($self->body->get_production('happiness') < 0) {
+      my $unhappy_workers = abs($self->body->get_production('happiness'))/100_000;
       $time_to_train = int($time_to_train * $unhappy_workers);
     }
     $time_to_train = 5184000 if ($time_to_train > 5184000); # Max time per spy is 60 days
