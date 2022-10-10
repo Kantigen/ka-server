@@ -1,1 +1,1 @@
-docker-compose exec ka-server /bin/bash
+docker compose exec ka-server /bin/bash
