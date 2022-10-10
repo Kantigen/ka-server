@@ -4,21 +4,21 @@ FROM centos:7
 RUN yum -y upgrade
 
 RUN yum install -y make \
- wget \
- gcc gcc-c++ \
- zlib-devel \
- openssl openssl-devel \
- expat expat-devel \
- ncurses-devel \
- glibc-devel \
- git \
- mysql mysql-devel \
- libxml2 libxml2-devel \
- gd gd-devel \
- cronie \
- bzip2 \
- && systemctl enable crond.service \
- && rm -fr /var/lib/apt/lists/*
+    wget \
+    gcc gcc-c++ \
+    zlib-devel \
+    openssl openssl-devel \
+    expat expat-devel \
+    ncurses-devel \
+    glibc-devel \
+    git \
+    mysql mysql-devel \
+    libxml2 libxml2-devel \
+    gd gd-devel \
+    cronie \
+    bzip2 \
+    && systemctl enable crond.service \
+    && rm -fr /var/lib/apt/lists/*
 
 RUN mkdir /usr/src/perl
 WORKDIR   /usr/src/perl
