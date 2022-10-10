@@ -79,12 +79,12 @@ sub bg_publish {
 sub bg_subscribe {
     my ($self, $context) = @_;
 
-    $self->log->debug("bg_subscribe: context[".$context->class_data."] ".Dumper($context));
+    # $self->log->debug("bg_subscribe: context[".$context->class_data."] ".Dumper($context));
     my $content = $context->content;
     my $pipe    = $content->{pipe};
 
     $context->class_data->{pipes}{$pipe} = 1;
-    $self->log->debug("Added channel ".$context->class_data->{pipes}." [".Dumper($context->class_data)."]");
+    # $self->log->debug("Added channel ".$context->class_data->{pipes}." [".Dumper($context->class_data)."]");
 }
 
 #--- Unsubscribe from a channel
@@ -99,12 +99,12 @@ sub bg_subscribe {
 sub bg_unsubscribe {
     my ($self, $context) = @_;
 
-    $self->log->debug("bg_unsubscribe: context[".$context->class_data."] ".Dumper($context));
+    # $self->log->debug("bg_unsubscribe: context[".$context->class_data."] ".Dumper($context));
     my $content = $context->content;
     my $pipe    = $content->{pipe};
     my $pipes   = $context->class_data->{pipes};
     delete $pipes->{$pipe};
-    $self->log->debug("Removed channel $pipes [".Dumper($context->class_data)."]");
+    # $self->log->debug("Removed channel $pipes [".Dumper($context->class_data)."]");
 
 }
 1;
