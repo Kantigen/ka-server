@@ -336,7 +336,7 @@ sub www_search_bodies {
     $out .= '<table style="width: 100%;"><tr><th>Id</th><th>Name</th><th>X</th><th>Y</th><th>Zone</th><th>Star</th><th>O</th><th>Type</th><th>Happiness</th><th>Empire</th></tr>';
     while (my $body = $bodies->next) {
         $out .= sprintf('<tr><td><a href="/admin/view/body?id=%s">%s</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td><a href="/admin/view/star?id=%d">%s (%d)</a></td><td>%s</td><td>%s</td><td>%s</td><td><a href="/admin/view/empire?id=%s">%s</a></td></tr>',
-                        $body->id, $body->id, $body->name, $body->x, $body->y, $body->zone, $body->star_id, $body->star->name,$body->star_id, $body->orbit, $body->image_name, kmbtq($body->happiness),
+                        $body->id, $body->id, $body->name, $body->x, $body->y, $body->zone, $body->star_id, $body->star->name,$body->star_id, $body->orbit, $body->image_name, 0,#kmbtq($body->get_stored('happiness')),
                         $body->empire_id || '', $body->empire_id ? sprintf("%s (%s)",$body->empire->name,$body->empire_id) : '' );
     }
     $out .= '</table>';
@@ -368,6 +368,23 @@ sub www_search_stars {
     $out .= '</table>';
     $out .= $self->format_paginator('search/stars', 'name', $name, $page_number);
     return $self->wrap($out);
+}
+
+sub www_fill_resources {
+    my ($self, $request) = @_;
+    my $body = KA->db->resultset('Map::Body')->find($request->param('body_id'));
+    unless (defined $body) {
+        confess [404, 'Body not found.'];
+    }
+    $body->add_food_type('apple', $body->get_capacity('food'));
+    $body->add_ore_type('bauxite', $body->get_capacity('ore'));
+    $body->add_water($body->get_capacity('water'));
+    $body->add_energy($body->get_capacity('energy'));
+    $body->set_stored('waste', 0);
+
+    $body->update;
+
+    return $self->wrap(sprintf('Resources refilled! <a href="/admin/view/body?id=%s">Back to Body</a>', $request->param('body_id')));
 }
 
 sub www_complete_builds {
@@ -661,7 +678,7 @@ sub www_add_resources {
     unless (defined $body) {
         confess [404, 'Body not found.'];
     }
-    $body->add_stored_type($request->param('resource'), $request->param('amount'));
+    $body->add_stored($request->param('resource'), $request->param('amount'));
     $body->update;
     return $self->www_view_resources($request, $body->id);
 }
@@ -972,7 +989,7 @@ sub www_view_empire {
     $out .= sprintf('<tr><th>Mission Curator</th><td>%s</td><td><a href="/admin/toggle/mission/curator?id=%s">Toggle</a></td></tr>', $empire->is_mission_curator, $empire->id);
 
     my $notes = KA->db->resultset('Log::EmpireAdminNotes')->find({empire_id => $empire->id},{order_by => { -desc => 'id' }, rows => 1 });
-    $out .= sprintf('<tr><th>Admin Notes</th><td colspan="2"><form method="post" style="display: inline" action="/admin/set/admin/notes"><input type="hidden" name="id" value="%s"><textarea name="notes" rows="4" cols="80">%s</textarea><input type="submit"></form></td><td>Last set by: %s<br/>Last set on: %s<br/><a href="/admin/view/admin/note/log?id=%s">View Log</a></td></tr>',
+    $out .= sprintf('<tr><th>Admin Notes</th><td><form method="post" style="display: inline" action="/admin/set/admin/notes"><input type="hidden" name="id" value="%s"><textarea name="notes" rows="4" cols="80">%s</textarea><input type="submit"></form></td><td>Last set by: %s<br/>Last set on: %s<br/><a href="/admin/view/admin/note/log?id=%s">View Log</a></td></tr>',
                     $empire->id,
                     $notes ? $notes->notes : '',
                     $notes ? $notes->creator : '<i>not set yet</i>',
@@ -1121,7 +1138,7 @@ sub www_view_body {
     $out .= sprintf('<tr><th>X</th><td>%s</td><td></td></tr>', $body->x);
     $out .= sprintf('<tr><th>Y</th><td>%s</td><td></td></tr>', $body->y);
     $out .= sprintf('<tr><th>Orbit</th><td>%s</td><td></td></tr>', $body->orbit);
-    $out .= sprintf('<tr><th>Happiness</th><td>%s</td><td><form method="post" style="display: inline" action="/admin/add/happiness"><input type="hidden" name="id" value="%s"><input name="amount" style="width: 10em" value="0"><input type="submit" value="add happiness"></form></td></tr>', $body->happiness, $body->id);
+    $out .= sprintf('<tr><th>Happiness</th><td>%s</td><td><form method="post" style="display: inline" action="/admin/add/happiness"><input type="hidden" name="id" value="%s"><input name="amount" style="width: 10em" value="0"><input type="submit" value="add happiness"></form></td></tr>', $body->get_stored('happiness'), $body->id);
     $out .= sprintf('<tr><th>Star</th><td><a href="/admin/view/star?id=%s">%s</a> (%s)</td><td><a href="/admin/search/bodies?star_id=%s">Bodies Orbiting This Star</a></td></tr>', $body->star_id, $body->star->name, $body->star_id, $body->star_id);
     if ($body->empire) {
         $out .= sprintf('<tr><th>Empire</th><td><a href="/admin/view/empire?id=%s">%s</a> (%s)</td><td></td></tr>', $body->empire_id, $body->empire->name, $body->empire_id);
@@ -1137,6 +1154,7 @@ sub www_view_body {
     $out .= sprintf('<li><a href="/admin/view/glyphs?body_id=%s">View Glyphs</a></li>', $body->id);
     $out .= sprintf('<li><a href="/admin/recalc/body?body_id=%s">Recalculate Body Stats</a></li>', $body->id);
     $out .= sprintf('<li><a href="/admin/complete/builds?body_id=%s">Complete All Builds</a></li>', $body->id);
+    $out .= sprintf('<li><a href="/admin/fill/resources?body_id=%s">Refill Resources</a></li>', $body->id);
     $out .= sprintf('<li><a href="/admin/send/stellar/flare?body_id=%s" onclick="return confirm(\'Set all buildings on planet (except PCC) to zero efficiency - Are you sure?\')" title="Set all buildings on planet (except PCC) to zero efficiency">Send Stellar Flare</a></li>', $body->id);
     $out .= sprintf('<li><a href="/admin/send/meteor/shower?body_id=%s" onclick="return confirm(\'Replace all infrastructure buildings on planet (except PCC) with level 1 craters - Are you sure?\')" title="Replace all infrastructure buildings on planet (except PCC) with level 1 craters">Send Meteor Shower</a></li>', $body->id);
     $out .= sprintf('<li><a href="/admin/send/pestilence?body_id=%s" onclick="return confirm(\'Abandon colony and remove all non-permanent buildings - Are you sure?\')" title="Abandon colony and remove all non-permanent buildings">Send Pestilence</a></li>', $body->id);
@@ -1807,10 +1825,9 @@ ATTACKER:
 sub wrap {
     my ($self, $content) = @_;
 
-    my $uri = URI->new(KA->config->get('server_url'));
-    my ($domain) = $uri->authority =~ /^([^.]+)\./;
+    my $server_url = URI->new(KA->config->get('server_url'));
 
-    return $self->wrapper('<div style="width: 150px;">
+    return $self->wrapper('<div>
     <ul class="admin_menu">
     <li><a href="/admin/search/empires">Empires</a></li>
     <li><a href="/admin/search/bodies">Bodies</a></li>
@@ -1823,9 +1840,9 @@ sub wrap {
     <li><a href="/admin/default">Home</a></li>
     </ul>
     </div>
-    <div style="position: absolute; top: 0; left: 160px; min-width: 600px; margin: 5px;">
+    <div>
     <div>'. $content .' </div></div>',
-    { title => "Admin Console ($domain)"}
+    { title => "Admin Console ($server_url)"}
     );
 }
 
