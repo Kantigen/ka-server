@@ -1,35 +1,31 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s</title>
-<style type="text/css">
- body {
-   background-color: #014986;
-   color: white;
-   font-family: Helvetica, san serif;
-   font-size: 14pt;
- }
- #logo {
-  width: 578px;
-  height: 136px;
-  margin: 0 auto;
-  margin-bottom: 20px;
- }
-a {
-    color: #ffb400;
-}
-tr {
-    text-align: left;
-}
-fieldset {
-    margin-top: 10px;
-    border: 1px solid black;
-}
-legend {
-    font-size: 12px;
-    color: #eeeeee;
-}
- .admin_menu {
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
+<style>
+  :root {
+    --background-body: #014986;
+    --background: #003875;
+    --button-base: #003875;
+    --button-hover: #ffb400;
+    --links: #ffb400;
+  }
+  body {
+    font-family: Helvetica, san-serif;
+    font-size: 16px;
+    max-width: 1200px;
+  }
+  tbody tr:nth-child(even) {
+    background-color: unset;
+  }
+  tr {
+    border-bottom: 1px #8f8f8f94 solid;
+  }
+  .admin_menu {
+    width: 150px;
     font-size: 15px;
     padding: 0;
     margin: 0;
@@ -56,7 +52,7 @@ legend {
    border: 1px solid black;
    -webkit-border-radius: 5px;
    -moz-border-radius: 5px;
-   border-radius: 5px; 
+   border-radius: 5px;
    position: relative;
    width: 650px;
    margin: 15px;
@@ -105,7 +101,7 @@ legend {
    left: 400px;
  }
  A.server_button div.play_now {
-   color: white; 
+   color: white;
    font-size: 30px;
    position: absolute;
    top: 8px;

@@ -17,7 +17,7 @@ sub call {
     $method_name =~ s{/}{_}g;               # replace slashes with underscores
     $method_name ||= 'default';             # if no method is specified, then display the default
     $method_name = 'www_' . $method_name;   # not all methods are public
-    
+
     # call it
     my $out;
     my $method = $self->can($method_name);
@@ -105,14 +105,13 @@ sub wrapper {
         }
         close $file;
         if ($options->{logo}) {
-            $content = '<div id="logo"><img src="https://s3.amazonaws.com/www.lacunaexpanse.com/logo.png"></div>'.$content;
+            $content = '<div id="logo"><img src="'.KA->config->get('assets_url').'ui/logo.png"></div>'.$content;
         }
-        return [ sprintf($html, ($options->{title} || 'The KA Expanse'), $options->{head_tags}, $content), { status => $options->{status} } ];    
+        return [ sprintf($html, ($options->{title} || 'The KA Expanse'), $options->{head_tags}, $content), { status => $options->{status} } ];
     }
-    return ['Could not open wrapper template.', {status => 500} ];    
+    return ['Could not open wrapper template.', {status => 500} ];
 }
 
 
 no Moose;
 __PACKAGE__->meta->make_immutable(inline_constructor => 0);
-
