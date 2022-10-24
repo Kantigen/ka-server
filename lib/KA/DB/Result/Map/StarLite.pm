@@ -21,8 +21,8 @@ __PACKAGE__->add_columns(
     star_x                  => { data_type => 'int', size => 11, default_value => 0 },
     star_y                  => { data_type => 'int', size => 11, default_value => 0 },
     star_zone               => { data_type => 'varchar', size => 16, is_nullable => 0 },
-    station_id              => { data_type => 'int', size => 11}, 
-    influence               => { data_type => 'int', size => 11}, 
+    station_id              => { data_type => 'int', size => 11},
+    influence               => { data_type => 'int', size => 11},
     body_id                 => { data_type => 'int', size => 11},
     body_name               => { data_type => 'varchar', size => 30, is_nullable => 0 },
     body_orbit              => { data_type => 'int', default_value => 0 },
@@ -39,9 +39,8 @@ __PACKAGE__->add_columns(
 
 __PACKAGE__->result_source_instance->is_virtual(1);
 
-#For now, during testing, return all bodies around all stars
 __PACKAGE__->result_source_instance->view_definition(q[
-    select 
+    select
         distinct(star.id) AS star_id,
         star.name AS star_name,
         star.color AS star_color,
@@ -66,11 +65,11 @@ __PACKAGE__->result_source_instance->view_definition(q[
     LEFT JOIN probe
       ON star.id = probe.star_id AND (probe.alliance_id=? OR probe.empire_id=?)
     LEFT JOIN body
-      ON star.id = body.star_id
+      ON star.id = body.star_id AND probe.id is not null
     LEFT JOIN empire
-      ON body.empire_id = empire.id 
+      ON body.empire_id = empire.id
     LEFT JOIN building
-      ON body.id = building.body_id 
+      ON body.id = building.body_id
       AND building.class='KA::DB::Result::Building::Permanent::Fissure'
     WHERE star.x >= ?
     AND star.x <= ?
@@ -82,7 +81,7 @@ __PACKAGE__->result_source_instance->view_definition(q[
 
 __PACKAGE__->belongs_to('station', 'KA::DB::Result::Map::Body', 'station_id');
 
-# get the planet image name 
+# get the planet image name
 # NOTE: This is not good, since image name generation is now duplicated.
 # to 'fix' this would need significant refactoring of the way body images and
 # types are calculated
