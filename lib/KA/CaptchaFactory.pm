@@ -95,7 +95,7 @@ for my $a ('a'..'c') {
        $string .= $a++;
        $riddles{$string} = $answer;
    }
-}    
+}
 
 for my $a ('a'..'c') {
     for (1..4) {
@@ -188,7 +188,7 @@ sub _build_bg_color {
 # return a random foreground color
 sub _build_fg_color {
     my ($self) = @_;
-    
+
     return random_element([ '#ddffff', '#ffddff', '#ffffdd' ]);
 }
 
@@ -201,7 +201,7 @@ sub _build_guid {
 # The folder where fonts can be found
 sub _build_font_path {
     my ($self) = @_;
-    
+
     return "/Library/Fonts";
 }
 
@@ -241,7 +241,7 @@ sub construct {
         ->create( ttf => $self->style, $self->fg_color, $self->fg_color )
         ->particle;
     }
-    
+
     my ($image, $mime, $string) = $security_image->info_text(
         x      => 'left',
         y      => 'up',
@@ -255,9 +255,9 @@ sub construct {
         force   => 'png',
         compress=> 1,
     );
-    
+
     my $prefix = substr($self->guid, 0,2);
-    my $dir = '/home/keno/ka-captcha/public/'.$prefix;
+    my $dir = '/home/keno/ka-server/captcha/'.$prefix;
     unless (-d $dir) {
         mkdir $dir;
     }
@@ -272,9 +272,8 @@ sub construct {
         created     => DateTime->now,
     });
 }
-    
+
 
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
-
