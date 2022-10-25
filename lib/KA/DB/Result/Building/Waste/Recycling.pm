@@ -59,7 +59,7 @@ sub recycle {
     # setup
     my $body = $self->body;
     my $total = $water + $ore + $energy;
-    
+
     # start
     my $seconds = $total * $self->seconds_per_resource;
     $seconds = 15 if $seconds < 15;
@@ -74,7 +74,7 @@ sub recycle {
     $body->spend_waste($total);
     if ($use_essentia) {
         $body->empire->spend_essentia({
-            amount  => 2, 
+            amount  => 2,
             reason  => 'recycling subsidy',
         });
         $body->empire->update;
@@ -90,7 +90,7 @@ before finish_work => sub {
     my $self = shift;
     my $planet = $self->body;
     $planet->add_water($self->work->{water_from_recycling});
-    $planet->add_ore($self->work->{ore_from_recycling});
+    $planet->add_random_ore($self->work->{ore_from_recycling});
     $planet->add_energy($self->work->{energy_from_recycling});
     $planet->update;
 };
