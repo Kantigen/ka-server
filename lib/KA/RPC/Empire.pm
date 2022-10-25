@@ -106,10 +106,7 @@ sub is_name_unique {
 
 sub logout {
     my ($self, %args) = @_;
-
-    my $session_id = $args{session_id};
-
-    $self->get_session($session_id)->end;
+    $self->get_session(\%args)->end;
     return { logout => 1 };
 }
 
