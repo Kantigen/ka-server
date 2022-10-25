@@ -220,7 +220,7 @@ sub build_fleet {
     my $building_ids    = $args{building_ids};
     my $type            = $args{type};
     my $quantity        = $args{quantity} || 1;
-    my $autoselect      = lc $args{autoselect};
+    my $autoselect      = lc $args{auto_select};
 
     if ($quantity <= 0 or int($quantity) != $quantity) {
         confess [1001, "Quantity must be a positive integer"];
