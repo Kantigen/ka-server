@@ -8,10 +8,10 @@ after handle_arrival_procedures => sub {
 
     # we're coming home
     return if ($self->direction eq 'in');
-    
+
     # deploy probe
     my $empire = $self->body->empire;
-    $empire->add_probe($self->foreign_star_id, $self->body_id);
+    $empire->add_observatory_probe($self->foreign_star_id, $self->body_id);
 
     # all pow
     $self->delete;
@@ -34,4 +34,3 @@ after can_send_to_target => sub {
 };
 
 1;
-
