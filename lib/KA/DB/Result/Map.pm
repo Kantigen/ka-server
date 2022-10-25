@@ -44,7 +44,7 @@ sub calculate_distance_to_xy {
 #
 sub calculate_distance_to_target {
     my ($self, $target) = @_;
-    return $self->calculate_distance_to_xy($target->x, $target->i);
+    return $self->calculate_distance_to_xy($target->x, $target->y);
 }
 
 use constant zone_size => 250;
@@ -124,7 +124,7 @@ sub format_zone_from_xy {
 sub determine_zone_coord_from_xy_coord {
     my ($self, $coord) = @_;
 
-    my $p = int(($coord - $self->map_size->{x}[0]) / zone_size) - int((0 - $self->map_size->{x}[0]) / zone_size); 
+    my $p = int(($coord - $self->map_size->{x}[0]) / zone_size) - int((0 - $self->map_size->{x}[0]) / zone_size);
     my $q = int(($coord - $self->map_size->{y}[0]) / zone_size) - int((0 - $self->map_size->{y}[0]) / zone_size);
     return ($p, $q);
 }
@@ -139,7 +139,7 @@ sub in_neutral_area {
         my $x    = $self->x;
         my $y    = $self->y;
         if ($na_param->{zone} and $na_param->{coord}) {
-            # Needs to be in both to qualify as in         
+            # Needs to be in both to qualify as in
             my $in_zone = 0;
             for my $z_test (@{$na_param->{zone_list}}) {
                 $in_zone = 1 if ($zone eq $z_test);
@@ -179,7 +179,7 @@ sub in_starter_zone {
         my $x    = $self->x;
         my $y    = $self->y;
         if ($sz_param->{zone} and $sz_param->{coord}) {
-# Needs to be in both to qualify as in         
+# Needs to be in both to qualify as in
             my $in_zone = 0;
             for my $z_test (@{$sz_param->{zone_list}}) {
                 $in_zone = 1 if ($zone eq $z_test);
