@@ -22,7 +22,7 @@ around 'view' => sub {
     my $out = $orig->($self, $session, $building);
     my $boost = (time < $empire->spy_training_boost->epoch) ? 1.5 : 1;
     my $points_per = $building->effective_level * $boost;
-    $out->{spies} = {
+    $out->{building}{spies} = {
         max_points  => 350 + $building->effective_level * 75,
         points_per  => $points_per,
         in_training => $building->spies_in_training_count,
@@ -36,4 +36,3 @@ __PACKAGE__->register_rpc_method_names();
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
-

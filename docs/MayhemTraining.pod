@@ -8,15 +8,17 @@ The list of methods below represents changes and additions to the methods that a
 
 =head2 view ( session_id, building_id )
 
- {
-    "status" : { ... },
-    "building" : { ... },
+{
+  "status" : { ... },
+  "building" : {
     "spies" : {
-        "max_points" : 2600,
-        "points_per" : 45,
-        "in_training" : 4,
+      "max_points" : 2600,
+      "points_per" : 45,
+      "in_training" : 4,
     },
- }
+    ...
+  },
+}
 
 =head3 session_id
 
