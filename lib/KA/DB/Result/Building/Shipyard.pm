@@ -18,7 +18,7 @@ has max_ships => (
         my $self = shift;
 
         return KA->db->resultset('Building')->search( {
-            class       => $self->class, 
+            class       => $self->class,
             body_id     => $self->body_id,
             efficiency  => 100,
         } )->get_column('level')->sum;
@@ -67,7 +67,7 @@ sub percentage_of_cost {
     my ($self, $fleet) = @_;
 
     my $body = $self->body;
-    my $percentage_of_cost = 100; 
+    my $percentage_of_cost = 100;
     if ($fleet->base_hold_size) {
         my $trade = $self->body->trade;
         if (defined $trade) {
@@ -108,11 +108,11 @@ sub get_fleet_costs {
     my $body = $self->body;
     my $percentage_of_cost = $self->percentage_of_cost($fleet);
 
-    
+
     my $throttle = KA->config->get('ship_build_speed') || 0;
     my $seconds = $fleet->quantity
         * (1 - ($fleet->quantity / 50 * 0.03))
-        * $fleet->base_time_cost 
+        * $fleet->base_time_cost
         * $self->time_cost_reduction_bonus(($self->level * 3) + $throttle);
 
     $seconds = sprintf('%0.f', $seconds);
@@ -140,8 +140,8 @@ sub get_fleet_repair_costs {
     my $damage = 1 - $fleet->quantity + int($fleet->quantity);
 
     my $throttle = KA->config->get('ship_build_speed') || 0;
-    my $seconds = $damage 
-        * $fleet->base_time_cost 
+    my $seconds = $damage
+        * $fleet->base_time_cost
         * $self->time_cost_reduction_bonus(($self->level * 3) + $throttle);
 
     $seconds = sprintf('%0.f', $seconds);
@@ -229,7 +229,7 @@ sub can_build_fleet {
             confess [1011, 'Not enough resources.', $key];
         }
     }
-    
+
     my ($fleets_building, $ships_building) = $body->fleets_building;
 
     if ($ships_building + $fleet->quantity > $self->max_ships) {
@@ -281,8 +281,8 @@ sub build_fleet {
         shipyard_id => $self->id,
         task        => 'Building',
     },
-    { 
-        order_by    => { -desc => 'date_available' }, 
+    {
+        order_by    => { -desc => 'date_available' },
         rows        => 1,
     })->single;
 
@@ -309,7 +309,7 @@ sub repair_fleet {
     my $partial         = $fleet->quantity - int($fleet->quantity);
     my $damaged_fleet   = $fleet->split($partial);
     $damaged_fleet->task('Repairing');
-    
+
     my $latest = $self->building_fleets->search(undef, {
         order_by    => { -desc => 'data_available' },
         rows        => 1,
@@ -345,6 +345,17 @@ use constant ore_consumption                => 6;
 use constant water_consumption              => 4;
 use constant waste_production               => 5;
 use constant star_to_body_distance_ratio    => 100;
+
+
+after 'finish_work' => sub {
+  #
+  # TODO: find fleets that have finished construction and complete their builds
+  # See the build subsidy process for reference of what needs to happen
+  #
+
+  my $self = shift;
+
+};
 
 # Get the pilot_training_level
 sub ptf_level {
@@ -399,11 +410,11 @@ sub cloaking_level {
 sub set_fleet_speed {
     my ($self, $fleet) = @_;
 
-    my $improvement      = 1 
-        + ($self->shipyard_level    * 0.01) 
-        + ($self->ptf_level($fleet) * 0.03) 
-        + ($self->propulsion_level  * 0.05) 
-        + ($self->css_level         * 0.05) 
+    my $improvement      = 1
+        + ($self->shipyard_level    * 0.01)
+        + ($self->ptf_level($fleet) * 0.03)
+        + ($self->propulsion_level  * 0.05)
+        + ($self->css_level         * 0.05)
         + ($self->body->empire->science_affinity * 0.03);
 
     $fleet->speed(sprintf('%.0f', $fleet->base_speed * $improvement));

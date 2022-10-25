@@ -44,24 +44,17 @@ around 'view' => sub {
 
 
 sub get_glyphs {
-    my $self = shift;
-    my $args = shift;
+    my ($self, %args) = @_;
 
-    if (ref($args) ne "HASH") {
-        $args = {
-            session_id      => $args,
-            building_id     => shift,
-        };
-    }
-    if ($args->{no_status}) {
+    if ($args{no_status}) {
         return {};
     }
-    my $session     = $self->get_session($args);
+    my $session     = $self->get_session(\%args);
     my $empire      = $session->current_empire;
     my $building    = $session->current_building;
 
     my @out;
-    my $glyphs = $building->body->glyph;
+    my $glyphs = $building->body->glyphs;
     while (my $glyph = $glyphs->next) {
         push @out, {
             id          => $glyph->id,
@@ -79,7 +72,7 @@ sub get_glyphs {
 
 sub get_glyph_summary {
     my ($self, $args) = @_;
-    return $self->get_glyphs(@_);
+    return $self->get_glyphs($args);
 }
 
 
@@ -187,14 +180,14 @@ sub subsidize_search {
     unless ($building->is_working) {
         confess [1010, "No one is searching."];
     }
- 
+
     unless ($empire->essentia >= 2) {
-        confess [1011, "Not enough essentia."];    
+        confess [1011, "Not enough essentia."];
     }
 
     $building->finish_work->update;
     $empire->spend_essentia({
-        amount      => 2, 
+        amount      => 2,
         reason      => 'glyph search subsidy after the fact',
     });
     $empire->update;
@@ -234,7 +227,7 @@ sub view_excavators {
     };
     my $excavators = $building->excavators;
     my $travel = KA->db->resultset('Fleet')->search({
-        type    => 'excavator', 
+        type    => 'excavator',
         task    => 'Travelling',
         body_id => $building->body_id,
     })->count;
@@ -253,7 +246,7 @@ sub view_excavators {
             distance => sprintf("%.2f", $building->body->calculate_distance_to_target($excav->body) / 100),
         };
     }
-    @sites = sort { 
+    @sites = sort {
         # closer first so player can see which ones are closer easily
         $a->{distance} <=> $b->{distance} or
         # if the distance is exactly the same (?), order of deployment
@@ -320,21 +313,20 @@ sub mass_abandon_excavator {
     $building->excavators->delete;
 	return {
         status  => $self->format_status($session, $building->body),
-    }; 
+    };
 }
 
 __PACKAGE__->register_rpc_method_names(qw(
-    get_ores_available_for_processing 
-    assemble_glyphs 
-    search_for_glyph 
-    get_glyphs 
-    get_glyph_summary 
-    subsidize_search 
-    view_excavators 
+    get_ores_available_for_processing
+    assemble_glyphs
+    search_for_glyph
+    get_glyphs
+    get_glyph_summary
+    subsidize_search
+    view_excavators
     abandon_excavator
     mass_abandon_excavator
 ));
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
-
