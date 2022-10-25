@@ -100,8 +100,6 @@ sub send_fleet {
 
     my $session     = $self->get_session(\%args);
     my $empire      = $session->current_empire;
-    my $building    = $session->current_building;
-    my $body        = $building->body;
 
     $args{arrival_date} = {soonest => 1} if not defined $args{arrival_date};
 
