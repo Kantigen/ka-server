@@ -376,8 +376,8 @@ sub www_fill_resources {
     unless (defined $body) {
         confess [404, 'Body not found.'];
     }
-    $body->add_food_type('apple', $body->get_capacity('food'));
-    $body->add_ore_type('bauxite', $body->get_capacity('ore'));
+    $body->add_random_type($body->get_capacity('food'));
+    $body->add_random_ore($body->get_capacity('ore'));
     $body->add_water($body->get_capacity('water'));
     $body->add_energy($body->get_capacity('energy'));
     $body->set_stored('waste', 0);

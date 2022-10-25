@@ -244,7 +244,7 @@ sub update_resources {
 
     foreach my $key (keys %{$self->resource_cache}, 'ore', 'food') {
         my $resource = $self->resource_cache->{$key};
-        
+
         if ($key ~~ [ORE_TYPES]) {
             $ore_resource->production($ore_resource->production + $resource->production);
             $ore_resource->consumption($ore_resource->consumption + $resource->consumption);
@@ -269,7 +269,7 @@ sub sorted_plans {
     my ($self) = @_;
 
     my @sorted_plans = sort {
-            $a->class->sortable_name cmp $b->class->sortable_name 
+            $a->class->sortable_name cmp $b->class->sortable_name
         ||  $a->level <=> $b->level
         ||  $a->extra_build_level <=> $b->extra_build_level
         } @{$self->plan_cache};
@@ -401,7 +401,7 @@ has is_claimed => (
 sub claimed_by {
     my $self = shift;
     my $empire_id = $self->is_claimed;
-    return $empire_id ? $self->db->resultset('Empire')->find($empire_id) : undef;    
+    return $empire_id ? $self->db->resultset('Empire')->find($empire_id) : undef;
 }
 
 # add a glyph to this planet
@@ -464,8 +464,8 @@ sub add_plan {
 
     # add it
     my ($plan) = grep {
-            $_->class eq $class 
-        and $_->level == $level 
+            $_->class eq $class
+        and $_->level == $level
         and $_->extra_build_level == $extra_build_level,
         } @{$self->plan_cache};
     if ($plan) {
@@ -530,7 +530,7 @@ sub sanitize {
     }
     $self->body_resources->delete_all;
     $self->clear_resource_cache;
-    $self->restrict_coverage(0); 
+    $self->restrict_coverage(0);
     $self->update;
     return $self;
 }
@@ -556,7 +556,7 @@ sub get_ore_status {
         $out->{"${type}_production"}    = $resource->production;
         $out->{"${type}_stored"}        = $resource->stored;
         $out->{"${type}_consumption"}   = $resource->consumption;
-    }         
+    }
     return $out;
 }
 
@@ -572,7 +572,7 @@ sub get_food_status {
         $out->{"${type}_production"}    = $resource->production;
         $out->{"${type}_stored"}        = $resource->stored;
         $out->{"${type}_consumption"}   = $resource->consumption;
-    }         
+    }
     return $out;
 }
 
@@ -608,7 +608,7 @@ around get_status => sub {
 
     my $out = $orig->($self);
     my $ore;
-    
+
     foreach my $type (ORE_TYPES) {
         $ore->{$type} = $self->$type;
     }
@@ -627,13 +627,13 @@ around get_status => sub {
             # OR this body is a station owned by this empires alliance
             # OR the empire is a sitter for this bodies owner
 
-            if ($empire->id eq $self->empire_id 
+            if ($empire->id eq $self->empire_id
                 or (
                     $self->isa('KA::DB::Result::Map::Body::Planet::Station')
                     and $empire->alliance_id && $self->empire->alliance_id == $empire->alliance_id
-                ) 
+                )
                 or $empire->babies->search({id => $self->empire_id})->count ) {
-                
+
                 if ($self->needs_recalc) {
                     $self->tick; # in case what we just did is going to change our stats
                 }
@@ -845,7 +845,7 @@ has building_count => (
 sub _build_building_count {
     my ($self) = @_;
 # Bleeders count toward building count, but supply pods don't since they can't be shot down.
-    my $count = grep {$_->class !~ /Permanent/ and $_->class !~ /SupplyPod/} @{$self->building_cache}; 
+    my $count = grep {$_->class !~ /Permanent/ and $_->class !~ /SupplyPod/} @{$self->building_cache};
     return $count;
 }
 
@@ -960,13 +960,13 @@ sub find_free_spaces
 
     my $sql = <<"EOSQL";
 select v.x,w.y
-  from 
+  from
    ($tmp_x) as v
   join
    ($tmp_y) as w
   left join
    (select x,y,id from building where body_id = ?) as b
-    on 
+    on
       b.x = v.x and b.y = w.y
   where
    b.id is null
@@ -1047,12 +1047,12 @@ sub check_for_available_build_space {
     my ($self, $unclean_x, $unclean_y) = @_;
     my $x = int( $unclean_x );
     my $y = int( $unclean_y );
-    
+
     if ($x > 5 || $x < -5 || $y > 5 || $y < -5) {
         confess [1009, "That's not a valid space for a building.", [$x, $y]];
     }
     unless ($self->is_space_free($x, $y)) {
-        confess [1009, "That space is already occupied.", [$x,$y]]; 
+        confess [1009, "That space is already occupied.", [$x,$y]];
     }
     return 1;
 }
@@ -1078,7 +1078,7 @@ sub has_met_building_prereqs {
     return 1;
 }
 
-# can we build this building at this time? 
+# can we build this building at this time?
 sub can_build_building {
     my ($self, $building) = @_;
 
@@ -1118,7 +1118,7 @@ sub has_room_in_build_queue {
     if ($count >= $max) {
         confess [1009, "There's no room left in the build queue.", $max];
     }
-    return 1; 
+    return 1;
 }
 
 use constant operating_resource_names => qw(food energy ore water);
@@ -1130,7 +1130,7 @@ has future_operating_resources => (
     lazy    => 1,
     default => sub {
         my ($self) = @_;
-        
+
         # get current
         my %future;
         foreach my $type ($self->operating_resource_names) {
@@ -1155,7 +1155,7 @@ sub has_resources_to_operate {
     my ($self, $building) = @_;
 
     # get future
-    my $future = $self->future_operating_resources; 
+    my $future = $self->future_operating_resources;
 
     # get change for this building
     my $after = $building->stats_after_upgrade;
@@ -1221,7 +1221,7 @@ sub has_max_instances_of_building {
 }
 
 # return all buildings currently being upgraded
-sub builds { 
+sub builds {
     my ($self, $reverse) = @_;
 
     my @buildings = sort {$a->upgrade_ends cmp $b->upgrade_ends} grep {$_->is_upgrading == 1} @{$self->building_cache};
@@ -1229,7 +1229,7 @@ sub builds {
     return \@buildings;
 }
 
-# get the time when the build queue will be completed 
+# get the time when the build queue will be completed
 sub get_existing_build_queue_time {
     my ($self) = @_;
 
@@ -1276,7 +1276,7 @@ sub found_colony {
     $self->empire_id($empire->id);
     $self->usable_as_starter_enabled(0);
     $self->last_tick(DateTime->now);
-    $self->update;    
+    $self->update;
 
     # Excavators get cleared when being checked for results.
 
@@ -1352,7 +1352,7 @@ sub convert_to_station {
     $self->last_tick(DateTime->now);
     $self->alliance_id($empire->alliance_id);
     $self->class('KA::DB::Result::Map::Body::Planet::Station');
-    $self->update;    
+    $self->update;
 
     # award medal
     $empire->add_medal('space_station_deployed');
@@ -1406,7 +1406,7 @@ sub convert_to_station {
 
 # total ore concentration of this planet
 has total_ore_concentration => (
-    is          => 'ro',  
+    is          => 'ro',
     lazy        => 1,
     default     => sub {
         my ($self) = @_;
@@ -1491,7 +1491,7 @@ sub recalc_stats {
     }
 
     foreach my $building (@{$self->building_cache}) {
-        
+
         $self->add_capacity('waste',  $building->waste_capacity);
         $self->add_capacity('water',  $building->water_capacity);
         $self->add_capacity('energy', $building->energy_capacity);
@@ -1593,7 +1593,7 @@ sub recalc_stats {
     }
     $self->update;
     $self->discard_changes;
-    
+
     # deal with negative amounts stored
     $self->set_stored('water',0) if $self->get_stored('water') < 0;
     $self->set_stored('energy',0) if $self->get_stored('energy') < 0;
@@ -1602,7 +1602,7 @@ sub recalc_stats {
     }
     $self->update;
     $self->discard_changes;
-    
+
     # deal with storage overages
     if ($self->get_stored('ore') > $self->get_capacity('ore')) {
         $self->spend_ore($self->get_stored('ore') - $self->get_capacity('ore'));
@@ -1657,7 +1657,7 @@ sub recalc_stats {
     # Decrease happiness production if short on plots.
     if ($stats{plots_available} < 0) {
         my $plot_tax = int(50 * 1.62 ** (abs($stats{plots_available})-1));
-        
+
         # Set max to at least -10k
         my $neg_hr = $self->get_stored('happiness') > 100_000 ? -1 * $self->get_stored('happiness')/10 : -10_000;
         my $happy_hour = $self->get_production('happiness');
@@ -1688,7 +1688,7 @@ sub add_news {
         my $network19 = $self->network19;
         if (defined $network19) {
             $chance += $network19->level * 2;
-            $chance = $chance / $self->planetary_command->level; 
+            $chance = $chance / $self->planetary_command->level;
         }
     }
     if (randint(1,100) <= $chance) {
@@ -1707,7 +1707,7 @@ sub add_news {
 # RESOURCE MANGEMENT
 sub tick {
     my ($self) = @_;
-    
+
     # stop a double tick
     my $cache = KA->cache;
     if ($cache->get('ticking',$self->id)) {
@@ -1716,7 +1716,7 @@ sub tick {
     else {
         $cache->set('ticking',$self->id, 1, 30);
     }
-    
+
     my $now = DateTime->now;
     my $now_epoch = $now->epoch;
 
@@ -1755,7 +1755,7 @@ sub tick {
         KA::Tutorial->new(empire=>$self->empire)->finish;
     }
     # clear caches
-    $self->clear_future_operating_resources;    
+    $self->clear_future_operating_resources;
     $cache->delete('ticking', $self->id);
 }
 
@@ -1767,7 +1767,7 @@ sub tick_to {
     my $seconds  = $now->epoch - $self->last_tick->epoch;
     my $tick_rate = $seconds / 3600;
     $self->last_tick($now);
-    
+
     #If we crossed zero happiness, either way, we need to recalc.
     if ($self->get_stored('happiness') < 0) {
         if ($self->unhappy) {
@@ -1787,9 +1787,9 @@ sub tick_to {
         $self->needs_recalc(1) if ($self->propaganda_boost > 50);
     }
     if ($self->needs_recalc) {
-        $self->recalc_stats;    
+        $self->recalc_stats;
     }
-    
+
     # Process excavator sites
     if ( my $arch = $self->archaeology) {
         if ($arch->effective_efficiency == 100 and $arch->effective_level > 0) {
@@ -1812,7 +1812,7 @@ sub tick_to {
 
     # happiness
     $self->add_happiness(sprintf('%.0f', $self->get_production('happiness') * $tick_rate));
-    
+
     # waste
     if ($self->get_production('waste') < 0 ) { # if it gets negative, spend out of storage
         $self->spend_waste(sprintf('%.0f',abs($self->get_production('waste')) * $tick_rate));
@@ -1820,7 +1820,7 @@ sub tick_to {
     else {
         $self->add_waste(sprintf('%.0f', $self->get_production('waste') * $tick_rate));
     }
-    
+
     # energy
     if ($self->get_production('energy') < 0 ) { # if it gets negative, spend out of storage
         $self->spend_energy(sprintf('%.0f',abs($self->get_production('energy')) * $tick_rate));
@@ -1828,7 +1828,7 @@ sub tick_to {
     else {
         $self->add_energy(sprintf('%.0f', $self->get_production('energy') * $tick_rate));
     }
-    
+
     # water
     if ($self->get_production('water') < 0 ) { # if it gets negative, spend out of storage
         $self->spend_water(sprintf('%.0f',abs($self->get_production('water')) * $tick_rate));
@@ -1836,7 +1836,7 @@ sub tick_to {
     else {
         $self->add_water(sprintf('%.0f', $self->get_production('water') * $tick_rate));
     }
-    
+
     # ore
     my %ore;
     my $ore_produced   = 0;
@@ -1920,7 +1920,7 @@ sub tick_to {
         if ($food_consumed > 0) {
             my $total_food = $self->get_stored('food');
             if ($total_food > 0) {
-                # 
+                #
                 my $deduct_ratio = $food_consumed / $total_food;
                 $deduct_ratio = 1 if $deduct_ratio > 1;
                 foreach my $type (FOOD_TYPES) {
@@ -2002,7 +2002,7 @@ sub toggle_supply_chain {
         $self->update;
         my $empire = $self->empire;
         if ($stalled
-            and defined $empire 
+            and defined $empire
             and not $empire->check_for_repeat_message('supply_stalled'.$chain->id)) {
             $empire->send_predefined_message(
                 filename    => 'stalled_chain.txt',
@@ -2060,8 +2060,8 @@ sub add_stored_limit {
     };
     if ($@) {
         my $empire = $self->empire;
-        if (defined $empire 
-            && !$empire->skip_resource_warnings 
+        if (defined $empire
+            && !$empire->skip_resource_warnings
             && !$empire->check_for_repeat_message('complaint_overflow'.$self->id)) {
             $empire->send_predefined_message(
                 filename        => 'complaint_overflow.txt',
@@ -2079,7 +2079,7 @@ sub add_stored_limit {
 sub add_random_ore {
     my ($self, $value) = @_;
     foreach my $type (shuffle ORE_TYPES) {
-        next if $self->$type < 100; 
+        next if $self->$type < 100;
         $self->add_stored($type,$value);
         last;
     }
@@ -2109,7 +2109,7 @@ sub spend_ore_type {
 
         if ($complain &&
             ($difference * 100) / $amount_spent > 5) {
-           
+
             $self->complain_about_lack_of_resources('ore');
         }
     }
@@ -2155,6 +2155,17 @@ sub food_hour {
     return $tally;
 }
 
+# add a random food type
+sub add_random_food {
+    my ($self, $value) = @_;
+    foreach my $type (shuffle FOOD_TYPES) {
+        next if $self->$type < 100;
+        $self->add_stored($type, $value);
+        last;
+    }
+    return $self;
+}
+
 # add to a specific $type of food stored
 sub add_food_type {
     my ($self, $type, $amount_requested) = @_;
@@ -2193,7 +2204,7 @@ sub spend_food_type {
 # Spend proportionally from all foods
 sub spend_food {
     my ($self, $food_consumed, $loss) = @_;
-    
+
     $loss = 0 unless defined($loss);
     # take inventory
     my $food_stored;
@@ -2203,7 +2214,7 @@ sub spend_food {
         $food_stored += $stored;
         $food_type_count++ if ($stored);
     }
-    
+
     # spend proportionally and save
     if ($food_stored) {
         foreach my $type (FOOD_TYPES) {
@@ -2212,7 +2223,7 @@ sub spend_food {
             $self->spend_food_type($type, sprintf('%.0f', ($food_consumed * $self->get_stored($type)) / $food_stored),'complain');
         }
     }
-    
+
     # adjust happiness based on food diversity
     unless ($loss or $self->isa('KA::DB::Result::Map::Body::Planet::Station')) {
         if ($food_type_count > 3) {
@@ -2302,7 +2313,7 @@ sub add_happiness {
 sub spend_happiness {
     my ($self, $value) = @_;
     $self->tick;
-    
+
     my $new = $self->get_stored('happiness') - $value;
     my $empire = $self->empire;
     if ($empire and $new < 0) {
