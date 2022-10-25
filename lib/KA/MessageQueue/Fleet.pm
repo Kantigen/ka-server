@@ -18,14 +18,14 @@ sub log {
 
 #--- Fleet arrives at destination
 #
-sub bg_arrives {
+sub bg_arrive {
     my ($self, $context) = @_;
 
-    $self->log->debug("BG_Fleet arrives : ".Dumper($context));
+    $self->log->debug("BG_Fleet arrive : ".Dumper($context));
     my $db = KA::SDB->instance->db;
 
     my $fleet_id = $context->content->{fleet_id};
-    my $fleet = $db->resultset('Fleet')->find({ $fleet_id });
+    my $fleet = $db->resultset('Fleet')->find($fleet_id);
     if (defined $fleet) {
         $fleet->arrive;
     }
@@ -43,7 +43,7 @@ sub bg_finishConstruction {
     my $db = KA::SDB->instance->db;
 
     my $fleet_id = $context->content->{fleet_id};
-    my $fleet = $db->resultset('Fleet')->find({ $fleet_id });
+    my $fleet = $db->resultset('Fleet')->find($fleet_id);
     if (defined $fleet) {
         $fleet->finish_construction;
     }
